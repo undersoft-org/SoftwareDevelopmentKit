@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Company>Undersoft</Company>
+    <Authors>Dariusz Hanc</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>2.6.2</Version>
+    <RepositoryUrl>https://github.com/undersoft-org/SoftwareDevelopmentKit</RepositoryUrl>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <AssemblyName>$(MSBuildProjectName.Replace(" ", "_"))</AssemblyName>
+    <AssemblyVersion>2.6.2.1</AssemblyVersion>
+    <FileVersion>2.6.2.1</FileVersion>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazor-ApexCharts" Version="3.*-*" />
+    <PackageReference Include="Markdig" Version="0.34.0" />
+    <PackageReference Include="Microsoft.JSInterop" Version="8.*-*" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.*-*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.*-*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.*-*" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.*-*" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.*-*" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.*-*" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.*-*" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.*-* " />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Undersoft.SDK.Service.Application" />
+    <Using Include="Undersoft.SDK.Service.Data.Store" />
+    <Using Include="Undersoft.SDK.Service.Data.Repository" />
+    <Using Include="Undersoft.SDK.Service.Data.Remote.Repository" />
+    <Using Include="Undersoft.SDK.Service.Data.Entity" />
+    <Using Include="Microsoft.AspNetCore.Components" />
+    <Using Include="Microsoft.Extensions.Options" />
+    <Using Include="Microsoft.JSInterop" />
+    <Using Include="System.ComponentModel.DataAnnotations" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\SoftwareDevelopmentKit\src\Undersoft.SDK.Service.Application\Undersoft.SDK.Service.Application.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,29 @@
+﻿@inherits GenericDialog<TModel>
+
+@typeparam TModel where TModel : class, IOrigin, IInnerProxy
+@typeparam TValidator where TValidator : class, IValidator<IViewData<TModel>>
+
+@implements IDialogContentComponent<IViewData<TModel>>
+@implements IView
+
+
+<CascadingValue Value="@Content">
+    <CascadingValue Value="Form">
+        <!-- Header -->
+        <GenericFormDialogHeader TModel="TModel" />
+
+        <!-- Body -->
+        <GenericFormDialogBody TValidator="TValidator" TModel="TModel" Orientation="@Orientation"/>
+
+        <!-- Footer -->
+        <GenericFormDialogFooter TModel="TModel" />
+    </CascadingValue>
+</CascadingValue>
+
+@code
+{
+
+
+    [Parameter]
+    public Orientation Orientation { get; set; } = Orientation.Vertical;
+}

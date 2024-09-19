@@ -1,0 +1,95 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Undersoft.SDK.Proxies
+@using Undersoft.SDK.Rubrics
+@using Undersoft.SDK;
+@using Undersoft.SDK.Service.Application.GUI.View.Abstraction
+
+@inherits ViewItem
+
+<CascadingValue Value="Data">
+
+    <FluentDataGridRow @key="@ViewId" GridTemplateColumns="@GridTemplateColumns" VerticalAlignment="VerticalAlignment.Center" Style="@Style" TGridItem="string" @ref=Reference>
+
+        @if (FeatureFlags.Expandable)
+        {
+            <GenericDataGridBodyItemFeature Ordinal="1">
+                <div id="@($"{ViewId}-expander")" role="button">
+                    <FluentIcon Value="@(new Icons.Regular.Size20.MoreVertical())" Color="Color.Accent" />
+                </div>
+                <GenericMenu Position="HorizontalPosition.Right"
+                             VerticalPosition="VerticalPosition.Unset"
+                             AnchorId="@($"{ViewId}-expander")"
+                             Data="@Data"
+                             Anchored="true" />
+            </GenericDataGridBodyItemFeature>
+        }
+
+        @if (FeatureFlags.Multiselect)
+        {
+            <GenericDataGridBodyItemFeature Ordinal="@(RubricOrdinalSeed > 2 ? 2 : 1)">
+                <div id="@($"{ViewId}-selector")">
+                    <FluentCheckbox @bind-Value="@Checked" Style="" />
+                </div>
+            </GenericDataGridBodyItemFeature>
+        }
+
+        @if (FeatureFlags.Editable && StateFlags.Editing && EditMode == EditMode.Row)
+        {
+            foreach (var rubric in Data.Rubrics)
+            {
+                <GenericDataGridBodyItemField OperationsData="@(GetOperationsData())" Rubric="rubric" Parent="this" />
+            }
+        }
+        else
+        {
+            foreach (var rubric in Data.Rubrics)
+            {
+                <GenericDataGridBodyItemValue OperationsData="@(GetOperationsData())" Rubric="rubric" Parent="this" />
+            }
+        }
+
+        @if ((FeatureFlags.Editable && EditMode != EditMode.None) || FeatureFlags.Showable)
+        {
+            <GenericDataGridBodyItemFeature Ordinal="@(Data.Rubrics.Count + RubricOrdinalSeed)" Parent="this">
+                <div id="@($"{ViewId}-menu")" role="button">
+                    <FluentIcon Value="@(new Icons.Regular.Size20.MoreVertical())" Color="Color.Accent" />
+                </div>
+                <GenericMenu Position="HorizontalPosition.Left"
+                             VerticalPosition="VerticalPosition.Unset"
+                             AnchorId="@($"{ViewId}-menu")"
+                             Data="@(GetOperationsData())"
+                             Anchored="true" />
+            </GenericDataGridBodyItemFeature>
+        }
+
+
+    </FluentDataGridRow>
+
+
+
+    @if (FeatureFlags.Editable && StateFlags.Editing && EditMode == EditMode.SubRow)
+    {
+        <FluentDataGridRow @key="@($"{ViewId}-edit")" TGridItem="string">
+
+            <GenericFormItem Orientation="Orientation.Horizontal" Parent="this" />
+
+        </FluentDataGridRow>
+    }
+
+</CascadingValue>
+
+@if (FeatureFlags.Expandable)
+{
+    foreach (var data in Data.Where(d => d.StateFlags.Expanded))
+    {
+        <FluentDataGridRow @key="@data.ViewId" TGridItem="string">
+
+            <GenericDataGridBodyItemSubGrid DataStore="@((IViewDataStore)data)" />
+
+        </FluentDataGridRow>
+    }
+}
+
+
+
+

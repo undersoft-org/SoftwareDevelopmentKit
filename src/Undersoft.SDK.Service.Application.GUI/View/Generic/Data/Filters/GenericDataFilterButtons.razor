@@ -1,0 +1,34 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Undersoft.SDK.Proxies
+@using Undersoft.SDK.Rubrics
+@using Undersoft.SDK;
+@using Undersoft.SDK.Service.Application.GUI.View.Abstraction
+
+@inherits ViewItem
+
+<GenericFieldMenuItem Id="@ViewId" @ref="@Reference" Style="height:auto;">
+    <FluentStack Orientation="Orientation.Horizontal" Style="padding-top:4px;"  HorizontalGap="5" VerticalGap="0" VerticalAlignment="VerticalAlignment.Center">
+        @if (IsAddable)
+        {
+            <div>
+                <FluentIcon Value="@(new Icons.Regular.Size20.Add())" Width="18px" OnClick="Add" />
+            </div>
+            @if(Added)
+            {
+                <div>
+                    <FluentIcon Value="@(new Icons.Regular.Size20.Subtract())" Width="18px" OnClick="Subtract" />
+                </div>
+            }
+        }
+        <FluentSpacer />
+        <div>
+            <FluentIcon Value="@(new Icons.Regular.Size20.Dismiss())" Width="18px" OnClick="@Dismiss" />
+        </div>
+        <div >
+            <FluentIcon Value="@(new Icons.Regular.Size24.Checkmark())" Width="18px" OnClick="@Apply" />
+        </div>
+    </FluentStack>
+
+</GenericFieldMenuItem>
+
+

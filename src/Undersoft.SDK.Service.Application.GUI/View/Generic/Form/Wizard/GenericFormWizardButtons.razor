@@ -1,0 +1,149 @@
+﻿@using System.ComponentModel.DataAnnotations
+
+@typeparam TModel where TModel : class, IOrigin, IInnerProxy
+
+<div>
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+
+        @if (!IsFirst)
+        {
+            @if(GoToFirstEnabled)
+            {
+                <FluentButton OnClick="@GoToFirst" Appearance="Appearance.Neutral">
+                    First
+                </FluentButton>
+            }
+
+            <FluentButton OnClick="@Previous" Appearance="Appearance.Neutral">
+                Previous
+            </FluentButton>
+        }
+
+        <FluentSpacer/>
+        
+        @if (!IsLast)
+        {
+            <FluentButton Appearance="Appearance.Accent" OnClick="@Next">
+                Next
+            </FluentButton>
+
+            @if (GoToLastEnabled)
+            {
+                <FluentButton OnClick="@GoToLast" Appearance="Appearance.Neutral">
+                    Last
+                </FluentButton>
+            }
+        }
+        else
+        {
+            @if (Dialog.Instance.Parameters.PrimaryActionEnabled)
+            {
+                <FluentButton Appearance="Appearance.Accent"
+                              OnClick="@SaveAsync">
+                    Done
+                </FluentButton>
+            }
+        }
+
+        @if (Dialog.Instance.Parameters.SecondaryActionEnabled)
+        {
+            <FluentButton OnClick="@CancelAsync" Appearance="Appearance.Neutral">
+                Skip
+            </FluentButton>
+        }
+
+    </FluentStack>
+</div>
+
+@code
+{
+    public int ActiveId
+    {
+        get => Content.ActiveRubric!.RubricOrdinal;
+        set => Content.ActiveRubric = Content.ExtendedRubrics[value];
+    }
+
+    public bool IsLast => Content.ActiveRubric!.RubricOrdinal == Content.ExtendedRubrics.Count - 1;
+
+    public bool IsFirst => Content.ActiveRubric!.RubricOrdinal == 0;
+
+    [CascadingParameter]
+    public IViewItem Form { get; set; } = default!;
+
+    [Parameter]
+    public bool Validatable { get; set; } = true;
+
+    [Parameter]
+    public bool GoToFirstEnabled { get; set; }
+
+
+    [Parameter]
+    public bool GoToLastEnabled { get; set; }
+
+    [CascadingParameter]
+    public IViewData<TModel> Content { get; set; } = default!;
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    private async Task SaveAsync()
+    {
+        if (Content.Validator != null && Validatable)
+        {
+            var result = await Content.Validator.ValidateAsync();
+            if (result.IsValid)
+                await Dialog.CloseAsync(Content);
+            else
+                Form.RenderView();
+        }
+        else
+            await Dialog.CloseAsync(Content);
+    }
+
+    private void GoToFirst()
+    {
+        ActiveId = 0;
+        Form.RenderView();
+    }
+
+    private void GoToLast()
+    {
+        ActiveId = Content.ExtendedRubrics.Count - 1;
+        Form.RenderView();
+    }
+
+    private async Task Next()
+    {
+        if (Content.Validator != null)
+        {
+            var result = await Content.Validator.ValidateAsync(
+                                    Content.ExtendedRubrics[ActiveId].ViewItem!.Data,
+                                    Content.ExtendedRubrics[ActiveId].RubricName);
+            if (result.IsValid)
+            {
+                if (!IsLast)
+                    ActiveId += 1;
+            }
+        }
+        else
+        {
+            if (!IsLast)
+                ActiveId += 1;
+        }
+        Form.RenderView();
+    }
+
+    private void Previous()
+    {
+        if (!IsFirst)
+            ActiveId -= 1;
+        Form.RenderView();
+    }
+
+    private async Task CancelAsync(MouseEventArgs e)
+    {
+        Content.StateFlags.Canceled = true;
+        await Dialog.CancelAsync(Content);
+
+    }
+}

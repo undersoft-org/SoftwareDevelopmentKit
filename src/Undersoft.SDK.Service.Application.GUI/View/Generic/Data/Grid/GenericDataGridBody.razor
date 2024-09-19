@@ -1,0 +1,21 @@
+﻿@using Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid.Body
+@using System.ComponentModel.DataAnnotations
+@using Undersoft.SDK.Rubrics
+@using Undersoft.SDK.Invoking
+@using Undersoft.SDK.Proxies
+
+@inherits ViewStore
+<CascadingValue Value="Multiline">
+            @if (Items != null)
+            {
+                foreach (var data in Items)
+                {
+                    <GenericDataGridBodyItem Data="data" Style="@Style" MenuRubrics="@MenuRubrics" />
+                }
+            }
+</CascadingValue>
+
+
+
+
+

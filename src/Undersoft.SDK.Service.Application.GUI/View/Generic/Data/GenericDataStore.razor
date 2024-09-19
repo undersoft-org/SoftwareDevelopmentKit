@@ -1,0 +1,19 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using FluentValidation
+@using Undersoft.SDK.Proxies
+@using Undersoft.SDK.Rubrics
+@using Undersoft.SDK
+@using Undersoft.SDK.Invoking
+
+@inherits ViewStore<TStore, TDto, TModel>
+
+@typeparam TStore where TStore : IDataServiceStore
+@typeparam TDto where TDto : class, IOrigin, IInnerProxy
+@typeparam TModel where TModel : class, IOrigin, IInnerProxy
+@implements IViewProgress
+
+<div class="dataset">
+        @ChildContent
+</div>
+
+

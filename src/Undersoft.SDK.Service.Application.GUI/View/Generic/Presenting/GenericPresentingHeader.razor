@@ -1,0 +1,51 @@
+﻿@using Undersoft.SDK.Service.Access;
+
+@inherits FluentComponentBase
+
+@typeparam TMenu where TMenu : class, IOrigin, IInnerProxy
+@typeparam TAccount where TAccount : class, IOrigin, IInnerProxy
+@typeparam TModel where TModel : class, IOrigin, IInnerProxy, IAuthorization
+@typeparam TValidator where TValidator : class, IValidator<IViewData<TModel>>
+
+<FluentHeader class="siteheader" Height="40" Style="margin-left:-1.0rem">
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" Width="100%" Style="height:40px">
+        @if (Logo != null)
+        {
+            <a href="" style="height:30px">
+                <FluentIcon Value="@Logo" Color="Color.Accent" Width="150px" />
+            </a>
+        }
+        <FluentSpacer />
+
+        <div class="top-bar-tools" style="height:30px">
+            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalGap="12">
+                <div id="genericdatasearch" class="generic-data-search" style="height:20px" role="button">
+                    <div>
+                        <FluentIcon Value="@(new Icons.Regular.Size20.Search())" Width="20" Color="Color.FillInverse" OnClick="OnSearchClick" />
+                    </div>
+                </div>
+                <a class="gihub" style="height:20px;" href="https://github.com/undersoft-org/Undersoft.Suite" Target="_blank" Rel="noreferrer noopener" title="Undersoft source on GitHub" aria-label="SSC Repository">
+                    <div>
+                        <FluentIcon Value="@(new ViewGraphic.Logo.GitHub())" Width="18" Color="Color.FillInverse" />
+                    </div>
+                </a>
+                <div class="notification" style="height:20px">
+                    <GenericNotificationPanelButton />
+                </div>
+                <div class="appearance" style="height:20px">
+                    <GenericAppearancePanelButton />
+                </div>
+                <div class="account" style="margin-right:-15px;">
+                    <GenericAccountMenuPersona TAccount="TAccount" TModel="TModel" TValidator="TValidator" ImageSize="30px" />
+                </div>
+            </FluentStack>
+        </div>
+
+    </FluentStack>
+</FluentHeader>
+
+@code
+{
+    [Inject]
+    private AppearanceState appearance { get; set; } = default!;
+}

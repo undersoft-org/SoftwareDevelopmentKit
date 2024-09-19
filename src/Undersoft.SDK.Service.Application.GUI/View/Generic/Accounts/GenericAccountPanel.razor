@@ -1,0 +1,41 @@
+﻿@typeparam TModel where TModel : class, IOrigin, IInnerProxy, IAuthorization
+@typeparam TValidator where TValidator : class, IValidator<IViewData<TModel>>
+
+@implements IDialogContentComponent<IViewData<TModel>>
+@implements IView
+@inject IMessageService MessageService
+
+
+
+<CascadingValue Value="@Content">
+
+    <!-- Header -->
+    <GenericFormTabsHeader TModel="TModel" />
+
+    <FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center" VerticalGap="20" Style="height:100%;">        
+        <!-- Body -->
+        <GenericFormTabsBody TValidator="TValidator" TModel="TModel" Orientation="Orientation.Vertical" />
+
+    </FluentStack>
+    <FluentSpacer />
+    <!-- Footer -->
+    <GenericFormTabsFooter TModel="TModel" HorizontalAlignment="HorizontalAlignment.Left"  />
+
+</CascadingValue>
+
+@code
+{
+    [Parameter]
+    public IViewData<TModel> Content { get; set; } = default!;
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    private string? _image = null;
+
+    public void RenderView()
+    {
+        this.StateHasChanged();
+    }
+
+}

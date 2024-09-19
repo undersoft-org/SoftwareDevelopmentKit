@@ -1,0 +1,22 @@
+﻿@inherits GenericDialog<TModel>
+
+@typeparam TModel where TModel : class, IOrigin, IInnerProxy
+@typeparam TValidator where TValidator : class, IValidator<IViewData<TModel>>
+
+@implements IDialogContentComponent<IViewData<TModel>>
+@implements IView
+
+
+<CascadingValue Value="@Content">
+    <CascadingValue Value="@Form">
+        <!-- Header -->
+        <GenericFormTabsHeader TModel="TModel" />
+
+        <!-- Body -->
+        <GenericFormTabsBody TValidator="TValidator" TModel="TModel" Orientation="Orientation.Vertical" EntryMode="@Content.EntryMode" />
+
+        <!-- Footer -->
+        <GenericFormTabsFooter TModel="TModel" />
+
+    </CascadingValue>
+</CascadingValue>

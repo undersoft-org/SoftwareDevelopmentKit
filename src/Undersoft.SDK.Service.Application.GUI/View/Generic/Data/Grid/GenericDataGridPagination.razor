@@ -1,0 +1,66 @@
+﻿@using Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid.Body
+@using Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid.Header
+@using System.ComponentModel.DataAnnotations
+@using Undersoft.SDK.Rubrics
+@using Undersoft.SDK.Invoking
+@using Undersoft.SDK.Proxies
+
+@inherits ViewStore
+
+<div class="generic-datagrid-pagination">
+
+    <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End" VerticalAlignment="VerticalAlignment.Center" Wrap="true" HorizontalGap="3">
+        @if (DataStore.Pagination!.TotalCount > DataStore.Pagination.PageSize)
+        {
+            <FluentButton @onclick="@(() => GoToPageAsync(1))"
+                          Disabled="@(!_pagination.HasPreviousPage)"
+                          Appearance="@Appearance.Stealth"
+                          aria-label="Go to first page">
+                <FluentIcon Value="@(new Icons.Regular.Size20.ChevronDoubleLeft())" Color="@(PagePreviousColor())" />
+            </FluentButton>
+
+            <FluentButton @onclick="@(() => PreviousPageAsync())"
+                          Disabled="@(!_pagination.HasPreviousPage)"
+                          Appearance="@Appearance.Stealth"
+                          aria-label="Previous page">
+                <FluentIcon Value="@(new Icons.Regular.Size20.ChevronLeft())" Color="@(PagePreviousColor())" />
+            </FluentButton>
+
+            for (var pageIndex = _pagination.GetLowestPageIndex(); pageIndex <= _pagination.GetHighestPageIndex(); pageIndex++)
+            {
+                var index = pageIndex;
+                <FluentButton @onclick="@(() => GoToPageAsync(index))"
+                              Appearance="@PageButtonAppearance(index)"
+                              aria-current="@AriaCurrentValue(index)"
+                              aria-label="@AriaLabel(index)"
+                              Color="@($"var(--accent-fill-rest)")">
+                    @(index)
+                </FluentButton>
+            }
+
+            <FluentButton @onclick="@(() => NextPageAsync())"
+                          Disabled="@(!_pagination.HasNextPage)"
+                          Appearance="@Appearance.Stealth"
+                          aria-label="Next page">
+                <FluentIcon Value="@(new Icons.Regular.Size20.ChevronRight())" Color="@(PageNexColor())" />
+            </FluentButton>
+
+            <FluentButton @onclick="@(() => GoToPageAsync(_pagination.TotalPages))"
+                          Disabled="@(!_pagination.HasNextPage)"
+                          Appearance="@Appearance.Stealth"
+                          aria-label="Go to last page">
+                <FluentIcon Value="@(new Icons.Regular.Size20.ChevronDoubleRight())" Color="@(PageNexColor())" />
+            </FluentButton>
+        }
+        @if (DataStore.Pagination.TotalCount > -1)
+        {
+            <FluentLabel Typo="Typography.Subject" Color="Color.Accent">
+                @DataStore.Pagination.TotalCount rows
+            </FluentLabel>
+        }
+    </FluentStack>
+</div>
+
+
+
+

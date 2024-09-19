@@ -1,0 +1,42 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Undersoft.SDK.Proxies
+@using Undersoft.SDK.Rubrics
+@using Undersoft.SDK;
+
+@inherits ViewItem
+
+<div style="width:@Width">
+
+    @if (_isImage)
+    {
+        if (_isPersona)
+        {
+            if (_dataUri != null)
+            {
+                <FluentPersona Image="@_dataUri" ImageSize="@Rubric.ImageWidth" />
+            }
+            else
+            {
+                <FluentPersona Image="@(new Icons.Regular.Size20.Person().ToDataUri(size: "30px", color: "white"))" ImageSize="@Rubric.ImageWidth" />
+            }
+        }
+        else
+        {
+            <img src="@_dataUri
+            " style="width:@Rubric.ImageWidth; height:@Rubric.ImageHeight
+            "/>
+        }
+    }
+    else if (_isBit)
+    {
+        <FluentCheckbox Value="@_bitValue"  />
+    }
+    else
+    {
+        <FluentLabel @ref="Reference">
+            @TextValue
+        </FluentLabel>
+    }
+
+</div>
+

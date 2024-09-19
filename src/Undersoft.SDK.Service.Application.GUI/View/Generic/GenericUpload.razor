@@ -1,0 +1,51 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using FluentValidation
+@using Undersoft.SDK.Proxies
+@using Undersoft.SDK.Rubrics
+@using Undersoft.SDK
+@using Undersoft.SDK.Invoking
+
+@inherits ViewItem
+
+<FluentLabel Typo="Typography.Body" MarginBlock="5px">
+    @DisplayName
+</FluentLabel>
+<div style="@ImageStyle">
+    <FluentInputFile @ref="@FileByStream"
+                     Id="@ViewId"
+                     Disabled="@Disabled"
+                     DragDropZoneVisible="true"
+                     Mode="InputFileMode.Stream"
+                     Multiple="false"
+                     MaximumFileSize="@(5 * 1024 * 1024)"
+                     @bind-ProgressPercent="@progressPercent"
+                     Accept=".png, .jpg, .svg"
+                     OnFileUploaded="@OnFileUploadedAsync"
+                     OnCompleted="@OnCompleted"
+                     Style="@StyleValue">
+        <ChildContent>
+            @if (Image == null)
+            {
+                <FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" VerticalGap="10">
+                    <label for="@ViewId" style="padding-top:20px;">
+                        <FluentIcon Value="@(new Icons.Regular.Size24.ArrowUpload())" Color="Color.Accent" />
+                    </label>
+                    <div>
+                        <label for="@CodeNo">
+                            <small>
+                                Drag or browse
+                            </small>
+                        </label>
+                    </div>
+                </FluentStack>
+            }
+            else
+            {
+                <label for="@ViewId">
+                    <FluentIcon Value="@(new Icons.Regular.Size24.ArrowUpload())" Color="Color.Accent" />
+                </label>
+            }
+        </ChildContent>
+    </FluentInputFile>
+</div>
+

@@ -1,0 +1,55 @@
+﻿@using Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid.Header
+@using System.ComponentModel.DataAnnotations
+@using Undersoft.SDK.Rubrics
+@using Undersoft.SDK.Invoking
+@using Undersoft.SDK.Proxies
+
+@inherits ViewStore
+
+<FluentDataGridRow TGridItem="string" RowType="DataGridRowType.StickyHeader" @ref="Reference">
+
+    <CascadingValue Value="@Resizable">
+
+        @if (FeatureFlags.Expandable)
+        {
+            <GenericDataGridHeaderFeature Ordinal="1" Parent="this" Style="justify-content:center;">
+                @* <FluentIcon Value="@(new Icons.Regular.Size20.TextBulletListTree())" Color="Color.Accent" /> *@
+            </GenericDataGridHeaderFeature>
+        }
+
+        @if (FeatureFlags.Multiselect)
+        {
+            <GenericDataGridHeaderFeature Ordinal="@(RubricOrdinalSeed > 2 ? 2 : 1)" Parent="this" Style="justify-content:center; align-items:center;">
+                <div id="@($"{ViewId}-{DataStore.Pagination!.PageIndex}-multiselect")">
+                    <FluentCheckbox @bind-Value="@Checked" CheckStateChanged="@OnCheckStateChanged" ThreeState="true" />
+                </div>
+            </GenericDataGridHeaderFeature>
+        }
+
+        @foreach (var rubric in DataStore.Rubrics)
+        {
+            <GenericDataGridHeaderRubric Rubric="rubric" Parent="this" Style="padding:0px 2px" />
+        }
+
+        @if (FeatureFlags.Editable && EditMode != EditMode.None)
+        {
+            <GenericDataGridHeaderFeature Ordinal="@(Data.Rubrics.Count + RubricOrdinalSeed)" Parent="this" Style="justify-content:center;">
+                <div id="@($"{ViewId}-operation")" role="button">
+                    <FluentIcon Value="@(new Icons.Regular.Size20.MultiselectLtr())" Color="Color.Accent" />
+                </div>
+                <div>
+                    <GenericMenu Position="HorizontalPosition.Left"
+                                 AnchorId="@($"{ViewId}-operation")"
+                                 Data="@(GetOperationData())"
+                                 Anchored="true" />
+                </div>
+            </GenericDataGridHeaderFeature>
+        }
+
+    </CascadingValue>
+
+</FluentDataGridRow>
+
+
+
+

@@ -1,0 +1,54 @@
+﻿@typeparam TModel where TModel : class, IOrigin, IInnerProxy
+
+<div>
+    <!-- Header -->
+    <FluentDialogHeader Style="padding:0px">
+        <FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center" VerticalGap="20">
+            <FluentMessageBarProvider Section="@ViewSection.DIALOG" MaxMessageCount="1" />
+            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="10" Style="text-align: right;">
+                @if (Content.Logo != null)
+                {
+                    <a href="">
+                        <FluentIcon Width="auto" Value="@Content.Logo" Color="Color.Accent" />
+                    </a>
+                }
+                <FluentSpacer />
+                @if (Content.Icon != null)
+                {
+                    <FluentIcon Value="@Content.Icon" />
+                }
+                <FluentLabel Typo="Typography.Header" style="font-weight:200" Color="Color.FillInverse">
+                    @Dialog.Instance.Parameters.Title
+                </FluentLabel>
+            </FluentStack>
+            <FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center" VerticalGap="0" Style="padding-bottom:10px">
+                <FluentLabel Typo="Typography.Subject" Style="font-weight:200">
+                    @Content.Description
+                </FluentLabel>
+                <FluentLabel Typo="Typography.Body" Color="Color.Error">
+                    <small>
+                    @Content.Notes.Errors
+                    </small>
+                </FluentLabel>
+                <FluentLabel Typo="Typography.Body" Color="Color.Success">
+                    @Content.Notes.Success
+                </FluentLabel>
+                <FluentLabel Typo="Typography.Body" Color="Color.Neutral">
+                    @Content.Notes.Info
+                </FluentLabel>
+            </FluentStack>
+        </FluentStack>
+    </FluentDialogHeader>
+</div>
+
+@code
+{
+    [CascadingParameter]
+    public IViewItem Form { get; set; } = default!;
+
+    [CascadingParameter]
+    public IViewData<TModel> Content { get; set; } = default!;
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+}
