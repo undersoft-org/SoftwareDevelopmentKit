@@ -11,8 +11,8 @@
 
     public class BankCurrencyService
     {
-        private const string file_dir = "http://www.nbp.pl/Kursy/xml/dir.txt";
-        private const string xml_url = "http://www.nbp.pl/kursy/xml/";
+        private const string file_dir = "https://static.nbp.pl/dane/kursy/xml/dir.txt";
+        private const string xml_url = "https://static.nbp.pl/dane/kursy/xml/";
 
         public string file_name;
         public DateTime rate_date;

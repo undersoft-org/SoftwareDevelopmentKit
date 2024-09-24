@@ -1,9 +1,9 @@
 ﻿namespace Undersoft.SDK.Workflows
 {
-    using Notes;
-    using Series;
     using System.Collections;
     using System.Threading;
+    using Notes;
+    using Series;
 
     public class Workspace : IWorkspace
     {
@@ -11,8 +11,8 @@
 
         private ManualResetEventSlim postAccess = new ManualResetEventSlim(true, 128);
         private SemaphoreSlim postPass = new SemaphoreSlim(1);
-        private object inlock = new object();
-        private object outlock = new object();
+        private object inputHolder = new object();
+        private object outputHolder = new object();
 
         private void acquirePostAccess()
         {
@@ -36,7 +36,7 @@
         public WorkAspect Aspect;
         private Thread[] workers;
         private int WorkersCount => Aspect.WorkersCount;
-        private Registry<Worker> Works = new Registry<Worker>();
+        private Registry<Worker> Workers = new Registry<Worker>();
 
         public Workspace(WorkAspect aspect)
         {
@@ -78,18 +78,14 @@
 
         public void Run(WorkItem work)
         {
-            lock (inlock)
+            lock (inputHolder)
             {
                 if (work != null)
-                {
-                    Works.Enqueue(work.Worker.Clone());
-                    Monitor.Pulse(inlock);
-                }
+                    Workers.Enqueue(work.Worker.Clone());
                 else
-                {
-                    Works.Enqueue(DateTime.Now.Ticks, null);
-                    Monitor.Pulse(inlock);
-                }
+                    Workers.Enqueue(DateTime.Now.Ticks, null);
+
+                Monitor.Pulse(inputHolder);
             }
         }
 
@@ -101,70 +97,42 @@
 
         public void Activate()
         {
-
             for (; ; )
             {
-                Worker worker;
-                object input;
+                Worker worker = null;
+                object input = null;
 
-                lock (inlock)
+                lock (inputHolder)
                 {
-                    while (!Works.TryDequeue(out worker))
-                    {
-                        Monitor.Wait(inlock);
-                    }
-                }
+                    while (!Workers.TryDequeue(out worker))
+                        Monitor.Wait(inputHolder);
 
-                lock (outlock)
-                {
                     if (worker != null)
-                    {
                         input = worker.GetInput();
-                    }
                     else
                         return;
                 }
 
-                object output;
+                object output =
+                    (input is object[])
+                        ? worker.Process.Invoke((object[])input)
+                        : worker.Process.Invoke(input);
 
-                if (input != null)
-                {
-                    if (input is IList)
-                        output = worker.Process.Invoke((object[])input);
-                    else
-                        output = worker.Process.Invoke(input);
-                }
-                else
-                {
-                    output = worker.Process.Invoke();
-                }
+                worker.WaitForOutput();
 
-                while (!worker.CanSetOutput())
-                {
-                    Thread.Sleep(10);
-                }
-                lock (outlock)
+                lock (outputHolder)
                 {
                     Outpost(worker, output);
                 }
             }
         }
 
-        private Worker Clone(Worker worker)
-        {
-            Worker _worker = new Worker(worker.Name, worker.Process);
-            _worker.Input = worker.Input;
-            _worker.Evokers = worker.Evokers;
-            _worker.Work = worker.Work;
-            return _worker;
-        }
-
         private void Outpost(Worker worker, object output)
         {
+            worker.SetOutput(output);
+
             if (output != null)
             {
-                worker.SetOutput(output);
-
                 if (worker.Evokers != null && worker.Evokers.Count > 0)
                 {
                     int l = worker.Evokers.Count;

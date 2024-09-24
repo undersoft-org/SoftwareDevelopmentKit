@@ -154,16 +154,13 @@
         {
             WorkNoteTopic _ioqueue = null;
             if (TryGet(key, out _ioqueue))
-                return _ioqueue.Dequeue();
+                return _ioqueue.Notes;
             return null;
         }
 
         public IList<WorkNote> TakeNotes(IList<string> keys)
         {
-            return AsItems()
-                .Where(q => keys.Contains(q.Value.SenderName))
-                .Select(v => v.Value.Notes)
-                .ToList();
+            return keys.ForEach(k => Get(k).Notes).ToList();
         }
 
         public object[] GetParams(string key)
@@ -178,9 +175,7 @@
 
         public bool MeetsRequirements(IList<string> keys)
         {
-            return AsItems()
-                .Where(q => keys.Contains(q.Value.SenderName))
-                .All(v => v.Value.Count > 0);
+            return keys.All(k => TryGet(k, out ISeriesItem<WorkNoteTopic> q) && q.Value.Any());
         }
 
         public void QualifyToEvoke()
@@ -202,20 +197,16 @@
                     if (MeetsRequirements(evoke.RelatedWorkNames))
                     {
                         IList<WorkNote> notes = TakeNotes(evoke.RelatedWorkNames);
-
-                        if (notes.All(a => a != null))
+                        var parameters = new List<object>();
+                        foreach (var parameter in notes.SelectMany(n => n.Parameters))
                         {
-                            var parameters = new List<object>();
-                            foreach (WorkNote note in notes)
-                            {
-                                foreach (var parameter in note.Parameters)
-                                {
-                                    parameters.Add(parameter);
-                                }
-                            }
-
-                            Work.Invoke(parameters.ToArray());
+                            if (parameter is object[])
+                                ((object[])parameter).ForEach(p => parameters.Add(p));
+                            else
+                                parameters.Add(parameter);
                         }
+
+                        Work.Invoke(parameters.ToArray());
                     }
                 }
             }

@@ -59,8 +59,7 @@
         {
             get
             {
-                WorkNote _result = null;
-                TryDequeue(out _result);
+                TryDequeue(out WorkNote _result);
                 return _result;
             }
             set

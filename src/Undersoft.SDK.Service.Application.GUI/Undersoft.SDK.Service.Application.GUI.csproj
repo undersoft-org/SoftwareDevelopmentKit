@@ -33,6 +33,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Undersoft.SDK.Service.Application\Undersoft.SDK.Service.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Undersoft.SDK.Service.Application" />
     <Using Include="Undersoft.SDK.Service.Data.Store" />
     <Using Include="Undersoft.SDK.Service.Data.Repository" />
@@ -42,10 +46,6 @@
     <Using Include="Microsoft.Extensions.Options" />
     <Using Include="Microsoft.JSInterop" />
     <Using Include="System.ComponentModel.DataAnnotations" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\SoftwareDevelopmentKit\src\Undersoft.SDK.Service.Application\Undersoft.SDK.Service.Application.csproj" />
   </ItemGroup>
 
 </Project>

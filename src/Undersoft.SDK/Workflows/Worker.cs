@@ -8,10 +8,10 @@
 
     public class Worker : Origin, IWorker
     {
-        public Registry<object> Input { get; set; } = new Registry<object>(true);
-        public Registry<object> Output { get; set; } = new Registry<object>(true);
+        public Registry<object> Input = new Registry<object>(true);
+        public Registry<object> Output  = new Registry<object>(true);
 
-        public Worker RootWorker { get; set; }
+        public Worker RootWorker;
 
         private Worker() { }
 
@@ -30,37 +30,38 @@
 
         public object GetInput()
         {
-            Input.TryDequeue(out object entry);
-            InputId = RootWorker.InputId++;
+            if(Input.TryGet(WorkerOrder, out object entry))
+                Input.Remove(WorkerOrder);
             return entry;
         }
 
         public void SetInput(object value)
         {
-            Input.Enqueue(Unique.NewId, value);
+            Input.Enqueue(Interlocked.Increment(ref RootWorker.InputOrder), value);
         }
 
         public object GetOutput()
         {
-            Output.TryDequeue(out object entry);
+            if (Output.TryGet(WorkerOrder, out object entry))
+                Output.Remove(WorkerOrder);
             return entry;
         }
 
         public void SetOutput(object value)
         {
-            Output.Enqueue(Unique.NewId, value);
-            OutputId = RootWorker.OutputId++;
+            Output.Enqueue(Interlocked.Increment(ref RootWorker.OutputOrder), value);            
         }
 
-        public bool CanSetOutput()
+        public void WaitForOutput()
         {
-            return InputId == RootWorker.OutputId;
+            SpinWait.SpinUntil(() => WorkerOrder - 1 == RootWorker.OutputOrder);            
         }
 
         public Worker Clone()
         {
             var _worker = new Worker(Name, Process);
-            RootWorker = this;
+            _worker.WorkerOrder = Interlocked.Increment(ref RootWorker.WorkerOrder);
+            _worker.RootWorker = this;
             _worker.Input = Input;
             _worker.Output = Output;
             _worker.Evokers = Evokers;
@@ -74,9 +75,11 @@
 
         public IInvoker Process { get; set; }
 
-        public int OutputId { get; set; }
+        public int OutputOrder;
 
-        public int InputId { get; set; }
+        public int InputOrder;
+
+        public int WorkerOrder;
 
         public WorkAspect FlowTo<T>(string methodName = null)
         {
