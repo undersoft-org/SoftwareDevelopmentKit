@@ -723,7 +723,7 @@ public class Updater : IUpdater
         set => source.Rubrics = value;
     }
 
-    public IRubrics Changes
+    public ISet<string> Changes
     {
         get => source.Changes;
         set => source.Changes = value;

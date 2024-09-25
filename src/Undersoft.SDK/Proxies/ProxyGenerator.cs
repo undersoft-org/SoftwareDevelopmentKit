@@ -2,6 +2,7 @@
 
 using Rubrics;
 using System;
+using System.ComponentModel;
 using System.Linq;
 using Undersoft.SDK.Instant;
 using Undersoft.SDK.Series;
@@ -69,22 +70,20 @@ public class ProxyGenerator : IInstantGenerator
 
     protected IProxy Compile()
     {
-        if (Type == null)
-        {
-            try
-            {
-                IProxy proxy = Compile(new ProxyCompiler(this, rubricModels));
-                Rubrics.Update();
-                proxy.Rubrics = Rubrics;
-                return proxy;
-            }
-            catch (Exception ex)
-            {
-                throw new SleeveCompilerException("ProxyGenerator compilation at runtime failed see inner exception", ex);
-            }
-        }
+        if (Type != null)
+            return CreateInstance();
 
-        return CreateInstance();
+        try
+        {
+            IProxy proxy = Compile(new ProxyCompiler(this, rubricModels));
+            Rubrics.Update();
+            proxy.Rubrics = Rubrics;
+            return proxy;
+        }
+        catch (Exception ex)
+        {
+            throw new SleeveCompilerException("ProxyGenerator compilation at runtime failed see inner exception", ex);
+        }
     }
 
     private IProxy Compile(ProxyCompiler compiler)
@@ -113,9 +112,15 @@ public class ProxyGenerator : IInstantGenerator
     {
         var s = (IProxy)Type.New();
         s.Rubrics = Rubrics;
+        //s.Changes = new HashSet<string>();
+        //s.PropertyChanged += OnPropertyChanged;
         return s;
     }
 
+    private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        ((IProxy)sender).Changes.Add(e.PropertyName);
+    }
 }
 
 public class SleeveCompilerException : Exception

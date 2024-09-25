@@ -30,7 +30,7 @@ public class ProxyCompiler : ProxyCompilerBase
 
         CreateRubricsProperty(tb, typeof(MemberRubrics), "Rubrics");
 
-        CreateChangesProperty(tb, typeof(MemberRubrics), "Changes");
+        CreateChangesProperty(tb, typeof(ISet<string>), "Changes");
 
         CreateFieldsAndProperties(tb);
 
@@ -319,9 +319,7 @@ public class ProxyCompiler : ProxyCompilerBase
                     }
 
                     il.Emit(OpCodes.Ldarg_1);
-
                     il.Emit(OpCodes.Switch, branches);
-
                     il.ThrowException(typeof(ArgumentOutOfRangeException));
 
                     for (int i = 0; i < rubricCount; i++)
@@ -335,17 +333,13 @@ public class ProxyCompiler : ProxyCompilerBase
                         if (
                             rubricBuilder.Field == null
                             || rubricBuilder.Field.IsBackingField
-                        )
-                        {
-                            il.EmitCall(OpCodes.Call, rubricBuilder.Getter, null);
-                        }
+                        )                        
+                            il.EmitCall(OpCodes.Call, rubricBuilder.Getter, null);                        
                         else
                             il.Emit(OpCodes.Ldfld, rubricBuilder.Field.RubricInfo);
 
-                        if (rubricBuilder.Type.IsValueType)
-                        {
-                            il.Emit(OpCodes.Box, rubricBuilder.Type);
-                        }
+                        if (rubricBuilder.Type.IsValueType)                        
+                            il.Emit(OpCodes.Box, rubricBuilder.Type);                        
                         il.Emit(OpCodes.Ret);
                     }
                 }
@@ -376,9 +370,7 @@ public class ProxyCompiler : ProxyCompilerBase
                     }
 
                     il.Emit(OpCodes.Ldarg_1);
-
                     il.Emit(OpCodes.Switch, branches);
-
                     il.ThrowException(typeof(ArgumentOutOfRangeException));
 
                     for (int i = 0; i < rubricCount; i++)
@@ -401,10 +393,8 @@ public class ProxyCompiler : ProxyCompilerBase
                         if (
                             rubricBuilder.Field == null
                             || rubricBuilder.Field.IsBackingField
-                        )
-                        {
-                            il.EmitCall(OpCodes.Call, rubricBuilder.Setter, null);
-                        }
+                        )                        
+                            il.EmitCall(OpCodes.Call, rubricBuilder.Setter, null);                        
                         else
                             il.Emit(OpCodes.Stfld, rubricBuilder.Field.RubricInfo);
 
@@ -476,17 +466,13 @@ public class ProxyCompiler : ProxyCompilerBase
                         if (
                             rubricBuilders[i].Field == null
                             || rubricBuilders[i].Field.IsBackingField
-                        )
-                        {
-                            il.EmitCall(OpCodes.Call, rubricBuilders[i].Getter, null);
-                        }
+                        )                        
+                            il.EmitCall(OpCodes.Call, rubricBuilders[i].Getter, null);                        
                         else
                             il.Emit(OpCodes.Ldfld, rubricBuilders[i].Field.RubricInfo);
 
-                        if (rubricBuilders[i].Type.IsValueType)
-                        {
-                            il.Emit(OpCodes.Box, rubricBuilders[i].Type);
-                        }
+                        if (rubricBuilders[i].Type.IsValueType)                        
+                            il.Emit(OpCodes.Box, rubricBuilders[i].Type);                        
                         il.Emit(OpCodes.Ret);
                     }
                 }
@@ -562,10 +548,8 @@ public class ProxyCompiler : ProxyCompilerBase
                         if (
                             rubricBuilder.Field == null
                             || rubricBuilder.Field.IsBackingField
-                        )
-                        {
-                            il.EmitCall(OpCodes.Call, rubricBuilder.Setter, null);
-                        }
+                        )                        
+                            il.EmitCall(OpCodes.Call, rubricBuilder.Setter, null);                        
                         else
                             il.Emit(OpCodes.Stfld, rubricBuilder.Field.RubricInfo);
 
@@ -955,17 +939,13 @@ public class ProxyCompiler : ProxyCompilerBase
 
             var o = rubricBuilders.GetItem(i);
 
-            if (rubricBuilders[i].Field == null || rubricBuilders[i].Field.IsBackingField)
-            {
-                il.EmitCall(OpCodes.Call, rubricBuilders[i].Getter, null);
-            }
+            if (rubricBuilders[i].Field == null || rubricBuilders[i].Field.IsBackingField)            
+                il.EmitCall(OpCodes.Call, rubricBuilders[i].Getter, null);            
             else
                 il.Emit(OpCodes.Ldfld, rubricBuilders[i].Field.RubricInfo);
 
-            if (rubricBuilders[i].Type.IsValueType)
-            {
-                il.Emit(OpCodes.Box, rubricBuilders[i].Type);
-            }
+            if (rubricBuilders[i].Type.IsValueType)            
+                il.Emit(OpCodes.Box, rubricBuilders[i].Type);            
 
             il.Emit(OpCodes.Stelem, typeof(object));
         }
@@ -1004,10 +984,8 @@ public class ProxyCompiler : ProxyCompilerBase
                 rubricBuilders[i].Type
             );
 
-            if (rubricBuilders[i].Field == null || rubricBuilders[i].Field.IsBackingField)
-            {
-                il.EmitCall(OpCodes.Call, rubricBuilders[i].Setter, null);
-            }
+            if (rubricBuilders[i].Field == null || rubricBuilders[i].Field.IsBackingField)            
+                il.EmitCall(OpCodes.Call, rubricBuilders[i].Setter, null);            
             else
                 il.Emit(OpCodes.Stfld, rubricBuilders[i].Field.RubricInfo);
         }

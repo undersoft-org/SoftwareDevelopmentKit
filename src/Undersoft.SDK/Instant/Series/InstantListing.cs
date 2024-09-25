@@ -103,7 +103,7 @@
             return null;
         }
 
-        public virtual IRubrics Changes { get; set; }
+        public virtual ISet<string> Changes { get; set; }
 
         public object[] ValueArray
         {

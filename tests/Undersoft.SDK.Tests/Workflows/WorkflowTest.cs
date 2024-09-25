@@ -23,13 +23,13 @@ namespace Undersoft.SDK.Tests.Workflows
                 .Aspect<BankCurrencyService>()
                     .AddWork<FirstCurrency>((w) => w.GetCurrency)
                     .AddWork<SecondCurrency>((w) => w.GetCurrency)
-                .Allocate(4);
+                .Allocate(6);
 
             var compute = work
                 .Aspect<WorkflowTest>()
                     .AddWork<ComputeCurrency>((w) => w.Compute)
                     .AddWork<PresentResult>((w) => w.Present)
-                .Allocate(2);
+                .Allocate(3);
 
             download
                 .Work<FirstCurrency>((w) => w.GetCurrency)
@@ -39,7 +39,7 @@ namespace Undersoft.SDK.Tests.Workflows
 
             compute
                 .Work<PresentResult>((w) => w.Present)
-                    .FlowFrom<ComputeCurrency>((w) => w.Compute);
+                    .FlowFrom<ComputeCurrency>((w) => w.Compute, (r) => (double)((object[])r)[2] > 0.8950D);
 
             for (int i = 1; i < 7; i++)
             {
@@ -48,7 +48,7 @@ namespace Undersoft.SDK.Tests.Workflows
                     .Work<SecondCurrency>((w) => w.GetCurrency).Post("USD", i);
             }
 
-            Task.Delay(30000).Wait();
+            Task.Delay(15000).Wait();
 
             download.Close(true);
             compute.Close(true);
@@ -61,9 +61,9 @@ namespace Undersoft.SDK.Tests.Workflows
             var ql1 = new Work<SecondCurrency>("USD", 1);
 
             var ql2 = Work.Run<FirstCurrency>(true, "EUR", 1);
-            var ql3 = Work.Run<SecondCurrency>(true, "USD", 1);
+            var ql3 = Work.Run<SecondCurrency>(true, "USD", 1);            
 
-            Task.Delay(5000);
+            Task.Delay(5000).Wait();
         }
     }
 }

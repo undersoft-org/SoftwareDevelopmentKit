@@ -26,7 +26,7 @@
 
         [JsonIgnore]
         [IgnoreDataMember]
-        IRubrics Changes { get; set; }
+        ISet<string> Changes { get; set; }
     }
 
     public interface IValueArray

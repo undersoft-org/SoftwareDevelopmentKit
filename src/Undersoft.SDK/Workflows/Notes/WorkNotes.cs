@@ -18,7 +18,7 @@
 
         private WorkCase Case { get; set; }
 
-        private void send(WorkNote parameters)
+        private void InnerSend(WorkNote parameters)
         {
             if (parameters.RecipientName != null && parameters.SenderName != null)
             {
@@ -54,11 +54,11 @@
             }
         }
 
-        public void Send(params WorkNote[] parametersList)
+        public void Send(IEnumerable<WorkNote> workNotes)
         {
-            foreach (WorkNote parameters in parametersList)
+            foreach (WorkNote note in workNotes)
             {
-                send(parameters);
+                InnerSend(note);
             }
         }
 

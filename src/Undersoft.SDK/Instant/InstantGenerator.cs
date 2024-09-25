@@ -3,10 +3,12 @@
     using Rubrics;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.InteropServices;
     using Undersoft.SDK.Logging;
+    using Undersoft.SDK.Proxies;
     using Undersoft.SDK.Series;
     using Undersoft.SDK.Uniques;
     using Undersoft.SDK.Utilities;
@@ -99,63 +101,63 @@
 
         private InstantType mode { get; set; }
 
-        private long? _seed = null;
-        private long seed => _seed ??= Type.UniqueKey64();
+        private long? _typeId = null;
+        private long TypeId => _typeId ??= Type.UniqueKey32();
 
         public IInstant Generate()
         {
-            if (this.Type == null)
-            {
-                try
-                {
-                    switch (mode)
-                    {
-                        case InstantType.Reference:
-                            CompileBuildedType(
-                                new InstantCompilerReferenceTypes(this, memberBuilders)
-                            );
-                            break;
-                        case InstantType.ValueType:
-                            CompileBuildedType(new InstantCompilerValueTypes(this, memberBuilders));
-                            break;
-                        case InstantType.Derived:
-                            CompileDerivedType(
-                                new InstantCompilerDerivedTypes(this, memberBuilders)
-                            );
-                            break;
-                        default:
-                            break;
-                    }
+            if (this.Type != null)
+                return CreateInstance();
 
-                    // Rubrics.Update();
-                }
-                catch (Exception ex)
+            try
+            {
+                switch (mode)
                 {
-                    throw new InstantTypeCompilerException(
-                        "Instant compilation at runtime failed see inner exception",
-                        ex
-                    );
+                    case InstantType.Reference:
+                        CompileBuildedType(
+                            new InstantCompilerReferenceTypes(this, memberBuilders)
+                        );
+                        break;
+                    case InstantType.ValueType:
+                        CompileBuildedType(new InstantCompilerValueTypes(this, memberBuilders));
+                        break;
+                    case InstantType.Derived:
+                        CompileDerivedType(
+                            new InstantCompilerDerivedTypes(this, memberBuilders)
+                        );
+                        break;
+                    default:
+                        break;
                 }
             }
-            return InnerGenerate();
+            catch (Exception ex)
+            {
+                throw new InstantTypeCompilerException(
+                    "Instant compilation at runtime failed see inner exception",
+                    ex
+                );
+            }
+            return CreateInstance();
         }
 
         public object New()
-        {
-            if (this.Type == null)
-                return Generate();
-            return this.Type.New();
+        {           
+            return Generate();
         }
 
-        private IInstant InnerGenerate()
+        private IInstant CreateInstance()
         {
-            if (this.Type == null)
-                return Generate();
-
             var figure = (IInstant)this.Type.New();
+            //figure.Changes = new HashSet<string>();
+            //figure.PropertyChanged += OnPropertyChanged;
             figure.Id = Unique.NewId;
-            figure.TypeId = seed;
+            figure.TypeId = TypeId;
             return figure;
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            ((IInstant)sender).Changes.Add(e.PropertyName);
         }
 
         private void CompileDerivedType(InstantCompiler compiler)

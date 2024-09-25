@@ -109,7 +109,7 @@
             set => Put(value);
         }
 
-        public virtual IRubrics Changes { get; set; }
+        public virtual ISet<string> Changes { get; set; }
 
         public Type Type { get; set; }
 

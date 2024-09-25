@@ -1,6 +1,7 @@
 ﻿namespace Undersoft.SDK.Workflows.Notes
 {
     using Series;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using Undersoft.SDK.Workflows;
@@ -178,36 +179,33 @@
             return keys.All(k => TryGet(k, out ISeriesItem<WorkNoteTopic> q) && q.Value.Any());
         }
 
-        public void QualifyToEvoke()
+        public IEnumerable<WorkNoteEvoker> GetQualifiedToEvoke()
         {
-            List<WorkNoteEvoker> toEvoke = new List<WorkNoteEvoker>();
             foreach (WorkNoteEvoker relay in Evokers.AsValues())
             {
                 if (relay.RelatedWorkNames.All(r => ContainsKey(r)))
                     if (relay.RelatedWorkNames.All(r => this[r].AsValues().Any()))
-                    {
-                        toEvoke.Add(relay);
-                    }
+                        yield return relay;
             }
+        }
 
-            if (toEvoke.Any())
+        public void EvokeQualified()
+        {
+            foreach (WorkNoteEvoker evoke in GetQualifiedToEvoke())
             {
-                foreach (WorkNoteEvoker evoke in toEvoke)
+                if (MeetsRequirements(evoke.RelatedWorkNames))
                 {
-                    if (MeetsRequirements(evoke.RelatedWorkNames))
+                    IList<WorkNote> notes = TakeNotes(evoke.RelatedWorkNames);
+                    var parameters = new List<object>();
+                    foreach (var parameter in notes.SelectMany(n => n.Parameters))
                     {
-                        IList<WorkNote> notes = TakeNotes(evoke.RelatedWorkNames);
-                        var parameters = new List<object>();
-                        foreach (var parameter in notes.SelectMany(n => n.Parameters))
-                        {
-                            if (parameter is object[])
-                                ((object[])parameter).ForEach(p => parameters.Add(p));
-                            else
-                                parameters.Add(parameter);
-                        }
-
-                        Work.Invoke(parameters.ToArray());
+                        if (parameter is object[])
+                            ((object[])parameter).ForEach(p => parameters.Add(p));
+                        else
+                            parameters.Add(parameter);
                     }
+
+                    Work.Invoke(parameters.ToArray());
                 }
             }
         }

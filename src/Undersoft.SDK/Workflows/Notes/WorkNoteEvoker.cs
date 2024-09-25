@@ -7,8 +7,8 @@
 
     public class WorkNoteEvoker : Registry<WorkItem>, IUnique
     {
-        public ISeries<WorkItem> RelatedWorks = new Catalog<WorkItem>();
-        public ISeries<string> RelatedWorkNames = new Catalog<string>();
+        public ISeries<WorkItem> RelatedWorks => this;
+        public ISeries<string> RelatedWorkNames = new Registry<string>();
 
         public WorkNoteEvoker(WorkItem sender, WorkItem recipient, params WorkItem[] relayWorks) : base(true)
         {
@@ -82,8 +82,10 @@
             );
         }
 
-        public IUnique Empty => new Usid();
+        public Func<object, bool> Condition { get; set; }
 
+        public IUnique Empty => new Usid();
+         
         public string EvokerName { get; set; }
 
         public EvokerType EvokerType { get; set; }

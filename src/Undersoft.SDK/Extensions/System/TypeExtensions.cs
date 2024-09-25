@@ -27,8 +27,8 @@ namespace System
                     throw new ArgumentException(
                         "{"
                             + MethodBase.GetCurrentMethod()
-                            + "} Error:\n\nThe Activator.CreateInstance method could not "
-                            + "CreateInstance a default instance of the supplied value type <"
+                            + "} Error:\n\nThe Activator.New method could not "
+                            + "New a default instance of the supplied value type <"
                             + type
                             + "> (Inner Exception message: \""
                             + e.Message
@@ -143,8 +143,8 @@ namespace System
                     throw new ArgumentException(
                         "{"
                             + MethodBase.GetCurrentMethod()
-                            + "} Error:\n\nThe Activator.CreateInstance method could not "
-                            + "CreateInstance a default instance of the supplied value type <"
+                            + "} Error:\n\nThe Activator.New method could not "
+                            + "New a default instance of the supplied value type <"
                             + type
                             + "> (Inner Exception message: \""
                             + e.Message

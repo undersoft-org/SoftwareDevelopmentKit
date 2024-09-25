@@ -67,7 +67,7 @@
                 value.SenderName = SenderName;
                 Enqueue(DateTime.Now.ToBinary(), value);
                 if (RecipientBox != null)
-                    RecipientBox.QualifyToEvoke();
+                    RecipientBox.EvokeQualified();
             }
         }
 

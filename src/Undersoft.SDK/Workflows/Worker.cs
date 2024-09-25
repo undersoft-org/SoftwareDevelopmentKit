@@ -15,10 +15,10 @@
 
         private Worker() { }
 
-        public Worker(string Name, IInvoker Method) : this()
+        public Worker(string name, IInvoker method) : this()
         {
-            Process = Method;
-            this.Name = Name;
+            Process = method;
+            Name = name;
             TypeId = Process.Id;
             Id = Unique.NewId.UniqueKey(TypeId);
             RootWorker = this;
@@ -52,9 +52,9 @@
             Output.Enqueue(Interlocked.Increment(ref RootWorker.OutputOrder), value);            
         }
 
-        public void WaitForOutput()
+        public bool CanSetOutput()
         {
-            SpinWait.SpinUntil(() => WorkerOrder - 1 == RootWorker.OutputOrder);            
+            return WorkerOrder - 1 == RootWorker.OutputOrder;            
         }
 
         public Worker Clone()
@@ -81,14 +81,14 @@
 
         public int WorkerOrder;
 
-        public WorkAspect FlowTo<T>(string methodName = null)
+        public WorkAspect FlowTo<T>(string methodName = null, Func<object, bool> condition = null)
         {
-            return Work.FlowTo<T>(methodName);
+            return Work.FlowTo<T>(methodName, condition);
         }
 
-        public WorkAspect FlowTo<T>(Func<T, Delegate> methodName) where T : class, new()
+        public WorkAspect FlowTo<T>(Func<T, Delegate> methodName, Func<object, bool> condition = null) where T : class, new()
         {
-            return Work.FlowTo(methodName);
+            return Work.FlowTo(methodName, condition);
         }
 
         public WorkAspect FlowTo(WorkItem recipient)
@@ -103,9 +103,19 @@
             return Work.Aspect;
         }
 
-        public WorkAspect FlowTo(string RecipientName, string methodName)
+        public WorkAspect FlowTo(Func<object, bool> condition, WorkItem Recipient, params WorkItem[] RelationWorks)
         {
-            Evokers.Add(new WorkNoteEvoker(Work, RecipientName, Name));
+            var evoker = new WorkNoteEvoker(Work, Recipient, RelationWorks);
+            evoker.Condition = condition;
+            Evokers.Add(evoker);
+            return Work.Aspect;
+        }
+
+        public WorkAspect FlowTo(string RecipientName, string methodName, Func<object, bool> condition = null)
+        {
+            var evoker = new WorkNoteEvoker(Work, RecipientName, Name);
+            evoker.Condition = condition;
+            Evokers.Add(evoker);
             return Work.Aspect;
         }
 
@@ -115,14 +125,14 @@
             return Work.Aspect;
         }
 
-        public WorkAspect FlowFrom<T>(string methodName = null)
+        public WorkAspect FlowFrom<T>(string methodName = null, Func<object, bool> condition = null)
         {
-            return Work.FlowFrom<T>(methodName);
+            return Work.FlowFrom<T>(methodName, condition);
         }
 
-        public WorkAspect FlowFrom<T>(Func<T, Delegate> methodName) where T : class, new()
+        public WorkAspect FlowFrom<T>(Func<T, Delegate> methodName, Func<object, bool> condition = null) where T : class, new()
         {
-            return Work.FlowFrom(methodName);
+            return Work.FlowFrom(methodName, condition);
         }
 
         public WorkAspect FlowFrom(WorkItem sender)
@@ -137,9 +147,9 @@
             return Work.Aspect;
         }
 
-        public WorkAspect FlowFrom(string SenderName, string methodName)
+        public WorkAspect FlowFrom(string SenderName, string methodName, Func<object, bool> condition = null)
         {
-            Work.FlowFrom(SenderName, methodName);
+            Work.FlowFrom(SenderName, methodName, condition);
             return Work.Aspect;
         }
 

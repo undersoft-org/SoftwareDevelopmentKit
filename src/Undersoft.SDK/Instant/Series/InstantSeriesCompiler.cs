@@ -900,7 +900,7 @@
             il.Emit(OpCodes.Ldfld, structTypeField);
             il.EmitCall(
                 OpCodes.Call,
-                typeof(Activator).GetMethod("CreateInstance", new Type[] { typeof(Type) }),
+                typeof(Activator).GetMethod("New", new Type[] { typeof(Type) }),
                 null
             );
             il.Emit(OpCodes.Castclass, castType ??= typeof(IInstant));
@@ -929,7 +929,7 @@
             il.Emit(OpCodes.Ldfld, structTypeField);
             il.EmitCall(
                 OpCodes.Call,
-                typeof(Activator).GetMethod("CreateInstance", new Type[] { typeof(Type) }),
+                typeof(Activator).GetMethod("New", new Type[] { typeof(Type) }),
                 null
             );
             il.Emit(OpCodes.Ret);

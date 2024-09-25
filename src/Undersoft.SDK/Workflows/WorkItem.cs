@@ -103,19 +103,19 @@
 
         public Task<object> InvokeAsync(params object[] parameters)
         {
-            return Task.Run(() =>
+            return Task.Factory.StartNew(() =>
             {
                 return Invoke(parameters);
-            });
+            }, TaskCreationOptions.AttachedToParent);
         }
 
         public Task<T> InvokeAsync<T>(params object[] parameters) where T : class
         {
-            return Task.Run(() =>
+            return Task.Factory.StartNew(() =>
             {
                 Invoke(parameters);
                 return default(T);
-            });
+            }, TaskCreationOptions.AttachedToParent);
         }
 
         public WorkNoteEvokers Evokers
@@ -142,16 +142,16 @@
             set => Process.TargetObject = value;
         }
 
-        public WorkAspect FlowTo<T>(string methodName = null)
+        public WorkAspect FlowTo<T>(string methodName = null, Func<object, bool> condition = null)
         {
             if (methodName == null)
                 methodName = typeof(T).GetMethods().FirstOrDefault(m => m.IsPublic).Name;
 
-            FlowTo(typeof(T).FullName, methodName);
+            FlowTo(typeof(T).FullName, methodName, condition);
             return Aspect;
         }
 
-        public WorkAspect FlowTo<T>(Func<T, Delegate> methodName) where T : class, new()
+        public WorkAspect FlowTo<T>(Func<T, Delegate> methodName, Func<object, bool> condition = null) where T : class, new()
         {
             string name = null;
             if (methodName == null)
@@ -161,11 +161,11 @@
                 name = methodName(new T()).Method.Name;
             }
 
-            FlowTo(typeof(T).FullName, name);
+            FlowTo(typeof(T).FullName, name, condition);
             return Aspect;
         }
 
-        public WorkAspect FlowTo(WorkItem Recipient)
+        public WorkAspect FlowTo(WorkItem Recipient, Func<object, bool> condition = null)
         {
             long recipientKey = Recipient.Name.UniqueKey();
 
@@ -179,9 +179,11 @@
                 noteEvoker.RelatedWorks.Put(this);
                 noteEvoker.RelatedWorkNames.Put(Name);
             }
-
-            Worker.FlowTo(Recipient, relationWorks.Concat(new[] { this }).ToArray());
-
+            
+            if (condition == null)
+                Worker.FlowTo(Recipient, relationWorks.Concat(new[] { this }).ToArray());
+            else
+                Worker.FlowTo(condition, Recipient, relationWorks.Concat(new[] { this }).ToArray());
             return Aspect;
         }
 
@@ -191,7 +193,7 @@
             return Aspect;
         }
 
-        public WorkAspect FlowTo(string recipientClass, string methodName)
+        public WorkAspect FlowTo(string recipientClass, string methodName, Func<object, bool> condition = null)
         {
             var recipientName = recipientClass + "." + methodName;
             var aspect = Case.Where(m => m.ContainsKey(recipientName)).FirstOrDefault();
@@ -209,8 +211,10 @@
                 noteEvoker.RelatedWorks.Put(this);
                 noteEvoker.RelatedWorkNames.Put(Name);
             }
-
-            Worker.FlowTo(recipient, relationWorks.Concat(new[] { this }).ToArray());
+            if(condition == null)
+                Worker.FlowTo(recipient, relationWorks.Concat(new[] { this }).ToArray());
+            else
+                Worker.FlowTo(condition, recipient, relationWorks.Concat(new[] { this }).ToArray());
             return Aspect;
         }
 
@@ -220,16 +224,16 @@
             return Aspect;
         }
 
-        public WorkAspect FlowFrom<T>(string methodName = null)
+        public WorkAspect FlowFrom<T>(string methodName = null, Func<object, bool> condition = null)
         {
             if (methodName == null)
                 methodName = typeof(T).GetMethods().FirstOrDefault(m => m.IsPublic).Name;
 
-            FlowFrom(typeof(T).FullName, methodName);
+            FlowFrom(typeof(T).FullName, methodName, condition);
             return Aspect;
         }
 
-        public WorkAspect FlowFrom<T>(Func<T, Delegate> methodName) where T : class, new()
+        public WorkAspect FlowFrom<T>(Func<T, Delegate> methodName, Func<object, bool> condition = null) where T : class, new()
         {
             string name = null;
             if (methodName == null)
@@ -239,7 +243,7 @@
                 name = methodName(new T()).Method.Name;
             }
 
-            FlowFrom(typeof(T).FullName, name);
+            FlowFrom(typeof(T).FullName, name, condition);
             return Aspect;
         }
 
@@ -255,13 +259,13 @@
             return Aspect;
         }
 
-        public WorkAspect FlowFrom(string senderCless, string methodName)
+        public WorkAspect FlowFrom(string senderCless, string methodName, Func<object, bool> condition = null)
         {
             var senderName = senderCless + "." + methodName;
             var aspect = Case.Where(m => m.ContainsKey(senderName)).FirstOrDefault();
             var sender = aspect.Get(senderName);
 
-            sender.FlowTo(this);
+            sender.FlowTo(this, condition);
             return Aspect;
         }
 

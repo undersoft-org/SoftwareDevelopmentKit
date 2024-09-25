@@ -7,28 +7,25 @@
 
     public class Workspace : IWorkspace
     {
-        private static readonly int WAIT_WRITE_TIMEOUT = 5000;
+        private static readonly int WAIT_FOR_OUTPUT_TIMEOUT = 30000;
 
-        private ManualResetEventSlim postAccess = new ManualResetEventSlim(true, 128);
-        private SemaphoreSlim postPass = new SemaphoreSlim(1);
-        private object inputHolder = new object();
-        private object outputHolder = new object();
+        private ManualResetEventSlim sendingAccess = new ManualResetEventSlim(true, 128);
 
-        private void acquirePostAccess()
+        private void AcquireSending(Worker worker)
         {
             do
             {
-                if (!postAccess.Wait(WAIT_WRITE_TIMEOUT))
-                    continue;
-                postAccess.Reset();
-            } while (!postPass.Wait(0));
+                if (!sendingAccess.Wait(WAIT_FOR_OUTPUT_TIMEOUT))
+                    throw new TimeoutException("Waiting for result timeout has been exceeded");
+            } while (!worker.CanSetOutput());
+            sendingAccess.Reset();
+        }
+        private void ReleaseSending()
+        {
+            sendingAccess.Set();
         }
 
-        private void releasePostAccess()
-        {
-            postPass.Release();
-            postAccess.Set();
-        }
+        private object holder = new object();
 
         public WorkNotes Notes;
         public bool Ready;
@@ -78,14 +75,14 @@
 
         public void Run(WorkItem work)
         {
-            lock (inputHolder)
+            lock (holder)
             {
                 if (work != null)
                     Workers.Enqueue(work.Worker.Clone());
                 else
                     Workers.Enqueue(DateTime.Now.Ticks, null);
 
-                Monitor.Pulse(inputHolder);
+                Monitor.Pulse(holder);
             }
         }
 
@@ -102,10 +99,10 @@
                 Worker worker = null;
                 object input = null;
 
-                lock (inputHolder)
+                lock (holder)
                 {
                     while (!Workers.TryDequeue(out worker))
-                        Monitor.Wait(inputHolder);
+                        Monitor.Wait(holder);
 
                     if (worker != null)
                         input = worker.GetInput();
@@ -113,49 +110,34 @@
                         return;
                 }
 
-                object output =
+                object result =
                     (input is object[])
                         ? worker.Process.Invoke((object[])input)
                         : worker.Process.Invoke(input);
 
-                worker.WaitForOutput();
+                AcquireSending(worker);
 
-                lock (outputHolder)
-                {
-                    Outpost(worker, output);
-                }
+                Send(worker, result);
+                
+                ReleaseSending();
             }
         }
 
-        private void Outpost(Worker worker, object output)
+        private void Send(Worker worker, object result)
         {
-            worker.SetOutput(output);
+            worker.SetOutput(result);
 
-            if (output != null)
-            {
-                if (worker.Evokers != null && worker.Evokers.Count > 0)
-                {
-                    int l = worker.Evokers.Count;
-                    if (l > 0)
+            if (result == null)
+                return;
+
+            Notes.Send(
+                worker
+                    .Evokers.Where(e => e.Condition == null || e.Condition(result))
+                    .ForEach(e => new WorkNote(worker.Work, e.Recipient, e, null, result)
                     {
-                        var notes = new WorkNote[l];
-                        for (int i = 0; i < worker.Evokers.Count; i++)
-                        {
-                            WorkNote note = new WorkNote(
-                                worker.Work,
-                                worker.Evokers[i].Recipient,
-                                worker.Evokers[i],
-                                null,
-                                output
-                            );
-                            note.SenderBox = worker.Work.Box;
-                            notes[i] = note;
-                        }
-
-                        Notes.Send(notes);
-                    }
-                }
-            }
+                        SenderBox = worker.Work.Box,
+                    })
+            );
         }
     }
 }

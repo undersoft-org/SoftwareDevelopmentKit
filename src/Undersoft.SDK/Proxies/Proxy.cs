@@ -79,7 +79,7 @@ public class Proxy : InnerProxy, IProxy
         set => proxy.Rubrics = value;
     }
 
-    public IRubrics Changes
+    public ISet<string> Changes
     {
         get => proxy.Changes;
         set => proxy.Changes = value;

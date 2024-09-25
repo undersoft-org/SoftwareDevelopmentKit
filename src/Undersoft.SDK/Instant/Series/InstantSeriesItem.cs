@@ -43,7 +43,7 @@
             set => this.value[propertyName] = value;
         }
 
-        public virtual IRubrics Changes { get; set; }
+        public virtual ISet<string> Changes { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

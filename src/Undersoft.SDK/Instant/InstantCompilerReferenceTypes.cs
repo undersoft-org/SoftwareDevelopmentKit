@@ -26,7 +26,7 @@
 
             CreateCodeProperty(tb, typeof(Uscn), "Code");
 
-            CreateChangesProperty(tb, typeof(MemberRubrics), "Changes");
+            CreateChangesProperty(tb, typeof(ISet<string>), "Changes");
 
             CreatePropertyChanged(tb);
 
