@@ -12,7 +12,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters
         private List<Option<string>>? _operandOptions { get; set; }
         private List<Option<string>>? _linkOptions { get; set; }
 
-        private string? _operandValue
+        private string? _compareValue
         {
             get => Filter.Operand.ToString();
             set
@@ -26,7 +26,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters
                 .ForEach(n => new Option<string> { Value = n, Text = n })
                 .ToList();
 
-        private string? _linkdValue
+        private string? _linkValue
         {
             get => Filter.Link.ToString();
             set
@@ -97,7 +97,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters
         {
             if (Parent != null)
             {
-                ((IViewFilter)Parent).UpdateFilters();
+                ((IViewFilter)Parent).Update();
                 Parent.RenderView();
             }
         }

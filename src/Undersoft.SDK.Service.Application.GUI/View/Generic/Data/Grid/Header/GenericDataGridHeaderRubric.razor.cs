@@ -23,8 +23,11 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid.Header
 
         public void OnFilterDismiss(MouseEventArgs args)
         {
-            ((IViewFilter)Rubric.ViewFilter).IsOpen = false;
-            Rubric.Filters.Clear();
+            var vi = Rubric.ViewFilter;
+            if (vi == null)
+                return;
+            var vf = (IViewFilter)vi;
+            vf.Clear();
             StateHasChanged();
         }
 

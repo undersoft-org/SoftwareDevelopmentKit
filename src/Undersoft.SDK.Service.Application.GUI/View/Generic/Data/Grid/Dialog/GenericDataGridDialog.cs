@@ -43,6 +43,9 @@ public class GenericDataGridDialog<TDialog, TModel> : ViewDialog<TDialog, TModel
     {
         if (Service != null)
         {
+            data.Rubrics.ForEach(r => r.Disabled = false).Commit();
+            data.ExtendedRubrics.ForEach(r => r.Disabled = false).Commit();
+
             Reference = await Service.ShowDialogAsync<TDialog>(data, new DialogParameters<IViewData<TModel>>()
             {
                 Height = data.Height,

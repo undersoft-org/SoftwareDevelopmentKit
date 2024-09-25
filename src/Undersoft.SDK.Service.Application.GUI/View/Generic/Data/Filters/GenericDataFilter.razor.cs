@@ -13,26 +13,8 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters
 
             Rubric.ViewFilter = this;
 
-            if (Rubric.Filterable)
-            {
-                FilteredType = Rubric.FilteredType ?? Rubric.RubricType;
-
-                if (Rubric.FilterMembers == null || !Rubric.FilterMembers.Any())
-                    Rubric.FilterMembers = new[] { Rubric.RubricName };
-
-                Rubric.FilterMembers.ForEach(m =>
-                {
-                    var rubricFilters = Filters.Where(f => f.Member == m).Commit();
-                    if (rubricFilters.Any())
-                    {
-                        FilterEntries.Put(rubricFilters);
-                    }
-                    else
-                    {
-                        FilterEntries.Put(new Filter(m, FilteredType.DefaultNotNullable(), CompareOperand.Equal, LinkOperand.And));
-                    }
-                });
-            }
+            Initialize();
+           
             base.OnInitialized();
         }
 
@@ -44,7 +26,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters
 
         public bool IsAddable => Rubric.FilterMembers!.Length < 2;
 
-        public void CloneLastFilter()
+        public void CloneLast()
         {
             var lastfilter = FilterEntries.LastOrDefault();
             if (lastfilter != null)
@@ -53,7 +35,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters
             RenderView();
         }
 
-        public void RemoveLastFilter()
+        public void RemoveLast()
         {
             var lastfilter = FilterEntries.LastOrDefault();
             if (lastfilter != null)
@@ -71,12 +53,53 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters
             RenderView();
         }
 
-        public void ClearFilters()
+        public void Initialize()
         {
-            Filters.Clear();
+            if (Rubric.Filterable)
+            {
+                FilteredType = Rubric.FilteredType ?? Rubric.RubricType;
+
+                if (Rubric.FilterMembers == null || !Rubric.FilterMembers.Any())
+                    Rubric.FilterMembers = new[] { Rubric.RubricName };
+
+                var compare = CompareOperand.Contains;
+                var link = LinkOperand.Or;
+
+                if (FilteredType.GetNotNullableType() != typeof(string))
+                {
+                    compare = CompareOperand.Equal;
+                    link = LinkOperand.And;
+                }
+
+                Rubric.FilterMembers.ForEach(m =>
+                {
+                    var rubricFilters = Filters.Where(f => f.Member == m).Commit();
+                    if (rubricFilters.Any())
+                    {
+                        FilterEntries.Put(rubricFilters);
+                    }
+                    else
+                    {
+                        FilterEntries.Put(new Filter(m, FilteredType.DefaultNotNullable(), compare, link));
+                    }
+                });
+            }
         }
 
-        public void UpdateFilters()
+        public void Clear()
+        {
+            Filters.Clear();
+            if(IsAddable)
+            {
+                var first = FilterEntries.First();
+                FilterEntries.Clear();
+                FilterEntries.Add(first);
+            }
+            var value = FilteredType.DefaultNotNullable();
+            FilterEntries.ForEach(f => f.Value == value);
+        }
+
+        public void Update()
         {
             FilterEntries.ForEach(f =>
             {
@@ -85,9 +108,9 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters
             });
         }
 
-        public async Task ApplyFiltersAsync()
+        public async Task ApplyAsync()
         {
-            UpdateFilters();
+            Update();
             await LoadViewAsync();
         }
 

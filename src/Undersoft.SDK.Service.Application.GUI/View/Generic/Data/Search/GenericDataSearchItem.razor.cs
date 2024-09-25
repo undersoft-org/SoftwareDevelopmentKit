@@ -1,4 +1,5 @@
 using Microsoft.FluentUI.AspNetCore.Components;
+using System.Runtime.CompilerServices;
 using Undersoft.SDK.Series;
 using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 
@@ -10,6 +11,8 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
         private int _index;
         private string? _name { get; set; } = "";
         private string? _label { get; set; }
+        private GenericDataSearch _parent = default!;
+        ISeries<Filter> _searchFilters = 
         private List<Option<string>>? _operandOptions { get; set; }
         private List<Option<string>>? _linkOptions { get; set; }
 
@@ -35,17 +38,18 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
         {
             _name = Data.ModelType.Name;
             _label = _name;
-
+            _parent = ((GenericDataSearch)Parent!);
+            _searchFilters = Data.SearchFilters = new Listing<Filter>();
             base.OnInitialized();
         }
 
-        //protected override async Task OnAfterRenderAsync(bool firstRender)
-        //{
-        //    if (firstRender)
-        //        await JSRuntime!.InvokeVoidAsync("GenericUtilites.setFocusByElement", FluentSearch!.Element);
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+                await JSRuntime!.InvokeVoidAsync("GenericUtilites.setFocusById", "genericsearchbar");
 
-        //    await base.OnAfterRenderAsync(firstRender);
-        //}
+            await base.OnAfterRenderAsync(firstRender);
+        }
 
         public virtual string? SearchValue { get; set; }
 
@@ -63,28 +67,28 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
             set => base.Root = value;
         }
 
+        async Task KeyDownHandlerAsync(FluentKeyCodeEventArgs e)
+        {
+            if (e.Key == KeyCode.Enter)
+                await HandleSearchAsync();
+        }
+
         private async Task HandleSearchAsync()
         {
             if (SearchValue != null && SearchValue.Length > 2)
             {
-                var parent = ((GenericDataSearch)Parent!);
-                var searchFilters = new Listing<Filter>();
-                string[] words = SearchValue.Split(' ');
-                words.ForEach(w =>
+                _searchFilters.Clear();
+                _searchFilters.Add(SearchValue.Split(' ').SelectMany(w =>
                 {
-                    var _w = w.Trim();
-                    searchFilters.Add(
-                        parent.FilterEntries.ForEach(f => new Filter(
-                            f.Member,
-                            _w,
-                            CompareOperand.Contains,
-                            LinkOperand.Or
-                        ))
-                    );
-                });
-                Data.SearchFilters = searchFilters;
+                    return _parent.FilterEntries.ForEach(f => new Filter(
+                        f.Member,
+                        w.Trim(),
+                        CompareOperand.Contains,
+                        LinkOperand.Or
+                    ));                
+                }));
 
-                await parent!.LoadViewAsync();
+                await _parent!.LoadViewAsync();
             }
         }
 

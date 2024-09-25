@@ -11,14 +11,14 @@
 
         void Close();
 
-        void CloneLastFilter();
+        void CloneLast();
 
-        void RemoveLastFilter();
+        void RemoveLast();
 
-        void UpdateFilters();
+        void Update();
 
-        void ClearFilters();
+        void Clear();
 
-        Task ApplyFiltersAsync();
+        Task ApplyAsync();
     }
 }

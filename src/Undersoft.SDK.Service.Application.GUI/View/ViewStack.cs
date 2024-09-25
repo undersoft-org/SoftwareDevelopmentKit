@@ -2,7 +2,7 @@
 
 namespace Undersoft.SDK.Service.Application.GUI.View
 {
-    public class ViewStack : Attribute
+    public class ViewStack
     {
         public ViewStack() { }
 

@@ -2,7 +2,7 @@ using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters;
 
-public partial class GenericDataFilterButtons : ViewItem
+public partial class GenericDataFilterActions : ViewItem
 {
     private Type _type = default!;
     private string? _name { get; set; } = "";
@@ -17,7 +17,7 @@ public partial class GenericDataFilterButtons : ViewItem
 
     protected override void OnInitialized()
     {
-        var type = FilteredType.GetNotNullableType();
+        _type = FilteredType.GetNotNullableType();
         base.OnInitialized();
     }
 
@@ -39,7 +39,7 @@ public partial class GenericDataFilterButtons : ViewItem
     {
         if (Parent != null)
         {
-            ((IViewFilter)Parent).CloneLastFilter();
+            ((IViewFilter)Parent).CloneLast();
         }
     }
 
@@ -47,7 +47,7 @@ public partial class GenericDataFilterButtons : ViewItem
     {
         if (Parent != null)
         {
-            ((IViewFilter)Parent).RemoveLastFilter();
+            ((IViewFilter)Parent).RemoveLast();
         }
     }
 
@@ -64,7 +64,7 @@ public partial class GenericDataFilterButtons : ViewItem
         if (Parent != null)
         {
             Close();
-            ((IViewFilter)Parent).ClearFilters();
+            ((IViewFilter)Parent).Clear();
         }
     }
 
@@ -73,7 +73,7 @@ public partial class GenericDataFilterButtons : ViewItem
         if (Parent != null)
         {
             Close();
-            await ((IViewFilter)Parent).ApplyFiltersAsync();
+            await ((IViewFilter)Parent).ApplyAsync();
         }
     }
 }

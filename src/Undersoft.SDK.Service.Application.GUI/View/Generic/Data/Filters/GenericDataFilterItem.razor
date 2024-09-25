@@ -14,11 +14,11 @@
             @if (Index > 0)
             {
                 <span slot="start">
-                    <FluentSelect Width="85px" Items="@LinkOptions" @bind-Value="@_linkdValue" Disabled="@Rubric.Disabled" OptionText="@(i => i.Text)" OptionValue="@(i => i.Value)" OptionSelected="@(i => i.Selected)" />
+                    <FluentSelect Width="85px" Items="@LinkOptions" @bind-Value="@_linkValue" Disabled="@Rubric.Disabled" OptionText="@(i => i.Text)" OptionValue="@(i => i.Value)" OptionSelected="@(i => i.Selected)" />
                 </span>
             }
             <span slot="start">
-                <FluentSelect Width="140px" Items="@OperandOptions" @bind-Value="@_operandValue" Disabled="@Rubric.Disabled" OptionText="@(i => i.Text)" OptionValue="@(i => i.Value)" OptionSelected="@(i => i.Selected)" />
+                <FluentSelect Width="140px" Items="@OperandOptions" @bind-Value="@_compareValue" Disabled="@Rubric.Disabled" OptionText="@(i => i.Text)" OptionValue="@(i => i.Value)" OptionSelected="@(i => i.Selected)" />
             </span>
         }
         <span>
