@@ -15,7 +15,7 @@ namespace Undersoft.SDK.Tests.Series
     {
         public static object holder = new object();
         public static int threadCount = 0;
-        public Task[] s1 = new Task[10];
+        public Task[] tasks = new Task[10];
 
         public RegistryTest() : base()
         {
@@ -92,11 +92,11 @@ namespace Undersoft.SDK.Tests.Series
 
             for (int i = 0; i < 10; i++)
             {
-                s1[i] = Task.Factory.StartNew(publicTest);
+                tasks[i] = Task.Factory.StartNew(publicTest);
             }
 
             return Task.Factory.ContinueWhenAll(
-                s1,
+                tasks,
                 new Action<Task[]>(a =>
                 {
                     Registry_Async_Thread_Safe_Integrated_Test_Callback(a);

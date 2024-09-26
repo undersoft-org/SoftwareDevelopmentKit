@@ -6,18 +6,18 @@
 
     public abstract class CatalogBase<V> : ChainBase<V>
     {
-        internal const int WAIT_READ_TIMEOUT = 5000;
+        internal const int READING_TIMEOUT = 5000;
 
-        internal const int WAIT_REHASH_TIMEOUT = 5000;
+        internal const int REHASHING_TIMEOUT = 5000;
 
         internal const int WAIT_WRITE_TIMEOUT = 5000;
 
         int readers;
 
-        internal readonly ManualResetEventSlim readAccess = new ManualResetEventSlim(true, 128);
-        internal readonly ManualResetEventSlim rehashAccess = new ManualResetEventSlim(true, 128);
-        internal readonly ManualResetEventSlim writeAccess = new ManualResetEventSlim(true, 128);
-        internal readonly SemaphoreSlim writePass = new SemaphoreSlim(1);
+        internal readonly ManualResetEventSlim readingAccess = new ManualResetEventSlim(true, 128);
+        internal readonly ManualResetEventSlim rehashingAccess = new ManualResetEventSlim(true, 128);
+        internal readonly ManualResetEventSlim writingAccess = new ManualResetEventSlim(true, 128);
+        internal readonly SemaphoreSlim writingPass = new SemaphoreSlim(1);
 
         protected CatalogBase() : base() { }
 
@@ -42,186 +42,189 @@
                 Add(c);
         }
 
-        protected void acquireReader()
+        protected void AcquireReading()
         {
             Interlocked.Increment(ref readers);
-            rehashAccess.Reset();
-            if (!readAccess.Wait(WAIT_READ_TIMEOUT))
-                throw new TimeoutException("Wait read Timeout");
+            rehashingAccess.Reset();
+            if (!readingAccess.Wait(READING_TIMEOUT))
+            {
+                ReleaseReading();
+                throw new TimeoutException("Reading timeout has been exceeded");
+            }
         }
 
-        protected void acquireRehash()
+        protected void AcquireRehashing()
         {
-            if (!rehashAccess.Wait(WAIT_REHASH_TIMEOUT))
+            if (!rehashingAccess.Wait(REHASHING_TIMEOUT))
                 throw new TimeoutException("Wait rehash Timeout");
-            readAccess.Reset();
+            readingAccess.Reset();
         }
 
-        protected void acquireWriter()
+        protected void AcquireWriting()
         {
             do
             {
-                if (!writeAccess.Wait(WAIT_WRITE_TIMEOUT))
+                if (!writingAccess.Wait(WAIT_WRITE_TIMEOUT))
                     throw new TimeoutException("Wait write Timeout");
-            } while (!writePass.Wait(1));
-            writeAccess.Reset();
+            } while (!writingPass.Wait(0));
+            writingAccess.Reset();
         }
 
-        protected void releaseReader()
+        protected void ReleaseReading()
         {
             if (0 == Interlocked.Decrement(ref readers))
-                rehashAccess.Set();
+                rehashingAccess.Set();
         }
 
-        protected void releaseRehash()
+        protected void ReleaseRehashing()
         {
-            readAccess.Set();
+            readingAccess.Set();
         }
 
-        protected void releaseWriter()
+        protected void ReleaseWriting()
         {
-            writePass.Release();
-            writeAccess.Set();
+            writingPass.Release();
+            writingAccess.Set();
         }
 
         protected override V InnerGet(long key)
         {
-            acquireReader();
+            AcquireReading();
             V v = base.InnerGet(key);
-            releaseReader();
+            ReleaseReading();
             return v;
         }
 
         protected override ISeriesItem<V> InnerGetItem(long key)
         {
-            acquireReader();
+            AcquireReading();
             ISeriesItem<V> item = base.InnerGetItem(key);
-            releaseReader();
+            ReleaseReading();
             return item;
         }
 
         protected override ISeriesItem<V> InnerPut(ISeriesItem<V> value)
         {
-            acquireWriter();
+            AcquireWriting();
             ISeriesItem<V> temp = base.InnerPut(value);
-            releaseWriter();
+            ReleaseWriting();
             return temp;
         }
 
         protected override ISeriesItem<V> InnerPut(V value)
         {
-            acquireWriter();
+            AcquireWriting();
             ISeriesItem<V> temp = base.InnerPut(value);
-            releaseWriter();
+            ReleaseWriting();
             return temp;
         }
 
         protected override ISeriesItem<V> InnerPut(long key, V value)
         {
-            acquireWriter();
+            AcquireWriting();
             ISeriesItem<V> temp = base.InnerPut(key, value);
-            releaseWriter();
+            ReleaseWriting();
             return temp;
         }
 
         protected override V InnerRemove(long key)
         {
-            acquireWriter();
+            AcquireWriting();
             V temp = base.InnerRemove(key);
-            releaseWriter();
+            ReleaseWriting();
             return temp;
         }
 
         protected override bool InnerTryGet(long key, out ISeriesItem<V> output)
         {
-            acquireReader();
+            AcquireReading();
             bool test = base.InnerTryGet(key, out output);
-            releaseReader();
+            ReleaseReading();
             return test;
         }
 
         protected override void Rehash(int newsize)
         {
-            acquireRehash();
+            AcquireRehashing();
             base.Rehash(newsize);
-            releaseRehash();
+            ReleaseRehashing();
         }
 
         protected override void Reindex()
         {
-            acquireRehash();
+            AcquireRehashing();
             base.Reindex();
-            releaseRehash();
+            ReleaseRehashing();
         }
 
         protected override bool InnerAdd(ISeriesItem<V> value)
         {
-            acquireWriter();
+            AcquireWriting();
             bool temp = base.InnerAdd(value);
-            releaseWriter();
+            ReleaseWriting();
             return temp;
         }
 
         protected override bool InnerAdd(V value)
         {
-            acquireWriter();
+            AcquireWriting();
             bool temp = base.InnerAdd(value);
-            releaseWriter();
+            ReleaseWriting();
             return temp;
         }
 
         protected override bool InnerAdd(long key, V value)
         {
-            acquireWriter();
+            AcquireWriting();
             bool temp = base.InnerAdd(key, value);
-            releaseWriter();
+            ReleaseWriting();
             return temp;
         }
 
         public override void Clear()
         {
-            acquireWriter();
-            acquireRehash();
+            AcquireWriting();
+            AcquireRehashing();
 
             base.Clear();
 
-            releaseRehash();
-            releaseWriter();
+            ReleaseRehashing();
+            ReleaseWriting();
         }
 
         public override void CopyTo(Array array, int index)
         {
-            acquireReader();
+            AcquireReading();
             base.CopyTo(array, index);
-            releaseReader();
+            ReleaseReading();
         }
 
         public override void CopyTo(ISeriesItem<V>[] array, int index)
         {
-            acquireReader();
+            AcquireReading();
             base.CopyTo(array, index);
-            releaseReader();
+            ReleaseReading();
         }
 
         public override void CopyTo(V[] array, int index)
         {
-            acquireReader();
+            AcquireReading();
             base.CopyTo(array, index);
-            releaseReader();
+            ReleaseReading();
         }
 
         public override ISeriesItem<V> GetItem(int index)
         {
             if (index < count)
             {
-                acquireReader();
+                AcquireReading();
                 if (removed > 0)
                 {
-                    releaseReader();
-                    acquireWriter();
+                    ReleaseReading();
+                    AcquireWriting();
                     Reindex();
-                    releaseWriter();
-                    acquireReader();
+                    ReleaseWriting();
+                    AcquireReading();
                 }
 
                 int i = -1;
@@ -231,7 +234,7 @@
                 {
                     if (++i == id)
                     {
-                        releaseReader();
+                        ReleaseReading();
                         return item;
                     }
                     item = item.Next;
@@ -243,57 +246,57 @@
         public override int IndexOf(ISeriesItem<V> item)
         {
             int id = 0;
-            acquireReader();
+            AcquireReading();
             id = base.IndexOf(item);
-            releaseReader();
+            ReleaseReading();
             return id;
         }
 
         public override int IndexOf(V item)
         {
             int id = 0;
-            acquireReader();
+            AcquireReading();
             id = base.IndexOf(item);
-            releaseReader();
+            ReleaseReading();
             return id;
         }
 
         public override void Insert(int index, ISeriesItem<V> item)
         {
-            acquireWriter();
+            AcquireWriting();
             base.Insert(index, item);
-            releaseWriter();
+            ReleaseWriting();
         }
 
         public override V[] ToArray()
         {
-            acquireReader();
+            AcquireReading();
             V[] array = base.ToArray();
-            releaseReader();
+            ReleaseReading();
             return array;
         }
 
         public override bool TryDequeue(out ISeriesItem<V> output)
         {
-            acquireWriter();
+            AcquireWriting();
             bool temp = base.TryDequeue(out output);
-            releaseWriter();
+            ReleaseWriting();
             return temp;
         }
 
         public override bool TryDequeue(out V output)
         {
-            acquireWriter();
+            AcquireWriting();
             bool temp = base.TryDequeue(out output);
-            releaseWriter();
+            ReleaseWriting();
             return temp;
         }
 
         public override bool TryPick(int skip, out V output)
         {
-            acquireReader();
+            AcquireReading();
             bool temp = base.TryPick(skip, out output);
-            acquireReader();
+            AcquireReading();
             return temp;
         }
 

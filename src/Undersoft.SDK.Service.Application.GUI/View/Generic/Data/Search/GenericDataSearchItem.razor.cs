@@ -12,7 +12,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
         private string? _name { get; set; } = "";
         private string? _label { get; set; }
         private GenericDataSearch _parent = default!;
-        ISeries<Filter> _searchFilters = 
+        ISeries<Filter> _searchFilters { get; set; } = default!;
         private List<Option<string>>? _operandOptions { get; set; }
         private List<Option<string>>? _linkOptions { get; set; }
 

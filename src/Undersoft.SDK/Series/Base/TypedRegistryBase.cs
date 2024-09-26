@@ -78,7 +78,10 @@
             Interlocked.Increment(ref readers);
             rehashAccess.Reset();
             if (!readAccess.Wait(WAIT_READ_TIMEOUT))
-                throw new TimeoutException("Wait read Timeout");
+            {
+                releaseReader();
+                throw new TimeoutException("Reading timeout has been exceeded");
+            }
         }
         protected void acquireRehash()
         {

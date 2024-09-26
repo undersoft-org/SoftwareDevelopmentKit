@@ -7,14 +7,59 @@
 
     public abstract class TypedCatalogBase<V> : TypedChainBase<V> where V : IIdentifiable
     {
-        protected static readonly int WAIT_READ_TIMEOUT = 5000;
-        protected static readonly int WAIT_REHASH_TIMEOUT = 5000;
-        protected static readonly int WAIT_WRITE_TIMEOUT = 5000;
-        public int readers;
-        protected ManualResetEventSlim readAccess = new ManualResetEventSlim(true, 128);
-        protected ManualResetEventSlim rehashAccess = new ManualResetEventSlim(true, 128);
-        protected ManualResetEventSlim writeAccess = new ManualResetEventSlim(true, 128);
-        protected SemaphoreSlim writePass = new SemaphoreSlim(1);
+        const int WAIT_READ_TIMEOUT = 5000;
+        const int WAIT_REHASH_TIMEOUT = 5000;
+        const int WAIT_WRITE_TIMEOUT = 5000;
+        int readers;
+        internal readonly ManualResetEventSlim readAccess = new ManualResetEventSlim(true, 128);
+        internal readonly ManualResetEventSlim rehashAccess = new ManualResetEventSlim(true, 128);
+        internal readonly ManualResetEventSlim writeAccess = new ManualResetEventSlim(true, 128);
+        internal readonly SemaphoreSlim writePass = new SemaphoreSlim(1);
+
+        protected void acquireReader()
+        {
+            Interlocked.Increment(ref readers);
+            rehashAccess.Reset();
+            if (!readAccess.Wait(WAIT_READ_TIMEOUT))
+            {
+                releaseReader();
+                throw new TimeoutException("Reading timeout has been exceeded");
+            }
+        }
+
+        protected void acquireRehash()
+        {
+            if (!rehashAccess.Wait(WAIT_REHASH_TIMEOUT))
+                throw new TimeoutException("Wait write Timeout");
+            readAccess.Reset();
+        }
+
+        protected void acquireWriter()
+        {
+            do
+            {
+                if (!writeAccess.Wait(WAIT_WRITE_TIMEOUT))
+                    throw new TimeoutException("Wait write Timeout");
+            } while (!writePass.Wait(0));
+            writeAccess.Reset();
+        }
+
+        protected void releaseReader()
+        {
+            if (0 == Interlocked.Decrement(ref readers))
+                rehashAccess.Set();
+        }
+
+        protected void releaseRehash()
+        {
+            readAccess.Set();
+        }
+
+        protected void releaseWriter()
+        {
+            writePass.Release();
+            writeAccess.Set();
+        }
 
         public TypedCatalogBase(
             IEnumerable<IUnique<V>> collection,
@@ -175,31 +220,6 @@
             return temp;
         }
 
-        protected void acquireReader()
-        {
-            Interlocked.Increment(ref readers);
-            rehashAccess.Reset();
-            if (!readAccess.Wait(WAIT_READ_TIMEOUT))
-                throw new TimeoutException("Wait write Timeout");
-        }
-
-        protected void acquireRehash()
-        {
-            if (!rehashAccess.Wait(WAIT_REHASH_TIMEOUT))
-                throw new TimeoutException("Wait write Timeout");
-            readAccess.Reset();
-        }
-
-        protected void acquireWriter()
-        {
-            do
-            {
-                if (!writeAccess.Wait(WAIT_WRITE_TIMEOUT))
-                    throw new TimeoutException("Wait write Timeout");
-                writeAccess.Reset();
-            } while (!writePass.Wait(0));
-        }
-
         protected override bool InnerAdd(ISeriesItem<V> value)
         {
             acquireWriter();
@@ -292,23 +312,6 @@
             acquireRehash();
             base.Reindex();
             releaseRehash();
-        }
-
-        protected void releaseReader()
-        {
-            if (0 == Interlocked.Decrement(ref readers))
-                rehashAccess.Set();
-        }
-
-        protected void releaseRehash()
-        {
-            readAccess.Set();
-        }
-
-        protected void releaseWriter()
-        {
-            writePass.Release();
-            writeAccess.Set();
-        }
+        }       
     }
 }

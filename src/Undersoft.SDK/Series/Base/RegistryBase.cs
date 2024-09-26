@@ -7,8 +7,8 @@ namespace Undersoft.SDK.Series.Base
     public abstract class RegistryBase<V> : ListingBase<V>
     {
         const int READING_TIMEOUT = 5000;
-        const int REHASHING_TIMEOUT = 5000;
-        const int WRITING_TIMEOUT = 5000;
+        const int REHASHING_TIMEOUT = 15000;
+        const int WRITING_TIMEOUT = 10000;
 
         int readers;
 
@@ -47,7 +47,10 @@ namespace Undersoft.SDK.Series.Base
             Interlocked.Increment(ref readers);
             rehashingAccess.Reset();
             if (!readingAccess.Wait(READING_TIMEOUT))
+            {
+                ReleaseReading();
                 throw new TimeoutException("Reading timeout has been exceeded");
+            }
         }
         protected void AcquireRehashing()
         {
@@ -61,7 +64,7 @@ namespace Undersoft.SDK.Series.Base
             {
                 if (!writingAccess.Wait(WRITING_TIMEOUT))
                     throw new TimeoutException("Writing timeout has been exceeded");
-            } while (!writingPass.Wait(1));
+            } while (!writingPass.Wait(0));
             writingAccess.Reset();
         }
         
