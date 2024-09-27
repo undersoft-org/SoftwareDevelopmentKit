@@ -196,10 +196,10 @@ namespace Undersoft.SDK.Service.Application.GUI.View
             }
         }
 
-        public long OriginId 
+        public long TenantId 
         { 
-            get => code.OriginId; 
-            set => code.OriginId = value; 
+            get => code.TenantId; 
+            set => code.TenantId = value; 
         }
 
         public DateTime Created

@@ -159,9 +159,7 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
             options.NumberHandling = JsonNumberHandling.AllowReadingFromString;
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.IgnoreReadOnlyProperties = true;
-            options.IgnoreReadOnlyProperties = true;
             options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, true));
-            //options.Converters.Add(new BinaryJsonConverter());
         });
         return this;
     }
@@ -353,11 +351,8 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
             .AddJwtBearer(x =>
             {
                 x.RequireHttpsMetadata = false;
-                //x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
-                    //RoleClaimType = JwtClaimTypes.Role,
-                    //NameClaimType = JwtClaimTypes.Email,
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
@@ -372,7 +367,7 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
 
     public IServerSetup AddAuthorization()
     {
-        var ic = configuration.AccessOptions;
+        var ao = configuration.AccessOptions;
 
         services.AddAuthorization(options =>
         {
@@ -380,11 +375,11 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
                 .RequireAuthenticatedUser()
                 .Build();
 
-            ic.Scopes.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim("scope", s)));
+            ao.Scopes.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim("scope", s)));
 
-            ic.Roles.ForEach(s => options.AddPolicy(s, policy => policy.RequireRole(s)));
+            ao.Roles.ForEach(s => options.AddPolicy(s, policy => policy.RequireRole(s)));
 
-            ic.Claims.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim(s)));
+            ao.Claims.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim(s)));
         });
 
         return this;
@@ -395,20 +390,6 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
         string ver = configuration.Version;
         var ao = configuration.Name;
 
-        //registry.AddApiVersioning(options =>
-        //{
-        //    options.AssumeDefaultVersionWhenUnspecified = true;
-        //    options.DefaultApiVersion = new ApiVersion(1, 0);
-        //    options.ReportApiVersions = true;
-        //});
-        //registry.AddVersionedApiExplorer(
-        //        options =>
-        //        {
-        //            options.GroupNameFormat = "'v'VVV";
-        //        });
-
-        //registry.AddTransient<IConfigureOptions<SwaggerGenOptions>, OpenApiOptions>();
-
         registry.AddSwaggerGen(options =>
         {
             options.SwaggerDoc(
@@ -416,7 +397,6 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
                 new OpenApiInfo { Title = configuration.Name, Version = configuration.Version }
             );
 
-            //options.OperationFilter<OpenApiDefaultValues>();
             options.OperationFilter<JsonIgnoreFilter>();
             options.DocumentFilter<IgnoreApiDocument>();
 
@@ -448,12 +428,6 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
             };
 
             options.AddSecurityRequirement(securityRequirement);
-
-            //options.OperationFilter<AuthorizeCheckOperationFilter>();
-
-            //var filePath = Path.Combine(System.AppContext.BaseDirectory, "Undersoft.SSC.Service.Server.xml");
-            //options.IncludeXmlComments(filePath);
-            //options.IncludeGrpcXmlComments(filePath, includeControllerXmlComments: true);
         });
 
         return this;

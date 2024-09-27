@@ -8,7 +8,7 @@ namespace Undersoft.SDK
 
     public interface IOrigin : IIdentifiable
     {
-        long OriginId { get; set; }
+        long TenantId { get; set; }
         string CodeNo { get; set; }
         DateTime Created { get; set; }
         string Creator { get; set; }

@@ -30,7 +30,7 @@ namespace Undersoft.SDK
         [IgnoreDataMember]
         private Uscn code;
 
-        [IdentityRubric(Order = 3)]
+        [IdentityRubric(Order = 2)]
         [StringLength(32)]
         [ConcurrencyCheck]
         [DataMember(Order = 0)]
@@ -108,14 +108,40 @@ namespace Undersoft.SDK
         [IgnoreDataMember]
         private bool IsNew { get; set; }
 
-        public virtual void SetOriginId(long originId)
+        public virtual void SetTenantId(long tenantId)
         {
-            code.SetOriginId(originId);
+            code.SetTenantId(tenantId);
+        }
+        public virtual long GetTenantId()
+        {
+            return code.TenantId;
         }
 
-        public virtual long GetOriginId()
+        public virtual void SetServiceId(int serviceId)
         {
-            return code.OriginId;
+            code.BlockZ = (ushort)serviceId;
+        }
+        public virtual int GetServiceId()
+        {
+            return code.BlockZ;
+        }
+
+        public virtual void SetCategoryId(int categoryId)
+        {
+            code.CategroyId = categoryId;
+        }
+        public virtual int GetCategoryId()
+        {
+            return code.CategroyId;
+        }
+
+        public virtual void SetClusterId(int clusterId)
+        {
+            code.BlockX = (ushort)clusterId;
+        }
+        public virtual int GetClusterId()
+        {
+            return code.BlockX;
         }
 
         public virtual long AutoId()

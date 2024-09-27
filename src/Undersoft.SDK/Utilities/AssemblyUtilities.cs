@@ -7,7 +7,7 @@
 
     public static partial class AssemblyUtilities
     {
-        public static string AssemblyCode
+        public static string AssemblyId
         {
             get
             {

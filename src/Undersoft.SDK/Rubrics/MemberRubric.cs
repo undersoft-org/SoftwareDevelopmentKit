@@ -226,7 +226,7 @@
             set { if (VirtualInfo != null) VirtualInfo.RubricAttributes = value; }
         }
 
-        public int RubricId { get => (int)OriginId; set => OriginId = value; }
+        public int RubricId { get => (int)TenantId; set => TenantId = value; }
 
         public int RubricOrdinal { get; set; }
 
@@ -278,7 +278,7 @@
 
         public string CodeNo { get => code.CodeNo; set => code.CodeNo = value; }
 
-        public long OriginId { get => code.OriginId; set => code.OriginId = value; }
+        public long TenantId { get => code.TenantId; set => code.TenantId = value; }
 
         public DateTime Created { get; set; }
 
@@ -292,7 +292,7 @@
 
         public string Modifier { get; set; }
 
-        public int Index { get => (int)code.OriginId; set => code.OriginId = (uint)value; }
+        public int Index { get; set; }
 
         public string TypeName { get; set; }
 

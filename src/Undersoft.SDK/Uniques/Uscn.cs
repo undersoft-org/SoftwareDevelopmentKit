@@ -58,7 +58,7 @@
             }
         }
 
-        public long OriginId
+        public long TenantId
         {
             get
             {
@@ -70,6 +70,24 @@
                 fixed (byte* b = sbytes)
                     *((int*)(b + 28)) = (int)value;
             }
+        }
+
+        public int ServiceId
+        {
+            get => BlockZ;
+            set => BlockZ = (ushort)value;
+        }
+
+        public int CategroyId
+        {
+            get => BlockY;
+            set => BlockY = (ushort)value;
+        }
+
+        public int ClusterId
+        {
+            get => BlockX;
+            set => BlockX = (ushort)value;
         }
 
         public uint BlockZY
@@ -452,14 +470,19 @@
             return TypeId = seed;
         }
 
-        public long SetOriginId(long key)
+        public long SetTenantId(long key)
         {
-            return OriginId = key;
+            return TenantId = key;
         }
 
         public long GetTypeId()
         {
             return TypeId;
+        }
+
+        public long GetTenantId()
+        {
+            return TenantId;
         }
 
         public ulong GetBlockId()

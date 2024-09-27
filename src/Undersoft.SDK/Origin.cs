@@ -17,85 +17,119 @@ namespace Undersoft.SDK
         {
         }
 
-        public Origin(bool autoId) : base(autoId) { }
+        public Origin(bool autoId) : base(autoId) { }       
 
-        [IdentityRubric(Order = 2)]
+        [IdentityRubric(Order = 3)]
         [DataMember(Order = 3)]
         [Column(Order = 3)]
-        public virtual long OriginId
+        public virtual long TenantId
         {
             get
             {
-                return GetOriginId();
+                return GetTenantId();
             }
             set
             {
-                SetOriginId(value);
+                SetTenantId(value);
             }
         }
 
-        [Column(TypeName = "timestamp", Order = 6)]
+        [IdentityRubric(Order = 4)]
+        [DataMember(Order = 4)]
+        [Column(Order = 4)]
+        public virtual int ServiceId
+        {
+            get
+            {
+                return GetServiceId();
+            }
+            set
+            {
+                SetServiceId(value);
+            }
+        }
+
+        [NotMapped]
+        [DataMember(Order = 5)]
+        public virtual int CategoryId
+        {
+            get
+            {
+                return GetCategoryId();
+            }
+            set
+            {
+                SetCategoryId(value);
+            }
+        }
+
+        [NotMapped]
         [DataMember(Order = 6)]
+        public virtual int ClusterId
+        {
+            get
+            {
+                return GetClusterId();
+            }
+            set
+            {
+                SetClusterId(value);
+            }
+        }
+
+        [Column(TypeName = "timestamp", Order = 7)]
+        [DataMember(Order = 7)]
         [InstantAs(UnmanagedType.I8, SizeConst = 8)]
-        public virtual DateTime Modified { get; set; }
+        public virtual DateTime Modified { get => Time; set => Time = value; }
 
         [StringLength(128)]
-        [Column(Order = 7)]
-        [DataMember(Order = 7)]
+        [Column(Order = 5)]
+        [DataMember(Order = 8)]
         [InstantAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         public virtual string Modifier { get; set; } = "";
 
-        [Column(TypeName = "timestamp", Order = 8)]
-        [DataMember(Order = 8)]
+        [Column(TypeName = "timestamp", Order = 6)]
+        [DataMember(Order = 9)]
         [InstantAs(UnmanagedType.I8, SizeConst = 8)]
         public virtual DateTime Created { get; set; }
 
         [StringLength(128)]
-        [Column(Order = 9)]
-        [DataMember(Order = 9)]
+        [Column(Order = 7)]
+        [DataMember(Order = 10)]
         [InstantAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         public virtual string Creator { get; set; } = "";
 
-        [DataMember(Order = 10)]
-        [Column(Order = 10)]
+        [DataMember(Order = 11)]
+        [Column(Order = 8)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public virtual int Index { get; set; } = -1;
 
-        [Column(Order = 11)]
+        [Column(Order = 9)]
         [StringLength(256)]
-        [DataMember(Order = 11)]
+        [DataMember(Order = 12)]
         [InstantAs(UnmanagedType.ByValTStr, SizeConst = 256)]
         public virtual string Label { get; set; } = "";
 
         public virtual TEntity Sign<TEntity>(TEntity entity = null) where TEntity : class, IOrigin
         {
-            if (entity == null)
-            {
-                AutoId();
-                if (!HaveTime())
-                    Time = Log.Clock;
-                Stamp<TEntity>();
-                Created = Time;
-                return default;
-            }
-            entity.AutoId();
-            if (!HaveTime())
-                entity.Time = Log.Clock;
-            Stamp(entity);
-            entity.Created = entity.Time;
-            return entity;
+            IOrigin origin = this;
+            if (entity != null)
+                origin = entity;
+
+            origin.AutoId();
+            Stamp(origin);
+            origin.Created = origin.Time;
+            return default;
+
         }
 
         public virtual TEntity Stamp<TEntity>(TEntity entity = null) where TEntity : class, IOrigin
         {
-            if (entity == null)
-            {
-                Modified = Log.Clock;
-                return default;
-            }
-            entity.Modified = Log.Clock;
+            IOrigin origin = this;
+            if (entity != null)
+                origin = entity;
+            origin.Modified = Log.Clock;
             return entity;
-
         }
 
         public virtual bool Equals(IUnique other)
