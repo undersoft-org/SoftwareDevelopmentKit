@@ -143,7 +143,7 @@ public partial class GenericFieldMenu : FluentComponentBase, IDisposable
             if (Trigger != MouseButton.None)
             {
                 _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import",
-                    "./_content/Undersoft.SDK.Service.Application.GUI/View/Generic/Menu/GenericFieldMenu.razor.js");
+                    "./_content/Undersoft.SDK.Service.Application.GUI/View/Generic/MenuRole/GenericFieldMenu.razor.js");
 
                 _dotNetHelper = DotNetObjectReference.Create(this);
 

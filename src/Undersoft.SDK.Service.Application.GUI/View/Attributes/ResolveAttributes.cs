@@ -265,6 +265,8 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Attributes
                 mr.FilterMembers = fta.FilterMembers;
                 mr.SortMembers = fta.SortMembers;
                 mr.FilteredType = fta.FilteredType ?? mr.RubricType;
+                mr.Filterable = fta.FilterMembers.Any();
+                mr.Sortable = fta.SortMembers.Any();
             }
         }
 

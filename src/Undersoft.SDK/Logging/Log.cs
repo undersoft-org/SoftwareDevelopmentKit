@@ -1,10 +1,11 @@
 ﻿namespace Undersoft.SDK.Logging
 {
-    using Serilog.Events;
     using System.Collections.Concurrent;
+    using System.Linq.Expressions;
     using System.Text.Json;
     using System.Text.Json.Serialization;
     using System.Threading;
+    using Serilog.Events;
 
     public static partial class Log
     {
@@ -13,65 +14,70 @@
         private static readonly int BACK_LOG_MINUTES = -1;
         private static readonly int SYNC_CLOCK_INTERVAL = 15;
         private static readonly JsonSerializerOptions jsonOptions;
-        private static Task loggingTask;
+        private static Task logging;
         private static CancellationTokenSource cancellation = new CancellationTokenSource();
-        private static int _logLevel = 2;
-        private static bool cleaningEnabled = false;
-        private static DateTime clearLogTime;
+        private static int level = 2;
+        private static bool clearable = false;
+        private static DateTime expiration;
         private static ILogHandler handler { get; set; }
 
-        private static ConcurrentQueue<Starlog> logQueue = new ConcurrentQueue<Starlog>();
+        private static ConcurrentQueue<Starlog> queue = new ConcurrentQueue<Starlog>();
 
-        private static bool threadLive;
-
+        private static bool active;
+        
         public static DateTime Clock = DateTime.Now;
 
         static Log()
         {
             jsonOptions = JsonOptionsBuilder();
             handler = new LogHandler(jsonOptions, LogEventLevel.Information);
-            clearLogTime = DateTime.Now
-                .AddDays(BACK_LOG_DAYS)
+            expiration = DateTime
+                .Now.AddDays(BACK_LOG_DAYS)
                 .AddHours(BACK_LOG_HOURS)
                 .AddMinutes(BACK_LOG_MINUTES);
-            Start(_logLevel);
+            Start(level);
         }
 
-        public static void Add(LogEventLevel logLevel, string category, string message, ILogSate state)
+        public static void Add(
+            LogEventLevel logLevel,
+            string category,
+            string message,
+            ILogSate state
+        )
         {
-            var _log = new Starlog()
+            var log = new Starlog()
             {
                 Level = logLevel,
                 Sender = category,
                 State = state,
-                Message = message
+                Message = message,
             };
 
-            logQueue.Enqueue(_log);
+            queue.Enqueue(log);
         }
 
-        public static void ClearLog()
+        public static void Clear()
         {
-            if (!cleaningEnabled || handler == null)
+            if (!clearable || handler == null)
                 return;
 
             try
             {
-                if (DateTime.Now.Day != clearLogTime.Day)
+                if (DateTime.Now.Day != expiration.Day)
                 {
-                    if (DateTime.Now.Hour != clearLogTime.Hour)
+                    if (DateTime.Now.Hour != expiration.Hour)
                     {
-                        if (DateTime.Now.Minute != clearLogTime.Minute)
+                        if (DateTime.Now.Minute != expiration.Minute)
                         {
-                            handler.Clean(clearLogTime);
-                            clearLogTime = DateTime.Now;
+                            handler.Clean(expiration);
+                            expiration = DateTime.Now;
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("see inner exception", ex);
             }
         }
 
@@ -82,26 +88,26 @@
 
         public static void SetLevel(int logLevel)
         {
-            _logLevel = logLevel;
+            level = logLevel;
         }
 
         public static void Start(int logLevel)
         {
             CreateHandler(LogEventLevel.Information);
             SetLevel(logLevel);
-            if (!threadLive)
+            if (!active)
             {
-                threadLive = true;
-                loggingTask = Task.Run(logging, cancellation.Token);
+                active = true;
+                logging = Task.Factory.StartNew(Logging, cancellation.Token);
             }
         }
 
-        private static async void logging()
+        private static async Task Logging()
         {
             try
             {
                 int syncInterval = SYNC_CLOCK_INTERVAL;
-                while (threadLive)
+                while (active)
                 {
                     if (--syncInterval > 0)
                         Clock = Clock.AddMilliseconds(1005);
@@ -110,34 +116,34 @@
                         Clock = DateTime.UtcNow;
                         syncInterval = SYNC_CLOCK_INTERVAL;
                     }
-                    await Task.Delay(1000);
+                    await Task.Delay(1000).ConfigureAwait(false);
                     if (handler != null)
                     {
-                        int count = logQueue.Count;
+                        int count = queue.Count;
                         for (int i = 0; i < count; i++)
                         {
-                            if (logQueue.TryDequeue(out Starlog log))
+                            if (queue.TryDequeue(out Starlog log))
                             {
                                 handler.Write(log);
                             }
                         }
                     }
 
-                    if (cleaningEnabled)
-                        ClearLog();
+                    if (clearable)
+                        Clear();
                 }
             }
             catch (Exception ex)
             {
                 Stop();
-                throw ex;
+                throw new Exception("see inner exception", ex);
             }
         }
 
         private static void Stop()
         {
             cancellation.Cancel();
-            threadLive = false;
+            active = false;
         }
 
         private static JsonSerializerOptions JsonOptionsBuilder()
@@ -145,10 +151,7 @@
             var options = new JsonSerializerOptions();
             options.Converters.Add(new LogExceptionConverter());
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            options.DefaultIgnoreCondition = System.Text.Json
-                .Serialization
-                .JsonIgnoreCondition
-                .WhenWritingNull;
+            options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             return options;
         }

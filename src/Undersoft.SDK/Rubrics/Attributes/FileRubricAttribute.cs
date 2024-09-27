@@ -20,8 +20,6 @@
     {
         None,
         Property,
-        Path,
-        Stream,
-        Blob
+        Path       
     }
 }

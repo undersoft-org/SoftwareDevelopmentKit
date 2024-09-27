@@ -31,9 +31,9 @@ public class AccountService<TAccount> : IAccessService<TAccount>
         HandlePrimeAccount();
     }
 
-    public async Task<IAuthorization> SignIn(IAuthorization identity)
+    public async Task<IAuthorization> SignIn(IAuthorization auth)
     {
-        var account = await ConfirmEmail(await Authenticate(identity));
+        var account = await ConfirmEmail(await Authenticate(auth));
 
         if (account.Credentials.Authenticated && account.Credentials.EmailConfirmed)
         {
@@ -59,9 +59,9 @@ public class AccountService<TAccount> : IAccessService<TAccount>
         return account;
     }
 
-    public async Task<IAuthorization> SignUp(IAuthorization identity)
+    public async Task<IAuthorization> SignUp(IAuthorization auth)
     {
-        var _creds = identity.Credentials;
+        var _creds = auth.Credentials;
         if (!_manager.TryGetByEmail(_creds.Email, out var account))
         {
             account = await _manager.SetUser(
@@ -72,26 +72,26 @@ public class AccountService<TAccount> : IAccessService<TAccount>
             );
             if (!account.Notes.IsSuccess)
             {
-                identity.Notes = account.Notes;
-                return identity;
+                auth.Notes = account.Notes;
+                return auth;
             }
         }
         else
         {
-            identity.Notes = new OperationNotes()
+            auth.Notes = new OperationNotes()
             {
                 Errors = "Account already exists!!",
                 Status = AccessStatus.Failure
             };
-            return identity;
+            return auth;
         }
 
-        return await ConfirmEmail(await Authenticate(identity));
+        return await ConfirmEmail(await Authenticate(auth));
     }
 
-    public async Task<IAuthorization> SignOut(IAuthorization identity)
+    public async Task<IAuthorization> SignOut(IAuthorization auth)
     {
-        var account = await SignedUp(identity);
+        var account = await SignedUp(auth);
 
         if (account.Credentials.IsLockedOut)
         {
@@ -109,13 +109,13 @@ public class AccountService<TAccount> : IAccessService<TAccount>
         return account;
     }
 
-    public async Task<IAuthorization> SignedIn(IAuthorization identity)
+    public async Task<IAuthorization> SignedIn(IAuthorization auth)
     {
-        var account = await SignedUp(identity);
+        var account = await SignedUp(auth);
 
         if (!account.Credentials.IsLockedOut)
         {
-            var token = await _manager.RenewToken(identity.Credentials.SessionToken);
+            var token = await _manager.RenewToken(auth.Credentials.SessionToken);
             if (token != null)
             {
                 account.Credentials.SessionToken = token;
@@ -138,9 +138,9 @@ public class AccountService<TAccount> : IAccessService<TAccount>
         return account;
     }
 
-    public async Task<IAuthorization> SignedUp(IAuthorization identity)
+    public async Task<IAuthorization> SignedUp(IAuthorization auth)
     {
-        var _creds = identity.Credentials;
+        var _creds = auth.Credentials;
         if (!_manager.TryGetByEmail(_creds.Email, out var account))
         {
             _creds.Password = null;
@@ -170,24 +170,24 @@ public class AccountService<TAccount> : IAccessService<TAccount>
         return await Task.FromResult(account);
     }
 
-    public async Task<IAuthorization> Authenticate(IAuthorization account)
+    public async Task<IAuthorization> Authenticate(IAuthorization auth)
     {
-        account = await SignedUp(account);
+        auth = await SignedUp(auth);
 
-        var _creds = account?.Credentials;
+        var credentials = auth?.Credentials;
 
-        if (account.Notes.Status == AccessStatus.InvalidEmail)
+        if (auth.Notes.Status == AccessStatus.InvalidEmail)
         {
-            _creds.Password = null;
-            return account;
+            credentials.Password = null;
+            return auth;
         }
 
-        if (!_creds.IsLockedOut)
+        if (!credentials.IsLockedOut)
         {
-            if (await _manager.CheckPassword(_creds.Email, _creds.Password) == null)
+            if (await _manager.CheckPassword(credentials.Email, credentials.Password) == null)
             {
-                _creds.Authenticated = false;
-                account.Notes = new OperationNotes()
+                credentials.Authenticated = false;
+                auth.Notes = new OperationNotes()
                 {
                     Errors = "Invalid password",
                     Status = AccessStatus.InvalidPassword
@@ -195,105 +195,105 @@ public class AccountService<TAccount> : IAccessService<TAccount>
             }
             else
             {
-                _creds.Authenticated = true;
-                account.Notes = new OperationNotes() { Info = "Pasword is valid", };
+                credentials.Authenticated = true;
+                auth.Notes = new OperationNotes() { Info = "Pasword is valid", };
             }
         }
         else
         {
-            _creds.Authenticated = false;
-            account.Notes = new OperationNotes()
+            credentials.Authenticated = false;
+            auth.Notes = new OperationNotes()
             {
                 Errors = "Account is locked out",
                 Status = AccessStatus.InvalidPassword
             };
         }
-        _creds.Password = null;
-        return account;
+        credentials.Password = null;
+        return auth;
     }
 
-    public async Task<IAuthorization> ConfirmEmail(IAuthorization account)
+    public async Task<IAuthorization> ConfirmEmail(IAuthorization auth)
     {
         if (
-            account != null
-            && !account.Credentials.IsLockedOut
-            && account.Credentials.Authenticated
+            auth != null
+            && !auth.Credentials.IsLockedOut
+            && auth.Credentials.Authenticated
         )
         {
-            var _creds = account.Credentials;
-            if (!_creds.EmailConfirmed)
+            var credentials = auth.Credentials;
+            if (!credentials.EmailConfirmed)
             {
-                if (_creds.EmailConfirmationToken != null)
+                if (credentials.EmailConfirmationToken != null)
                 {
-                    var _code = int.Parse(_creds.EmailConfirmationToken);
+                    var _code = int.Parse(credentials.EmailConfirmationToken);
                     var _token = TokenRegistry.Get(_code);
                     var result = await _manager.User.ConfirmEmailAsync(
-                        (await _manager.GetByEmail(_creds.Email)).User,
+                        (await _manager.GetByEmail(credentials.Email)).User,
                         _token
                     );
                     TokenRegistry.Remove(_code);
                     if (result.Succeeded)
                     {
                         HandlePrimeAccount();
-                        _creds.EmailConfirmed = true;
-                        account.Credentials.Authenticated = true;
-                        account.Notes = new OperationNotes()
+                        credentials.EmailConfirmed = true;
+                        auth.Credentials.Authenticated = true;
+                        auth.Notes = new OperationNotes()
                         {
                             Success = "Email has been confirmed",
                             Status = AccessStatus.EmailConfirmed
                         };
-                        this.Success<Accesslog>(account.Notes.Success, account);
+                        this.Success<Accesslog>(auth.Notes.Success, auth);
                     }
                     else
                     {
-                        account.Notes = new OperationNotes()
+                        auth.Notes = new OperationNotes()
                         {
                             Errors = result
                                 .Errors.Select(d => d.Description)
                                 .Aggregate((a, b) => a + ". " + b),
                             Status = AccessStatus.Failure
                         };
-                        this.Failure<Accesslog>(account.Notes.Errors, account);
+                        this.Failure<Accesslog>(auth.Notes.Errors, auth);
                     }
-                    _creds.EmailConfirmationToken = null;
-                    return account;
+                    credentials.EmailConfirmationToken = null;
+                    return auth;
                 }
 
                 var token = await _manager.User.GenerateEmailConfirmationTokenAsync(
-                    (await _manager.GetByEmail(_creds.Email)).User
+                    (await _manager.GetByEmail(credentials.Email)).User
                 );
                 var code = Math.Abs(token.UniqueKey32());
                 TokenRegistry.Add(code, token);
                 var sender = _servicer.GetService<IEmailSender>();
                 await sender.SendEmailAsync(
-                    _creds.Email,
-                    "Verfication code to confirm your email address and proceed with account registration process",
+                    credentials.Email,
+                    "Verfication code to confirm your email address and proceed with auth registration process",
                     EmailTemplate.GetVerificationCodeMessage(code.ToString())
                 );
 
-                account.Notes = new OperationNotes()
+                auth.Notes = new OperationNotes()
                 {
                     Info = "Please check your email",
                     Status = AccessStatus.EmailNotConfirmed,
                 };
-                this.Security<Accesslog>(account.Notes.Info, account);
+                this.Security<Accesslog>(auth.Notes.Info, auth);
             }
             else
             {
-                account.Notes = new OperationNotes() { Info = "Email was confirmed" };
-                account.Credentials.Authenticated = true;
+                auth.Notes = new OperationNotes() { Info = "Email was confirmed" };
+                auth.Credentials.Authenticated = true;
             }
         }
-        return account;
+        return auth;
     }
 
-    public async Task<IAuthorization> ResetPassword(IAuthorization account)
+    public async Task<IAuthorization> ResetPassword(IAuthorization auth)
     {
-        account = await SignedUp(account);
+        auth = await SignedUp(auth);
 
-        if (account != null && !account.Credentials.IsLockedOut)
+        if (auth != null && !auth.Credentials.IsLockedOut)
         {
-            var _creds = account.Credentials;
+            var _creds = auth.Credentials;
             if (_creds.PasswordResetToken != null)
             {
                 IdentityResult result = null;
@@ -311,13 +311,13 @@ public class AccountService<TAccount> : IAccessService<TAccount>
                 TokenRegistry.Remove(_code);
                 if (result != null && result.Succeeded)
                 {
-                    account.Credentials.Authenticated = true;
-                    account.Notes = new OperationNotes()
+                    auth.Credentials.Authenticated = true;
+                    auth.Notes = new OperationNotes()
                     {
                         Success = "Password has been reset",
                         Status = AccessStatus.ResetPasswordConfirmed
                     };
-                    this.Success<Accesslog>(account.Notes.Success, account);
+                    this.Success<Accesslog>(auth.Notes.Success, auth);
                     _ = _servicer.Serve<IEmailSender>(e =>
                         e.SendEmailAsync(
                             _creds.Email,
@@ -328,18 +328,18 @@ public class AccountService<TAccount> : IAccessService<TAccount>
                 }
                 else
                 {
-                    account.Credentials.Authenticated = false;
-                    account.Notes = new OperationNotes()
+                    auth.Credentials.Authenticated = false;
+                    auth.Notes = new OperationNotes()
                     {
                         Errors = result
                             .Errors.Select(d => d.Description)
                             .Aggregate((a, b) => a + ". " + b),
                         Status = AccessStatus.Failure
                     };
-                    this.Failure<Accesslog>(account.Notes.Errors, account);
+                    this.Failure<Accesslog>(auth.Notes.Errors, auth);
                 }
                 _creds.PasswordResetToken = null;
-                return account;
+                return auth;
             }
 
             var token = await _manager.User.GeneratePasswordResetTokenAsync(
@@ -355,269 +355,270 @@ public class AccountService<TAccount> : IAccessService<TAccount>
                 )
             );
 
-            account.Notes = new OperationNotes()
+            auth.Notes = new OperationNotes()
             {
                 Info = "Please check your email to confirm password reset",
                 Status = AccessStatus.ResetPasswordNotConfirmed,
             };
-            account.Credentials.Authenticated = false;
-            this.Security<Accesslog>(account.Notes.Info, account);
+            auth.Credentials.Authenticated = false;
+            this.Security<Accesslog>(auth.Notes.Info, auth);
         }
-        return account;
+        return auth;
     }
 
-    public async Task<IAuthorization> ChangePassword(IAuthorization account)
+    public async Task<IAuthorization> ChangePassword(IAuthorization auth)
     {
-        account = await Authenticate(account);
+        auth = await Authenticate(auth);
 
-        if (account != null && account.Credentials.Authenticated)
+        if (auth != null && auth.Credentials.Authenticated)
         {
-            var _creds = account.Credentials;
+            var credentials = auth.Credentials;
             var result = await _manager.User.ChangePasswordAsync(
-                (await _manager.GetByEmail(_creds.Email)).User,
-                _creds.Password,
-                _creds.NewPassword
+                (await _manager.GetByEmail(credentials.Email)).User,
+                credentials.Password,
+                credentials.NewPassword
             );
 
             if (result.Succeeded)
             {
-                account.Notes = new OperationNotes()
+                auth.Notes = new OperationNotes()
                 {
                     Success = "Password has been changed",
                     Status = AccessStatus.Succeed
                 };
-                this.Success<Accesslog>(account.Notes.Success, account);
+                this.Success<Accesslog>(auth.Notes.Success, auth);
             }
             else
             {
-                account.Credentials.Authenticated = false;
-                account.Notes = new OperationNotes()
+                auth.Credentials.Authenticated = false;
+                auth.Notes = new OperationNotes()
                 {
                     Errors = result
                         .Errors.Select(d => d.Description)
                         .Aggregate((a, b) => a + ". " + b),
                     Status = AccessStatus.Failure
                 };
-                this.Failure<Accesslog>(account.Notes.Errors, account);
+                this.Failure<Accesslog>(auth.Notes.Errors, auth);
             }
-            _creds.Password = null;
-            return account;
+            credentials.Password = null;
+            return auth;
         }
-        return account;
+        return auth;
     }
 
-    public async Task<IAuthorization> CompleteRegistration(IAuthorization account)
+    //public async Task<IAuthorization> CompleteRegistration(IAuthorization account)
+    //{
+    //    var _creds = account.Credentials;
+    //    if (!_creds.RegistrationCompleted)
+    //    {
+    //        var _account = await _manager.GetByEmail(_creds.Email);
+    //        if (_account == null)
+    //        {
+    //            account.Notes = new OperationNotes()
+    //            {
+    //                Errors = "Account not found",
+    //                Status = AccessStatus.RegistrationNotCompleted
+    //            };
+    //            this.Failure<Accesslog>(account.Notes.Success, account);
+    //            return account;
+    //        }
+
+    //        if (_creds.RegistrationCompleteToken != null)
+    //        {
+    //            var _code = int.Parse(_creds.RegistrationCompleteToken);
+    //            var _token = TokenRegistry.Get(_code);
+    //            TokenRegistry.Remove(_code);
+    //            var isValid = await _manager.User.VerifyUserTokenAsync(
+    //                _account.User,
+    //                "AccountRegistrationProcessTokenProvider",
+    //                "Registration",
+    //                _token
+    //            );
+
+    //            if (isValid)
+    //            {
+    //                _account.User.RegistrationCompleted = true;
+
+    //                if ((await _manager.User.UpdateAsync(_account.User)).Succeeded)
+    //                {
+    //                    _creds.RegistrationCompleted = true;
+    //                    _creds.Authenticated = true;
+    //                    account.Notes = new OperationNotes()
+    //                    {
+    //                        Success = "Registration completed",
+    //                        Status = AccessStatus.RegistrationCompleted
+    //                    };
+    //                    this.Success<Accesslog>(account.Notes.Success, account);
+    //                }
+    //                else
+    //                {
+    //                    this.Failure<Accesslog>(account.Notes.Errors, account);
+    //                }
+    //            }
+    //            else
+    //            {
+    //                account.Notes = new OperationNotes()
+    //                {
+    //                    Errors = "Registration not completed. Invalid verification code",
+    //                    Status = AccessStatus.RegistrationNotCompleted
+    //                };
+    //                this.Failure<Accesslog>(account.Notes.Success, account);
+    //            }
+
+    //            _creds.RegistrationCompleteToken = null;
+    //            return account;
+    //        }
+
+    //        var token = await _manager.User.GenerateUserTokenAsync(
+    //            (await _manager.GetByEmail(_creds.Email)).User,
+    //            "AccountRegistrationProcessTokenProvider",
+    //            "Registration"
+    //        );
+    //        var code = Math.Abs(token.UniqueKey32());
+    //        TokenRegistry.Add(code, token);
+    //        _ = _servicer.Serve<IEmailSender>(e =>
+    //            e.SendEmailAsync(
+    //                _creds.Email,
+    //                "Verfication code to confirm your email address and proceed with account registration process",
+    //                EmailTemplate.GetVerificationCodeMessage(code.ToString())
+    //            )
+    //        );
+    //        account.Notes = new OperationNotes()
+    //        {
+    //            Info = "Please confirm registration process",
+    //            Status = AccessStatus.RegistrationNotConfirmed
+    //        };
+    //    }
+    //    else
+    //        account.Notes = new OperationNotes() { Info = "Registration was completed" };
+
+    //    return account;
+    //}
+
+    public async Task<TAccount> Register(TAccount accessAccount)
     {
-        var _creds = account.Credentials;
-        if (!_creds.RegistrationCompleted)
+        var credentials = accessAccount.Credentials;
+        var serverAccount = await _manager.GetByEmail(credentials.Email);
+
+        if (serverAccount == null)
         {
-            var _account = await _manager.GetByEmail(_creds.Email);
-            if (_account == null)
-            {
-                account.Notes = new OperationNotes()
-                {
-                    Errors = "Account not found",
-                    Status = AccessStatus.RegistrationNotCompleted
-                };
-                this.Failure<Accesslog>(account.Notes.Success, account);
-                return account;
-            }
-
-            if (_creds.RegistrationCompleteToken != null)
-            {
-                var _code = int.Parse(_creds.RegistrationCompleteToken);
-                var _token = TokenRegistry.Get(_code);
-                TokenRegistry.Remove(_code);
-                var isValid = await _manager.User.VerifyUserTokenAsync(
-                    _account.User,
-                    "AccountRegistrationProcessTokenProvider",
-                    "Registration",
-                    _token
-                );
-
-                if (isValid)
-                {
-                    _account.User.RegistrationCompleted = true;
-
-                    if ((await _manager.User.UpdateAsync(_account.User)).Succeeded)
-                    {
-                        _creds.RegistrationCompleted = true;
-                        _creds.Authenticated = true;
-                        account.Notes = new OperationNotes()
-                        {
-                            Success = "Registration completed",
-                            Status = AccessStatus.RegistrationCompleted
-                        };
-                        this.Success<Accesslog>(account.Notes.Success, account);
-                    }
-                    else
-                    {
-                        this.Failure<Accesslog>(account.Notes.Errors, account);
-                    }
-                }
-                else
-                {
-                    account.Notes = new OperationNotes()
-                    {
-                        Errors = "Registration not completed. Invalid verification code",
-                        Status = AccessStatus.RegistrationNotCompleted
-                    };
-                    this.Failure<Accesslog>(account.Notes.Success, account);
-                }
-
-                _creds.RegistrationCompleteToken = null;
-                return account;
-            }
-
-            var token = await _manager.User.GenerateUserTokenAsync(
-                (await _manager.GetByEmail(_creds.Email)).User,
-                "AccountRegistrationProcessTokenProvider",
-                "Registration"
-            );
-            var code = Math.Abs(token.UniqueKey32());
-            TokenRegistry.Add(code, token);
-            _ = _servicer.Serve<IEmailSender>(e =>
-                e.SendEmailAsync(
-                    _creds.Email,
-                    "Verfication code to confirm your email address and proceed with account registration process",
-                    EmailTemplate.GetVerificationCodeMessage(code.ToString())
-                )
-            );
-            account.Notes = new OperationNotes()
-            {
-                Info = "Please confirm registration process",
-                Status = AccessStatus.RegistrationNotConfirmed
-            };
-        }
-        else
-            account.Notes = new OperationNotes() { Info = "Registration was completed" };
-
-        return account;
-    }
-
-    public async Task<TAccount> Register(TAccount account)
-    {
-        var _creds = account.Credentials;
-        var _account = await _manager.GetByEmail(_creds.Email);
-
-        if (_account == null)
-        {
-            account.Notes = new OperationNotes()
+            accessAccount.Notes = new OperationNotes()
             {
                 Errors = "Account not found",
                 Status = AccessStatus.RegistrationNotCompleted
             };
-            this.Failure<Accesslog>(account.Notes.Success, account);
-            return account;
+            this.Failure<Accesslog>(accessAccount.Notes.Success, accessAccount);
+            return accessAccount;
         }
 
-        account.PutTo(_account);
+        accessAccount.PutTo(serverAccount);
 
-        var _accountuser = await _manager.User.FindByEmailAsync(_creds.Email);
+        var accountUser = await _manager.User.FindByEmailAsync(credentials.Email);
 
-        if (account.Notes.Status != AccessStatus.RegistrationNotCompleted)
+        if (accessAccount.Notes.Status != AccessStatus.RegistrationNotCompleted)
         {
-            _accountuser.RegistrationCompleted = true;
+            accountUser.RegistrationCompleted = true;
             var claims = _manager.User.AddClaimsAsync(
-                    _accountuser, new[] {
+                    accountUser, new[] {
 
-                        new Claim("tenant_id", _account.Tenant.Id.ToString()),
-                        new Claim("organization_id", _account.Organization.Id.ToString())
+                        new Claim("tenant_id", serverAccount.Tenant.Id.ToString()),
+                        new Claim("organization_id", serverAccount.Organization.Id.ToString())
                     }
                 );
             claims.Wait();
 
         }
-        if ((await _manager.User.UpdateAsync(_accountuser)).Succeeded)
+        if ((await _manager.User.UpdateAsync(accountUser)).Succeeded)
         {
-            if (account.Notes.Status != AccessStatus.RegistrationNotCompleted)
+            if (accessAccount.Notes.Status != AccessStatus.RegistrationNotCompleted)
             {                
-                _creds.RegistrationCompleted = true;
+                credentials.RegistrationCompleted = true;
             }
-            _creds.Authenticated = true;
-            _account.Notes = new OperationNotes()
+            credentials.Authenticated = true;
+            serverAccount.Notes = new OperationNotes()
             {
                 Success = "Registration completed",
                 Status = AccessStatus.RegistrationCompleted
             };
-            this.Success<Accesslog>(_account.Notes.Success, account);
+            this.Success<Accesslog>(serverAccount.Notes.Success, accessAccount);
         }
         else
         {
-            this.Failure<Accesslog>(_account.Notes.Errors, account);
+            this.Failure<Accesslog>(serverAccount.Notes.Errors, accessAccount);
         }
 
-        _account = await _manager.Accounts.Put(_account, null);
+        serverAccount = await _manager.Accounts.Put(serverAccount, null);
 
         var count = await _manager.Accounts.Save(true);
 
-        _account.PatchTo(account);
-        _accountuser.PatchTo(account.Credentials);
-        _account.Personal.PatchTo(account.Credentials);
+        serverAccount.User = accountUser;
+        serverAccount.PatchTo(accessAccount);
+        accountUser.PatchTo(accessAccount.Credentials);
+        serverAccount.Personal.PatchTo(accessAccount.Credentials);
 
-        return account;
+        return accessAccount;
     }
 
-    public async Task<TAccount> Unregister(TAccount account)
+    public async Task<TAccount> Unregister(TAccount accessAccount)
     {
-        var _creds = account.Credentials;
-        var _account = await _manager.GetByEmail(_creds.Email);
+        var credentials = accessAccount.Credentials;
+        var serverAccount = await _manager.GetByEmail(credentials.Email);
 
-        if (_account == null)
+        if (serverAccount == null)
         {
-            account.Notes = new OperationNotes()
+            accessAccount.Notes = new OperationNotes()
             {
                 Errors = "Account not found",
                 Status = AccessStatus.RegistrationNotCompleted
             };
-            this.Failure<Accesslog>(account.Notes.Success, account);
-            return account;
+            this.Failure<Accesslog>(accessAccount.Notes.Success, accessAccount);
+            return accessAccount;
         }
 
-        var _accountuser = await _manager.User.FindByEmailAsync(_creds.Email);
-        if (_accountuser != null)
+        var accountUser = serverAccount.User;
+        if (accountUser != null)
         {
-            _account = await _manager.Accounts.Delete(_accountuser.Id);
-            if (_account != null)
+            serverAccount = await _manager.Accounts.Delete(accountUser.Id);
+            if (serverAccount != null)
             {
-                _account.User = _accountuser;
-                _account.PatchTo(account);
-                _accountuser.PatchTo(account.Credentials);
-                _account.Personal.PatchTo(account.Credentials);
+                serverAccount.User = accountUser;
+                serverAccount.PatchTo(accessAccount);
+                accountUser.PatchTo(accessAccount.Credentials);
+                serverAccount.Personal.PatchTo(accessAccount.Credentials);
             }
         }
-        return account;
+        return accessAccount;
     }
 
-    public async Task<TAccount> Registered(TAccount account)
+    public async Task<TAccount> Registered(TAccount accessAccount)
     {
-        var _creds = account.Credentials;
-        var _account = await _manager.GetByEmail(_creds.Email);
+        var credentials = accessAccount.Credentials;
+        var serverAccount = await _manager.GetByEmail(credentials.Email);
 
-        if (_account == null)
+        if (serverAccount == null)
         {
-            account.Notes = new OperationNotes()
+            accessAccount.Notes = new OperationNotes()
             {
                 Errors = "Account not found",
                 Status = AccessStatus.RegistrationNotCompleted
             };
-            this.Failure<Accesslog>(account.Notes.Success, account);
-            return account;
+            this.Failure<Accesslog>(accessAccount.Notes.Success, accessAccount);
+            return accessAccount;
         }
 
-        var _accountuser = await _manager.User.FindByEmailAsync(_creds.Email);
-        if (_accountuser != null)
+        if (serverAccount.User != null)
         {
-            _account = _manager.Accounts.Query.Where(a => a.Id == _accountuser.Id).FirstOrDefault();
-            if (_account != null)
+            if (serverAccount.Personal == null)
             {
-                _account.User = _accountuser;
-                _account.PutTo(account);               
-                _accountuser.PatchTo(account.Credentials);
-                _account.Personal.PatchTo(account.Credentials);
+                var account = _manager.Accounts.Query.Where(a => a.Id == serverAccount.User.Id).AsNoTracking().FirstOrDefault();
+                if ((account != null))
+                    account.PatchTo(serverAccount);
             }
+            serverAccount.PutTo(accessAccount);
+            serverAccount.User.PatchTo(accessAccount.Credentials);
+            serverAccount.Personal.PatchTo(accessAccount.Credentials);        
         }
-        return account;
+        return accessAccount;
     }
 
     public Task<ClaimsPrincipal?> RefreshAsync()

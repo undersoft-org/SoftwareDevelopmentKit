@@ -26,7 +26,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Critical<T>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate
@@ -46,7 +46,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Info<T>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate
@@ -66,7 +66,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Failure<T>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate
@@ -86,7 +86,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Success<T>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate
@@ -107,7 +107,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Warning<T>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate
@@ -128,7 +128,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Security<T>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate
@@ -149,7 +149,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Alert<T>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate
@@ -170,7 +170,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
 
@@ -192,7 +192,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
 
                 throw t.Exception;
 
@@ -217,7 +217,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
 
                 throw t.Exception;
 
@@ -241,7 +241,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Failure<T, TEx>(this object sender, string message, object data = null, Exception ex = null, bool withThrow = true) where T : ILogSate where TEx : Exception
@@ -262,7 +262,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
 
                 if (withThrow)
                     throw t.Exception;
@@ -286,7 +286,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Warning<T, TEx>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate where TEx : Exception
@@ -307,7 +307,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Security<T, TEx>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate where TEx : Exception
@@ -328,7 +328,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
             });
         }
         public static void Alert<T, TEx>(this object sender, string message, object data = null, Exception ex = null) where T : ILogSate where TEx : Exception
@@ -348,7 +348,7 @@
                     Message = message
                 };
 
-                logQueue.Enqueue(_log);
+                queue.Enqueue(_log);
 
                 throw t.Exception;
             });

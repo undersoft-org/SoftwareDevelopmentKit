@@ -375,12 +375,14 @@
                 DisplayRubricAttribute fda = (DisplayRubricAttribute)o;
                 ;
                 mr.DisplayName = fda.Name;
+                mr.Visible = true;
 
                 if (fb != null)
                     CreateInstantGeneratorDisplayAttribute(fb, fda);
             }
             else if (mr.DisplayName != null)
             {
+                mr.Visible = true;
                 CreateInstantGeneratorDisplayAttribute(
                     fb,
                     new DisplayRubricAttribute(mr.DisplayName)
