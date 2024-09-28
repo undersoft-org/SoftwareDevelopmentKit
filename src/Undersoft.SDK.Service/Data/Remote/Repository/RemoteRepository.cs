@@ -78,7 +78,7 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         if (RemoteContext != null)
         {
             RemoteQuery = RemoteContext.CreateQuery<TEntity>(Name);
-            Expression = Expression.Constant(this.AsEnumerable());
+            Expression = Expression.Constant(this);
             Provider = new RemoteRepositoryExpressionProvider<TEntity>(RemoteQuery);
         }
     }

@@ -1,42 +1,98 @@
-﻿namespace Undersoft.SDK.Estimating
+﻿using System.Collections;
+using Undersoft.SDK.Series;
+
+namespace Undersoft.SDK.Estimating
 {
-    public class EstimatorCluster : Identifiable
+    public class EstimatorCluster<T> : EstimatorCluster, IEstimatorCluster<T> where T : IEstimatorItem
     {
-        public double[] ClusterVector { get; set; }
+        public ISeries<IEstimatorCluster<T>> HyperClusters { get; set; }          
 
-        public EstimatorSeries ClusterItems { get; set; }
+        public EstimatorCluster(int id) :base(id) { }
 
-        public double[] ClusterVectorSummary { get; set; }
-
-        public EstimatorCluster(EstimatorItem item)
+        public EstimatorCluster(T item, int id) : this(id)
         {
-            ClusterVector = item.Vector[..item.Vector.Length];
-            ClusterVectorSummary = item.Vector[..item.Vector.Length];
-            ClusterItems = new EstimatorSeries([item]);
+            item.ClusterId = id;
+            Vector = item.Vector[..item.Vector.Length];
+            VectorSummary = item.Vector[..item.Vector.Length];
+            Items = new EstimatorSeries([item]);
         }
 
-        public bool RemoveItemFromCluster(EstimatorItem item)
+        public virtual bool RemoveFromCluster(T item)
         {
-            if (ClusterItems.Remove(item) == true)
+            if (Items.TryRemove(item))
             {
-                if (ClusterItems.Count > 0)
+                item.ClusterId = 0;
+                if (Items.Count > 0)
                 {
-                    AdaptiveResonainceTheoryEstimator.CalculateIntersection(ClusterItems, ClusterVector);
-                    AdaptiveResonainceTheoryEstimator.CalculateSummary(ClusterItems, ClusterVectorSummary);
+                    AdaptiveResonainceTheoryEstimator.CalculateIntersection(Items, Vector);
+                    AdaptiveResonainceTheoryEstimator.CalculateSummary(Items, VectorSummary);
 
                 }
             }
-            return ClusterItems.Count > 0;
+            return Items.Count > 0;
         }
 
-        public void AddItemToCluster(EstimatorItem item)
+        public virtual void AddToCluster(T item)
         {
-            if (!ClusterItems.Contains(item))
+            if (!Items.Contains(item))
             {
-                ClusterItems.Add(item);
-                AdaptiveResonainceTheoryEstimator.UpdateIntersectionByLast(ClusterItems, ClusterVector);
-                AdaptiveResonainceTheoryEstimator.UpdateSummaryByLast(ClusterItems, ClusterVectorSummary);
+                Items.Add(item);
+                item.ClusterId = (ushort)Id;
+                AdaptiveResonainceTheoryEstimator.UpdateIntersectionByLast(Items, Vector);
+                AdaptiveResonainceTheoryEstimator.UpdateSummaryByLast(Items, VectorSummary);
             }
+        }
+    }
+
+    public class EstimatorCluster : EstimatorItem, IEstimatorCluster
+    {
+        public virtual ISeries<IEstimatorCluster> Clusters { get; set; }
+
+        public ISeries<IEstimatorItem> Items { get; set; }
+
+        public double[] VectorSummary { get; set; }
+
+        public bool IsNode { get; set; }
+
+        public EstimatorCluster(int id) { Id = id; }
+
+        public EstimatorCluster(IEstimatorItem item, int id) : this(id)
+        {
+            item.ClusterId = id;
+            Vector = item.Vector[..item.Vector.Length];
+            VectorSummary = item.Vector[..item.Vector.Length];
+            Items = new EstimatorSeries([item]);
+        }
+
+        public virtual bool RemoveFromCluster(IEstimatorItem item)
+        {
+            if (Items.TryRemove(item))
+            {
+                item.ClusterId = 0;
+                if (Items.Count > 0)
+                {
+                    AdaptiveResonainceTheoryEstimator.CalculateIntersection(Items, Vector);
+                    AdaptiveResonainceTheoryEstimator.CalculateSummary(Items, VectorSummary);
+
+                }
+            }
+            return Items.Count > 0;
+        }
+
+        public virtual void AddToCluster(IEstimatorItem item)
+        {
+            if (!Items.Contains(item))
+            {
+                Items.Add(item);
+                item.ClusterId = (ushort)Id;
+                AdaptiveResonainceTheoryEstimator.UpdateIntersectionByLast(Items, Vector);
+                AdaptiveResonainceTheoryEstimator.UpdateSummaryByLast(Items, VectorSummary);
+            }
+        }
+
+        public virtual ISeries<IEstimatorItem> MergeItems()
+        {
+            return Items;
         }
     }
 

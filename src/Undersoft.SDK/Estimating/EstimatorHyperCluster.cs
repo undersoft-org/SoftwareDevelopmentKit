@@ -1,59 +1,50 @@
-﻿using Undersoft.SDK.Series;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.Metrics;
+using Undersoft.SDK.Series;
 
 namespace Undersoft.SDK.Estimating
 {
-    public class EstimatorHyperCluster : Identifiable
+    public class EstimatorHyperCluster : EstimatorCluster<IEstimatorCluster>
     {
-        public double[] HyperClusterVector { get; set; }
-
-        public Listing<EstimatorCluster> Clusters { get; set; }
-
-        public EstimatorSeries HyperClusterItems { get; set; }
-
-        public double[] HyperClusterVectorSummary { get; set; }
-
-        public EstimatorHyperCluster(EstimatorCluster cluster)
+        public EstimatorHyperCluster(ISeries<IEstimatorCluster> clusters, int id) : base(id)
         {
-            HyperClusterVector = cluster.ClusterVector[..cluster.ClusterVector.Length];
-            HyperClusterVectorSummary = cluster.ClusterVectorSummary[..cluster.ClusterVectorSummary.Length];
-            Clusters = new Listing<EstimatorCluster>([cluster]);
+            Clusters = clusters;
+            IsNode = true;
+            HyperClusters = new Listing<IEstimatorCluster<IEstimatorCluster>>();
         }
 
-        public bool RemoveClusterFromHyperCluster(EstimatorCluster cluster)
+        public EstimatorHyperCluster(IEstimatorCluster cluster, int id) : base(id)
         {
-            if (Clusters.Remove(cluster) == true)
+            Vector = cluster.Vector[..cluster.Vector.Length];
+            VectorSummary = cluster.VectorSummary[..cluster.VectorSummary.Length];
+            Clusters = new Listing<IEstimatorCluster>([cluster]);
+        }
+
+        public override bool RemoveFromCluster(IEstimatorCluster cluster)
+        {
+            if (Clusters.Remove(cluster))
             {
+                cluster.Id = 0;
                 if (Clusters.Count > 0)
                 {
-                    AdaptiveResonainceTheoryEstimator.CalculateClusterIntersection(Clusters, HyperClusterVector);
-                    AdaptiveResonainceTheoryEstimator.CalculateClusterSummary(Clusters, HyperClusterVectorSummary);
+                    AdaptiveResonainceTheoryEstimator.CalculateIntersection(Clusters, Vector);
+                    AdaptiveResonainceTheoryEstimator.CalculateSummary(Clusters, VectorSummary);
                 }
             }
             return Clusters.Count > 0;
         }
 
-        public void AddClusterToHyperCluster(EstimatorCluster cluster)
+        public override void AddToCluster(IEstimatorCluster cluster)
         {
+            cluster.ClusterId = (ushort)Id;
             Clusters.Add(cluster);
-            AdaptiveResonainceTheoryEstimator.UpdateClusterIntersectionByLast(Clusters, HyperClusterVector);
-            AdaptiveResonainceTheoryEstimator.UpdateClusterSummaryByLast(Clusters, HyperClusterVectorSummary);
+            AdaptiveResonainceTheoryEstimator.UpdateIntersectionByLast(Clusters, Vector);
+            AdaptiveResonainceTheoryEstimator.UpdateSummaryByLast(Clusters, VectorSummary);
         }
 
-
-        public EstimatorSeries GetHyperClusterItems()
+        public override ISeries<IEstimatorItem> MergeItems()
         {
-            EstimatorSeries updatedItemList = new EstimatorSeries();
-
-            for (int i = 0; i < Clusters.Count; i++)
-            {
-                for (int j = 0; j < Clusters[i].ClusterItems.Count; j++)
-                {
-                    updatedItemList.Add(Clusters[i].ClusterItems[j]);
-                }
-            }
-            HyperClusterItems = updatedItemList;
-
-            return HyperClusterItems;
+            return Items = new EstimatorSeries(Clusters.Concat(Items));
         }
 
     }

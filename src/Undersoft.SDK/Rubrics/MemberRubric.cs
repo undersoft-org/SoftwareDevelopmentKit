@@ -280,6 +280,12 @@
 
         public long TenantId { get => code.TenantId; set => code.TenantId = value; }
 
+        public int ServiceId { get => code.ServiceId; set => code.ServiceId = value; }
+
+        public int CategoryId { get => code.CategroyId; set => code.CategroyId = value; }
+
+        public int ClusterId { get => code.ClusterId; set => code.ClusterId = value; }
+
         public DateTime Created { get; set; }
 
         public string Creator { get; set; }

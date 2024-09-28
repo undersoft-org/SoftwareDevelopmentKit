@@ -9,7 +9,8 @@ using Undersoft.SDK.Utilities;
 
 namespace Undersoft.SDK.Service.Application.GUI.View
 {
-    public class ViewItem<TModel> : ViewItem where TModel : class, IOrigin, IInnerProxy
+    public class ViewItem<TModel> : ViewItem
+        where TModel : class, IOrigin, IInnerProxy
     {
         protected override void OnInitialized()
         {
@@ -39,7 +40,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View
         protected Uscn code;
 
         protected override void OnInitialized()
-        {            
+        {
             code.SetId(Unique.NewId);
             IsNew = true;
             if (Parent != null)
@@ -98,7 +99,12 @@ namespace Undersoft.SDK.Service.Application.GUI.View
         [Parameter]
         public virtual object? Value
         {
-            get => (Data != null) ? (Rubric != null) ? Data.Model.Proxy[Rubric.RubricId] : Data.Model : _value;
+            get =>
+                (Data != null)
+                    ? (Rubric != null)
+                        ? Data.Model.Proxy[Rubric.RubricId]
+                        : Data.Model
+                    : _value;
             set
             {
                 if (Data != null)
@@ -196,10 +202,28 @@ namespace Undersoft.SDK.Service.Application.GUI.View
             }
         }
 
-        public long TenantId 
-        { 
-            get => code.TenantId; 
-            set => code.TenantId = value; 
+        public long TenantId
+        {
+            get => code.TenantId;
+            set => code.TenantId = value;
+        }
+
+        public int ServiceId
+        {
+            get => code.ServiceId;
+            set => code.ServiceId = value;
+        }
+
+        public int CategoryId
+        {
+            get => code.CategroyId;
+            set => code.CategroyId = value;
+        }
+
+        public int ClusterId
+        {
+            get => code.ClusterId;
+            set => code.ClusterId = value;
         }
 
         public DateTime Created
@@ -261,8 +285,6 @@ namespace Undersoft.SDK.Service.Application.GUI.View
         {
             return origin.GetPriority();
         }
-
-
 
         public virtual void RenderView()
         {

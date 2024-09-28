@@ -7,10 +7,9 @@
     using Uniques;
 
     public interface ISeries<V>
-        : IEnumerable<V>,
-            IEnumerable,
-            ICollection,
-            ICollection<V>,
+        :   ICollection,
+            IList,
+            ISet<V>,
             IList<V>,
             IProducerConsumerCollection<V>,
             IDisposable,
@@ -98,10 +97,12 @@
         void Put(IEnumerable<V> items);
         ISeriesItem<V> Put(V value);
 
-        V Remove(object key);
+        new V Remove(object key);
+        new bool Remove(V item);
         bool Remove(object key, V item);
         bool Remove(ISeriesItem<V> item);
         bool TryRemove(object key);
+        new void RemoveAt(int id);
 
         void Renew(IEnumerable<V> items);
         void Renew(IList<V> items);
@@ -130,6 +131,6 @@
 
         void Resize(int size);
 
-        void Flush();
+        void Flush();       
     }
 }

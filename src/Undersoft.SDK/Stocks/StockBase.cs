@@ -14,7 +14,7 @@ namespace Undersoft.SDK.Stocks
         public string Path { get; set; }
         public string Name { get; private set; }
 
-        public ushort ClusterId { get; set; } = 0;
+        public new ushort ClusterId { get => ClusterId; set => ClusterId = value; }
         public ushort SectorId { get; set; } = 0;
 
         public long BufferSize { get; set; } = 0;
@@ -293,7 +293,7 @@ namespace Undersoft.SDK.Stocks
             header.ItemCapacity = ItemCapacity;
             header.ItemCount = ItemCount;
             header.ItemSize = ItemSize;
-            header.ClusterId = ClusterId;
+            header.ClusterId = (ushort)ClusterId;
             header.SectorId = SectorId;
             header.Shutdown = 0;
             View.Write(HeaderOffset, header);

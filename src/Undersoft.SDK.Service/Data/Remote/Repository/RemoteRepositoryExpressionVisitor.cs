@@ -2,19 +2,17 @@
 
 namespace Undersoft.SDK.Service.Data.Remote.Repository;
 
-internal class RemoteRepositoryExpressionVisitor : ExpressionVisitor
+internal class RemoteRepositoryExpressionVisitor<T> : ExpressionVisitor where T : class, IOrigin, IInnerProxy
 {
-    private readonly IQueryable newRoot;
+    private readonly IQueryable<T> newRoot;
 
-    public RemoteRepositoryExpressionVisitor(IQueryable newRoot)
+    public RemoteRepositoryExpressionVisitor(IQueryable<T> newRoot)
     {
         this.newRoot = newRoot;
     }
 
     protected override Expression VisitConstant(ConstantExpression node) =>
-        node.Type.BaseType != null
-        && node.Type.BaseType.IsGenericType
-        && node.Type.BaseType.GetGenericTypeDefinition() == typeof(RemoteRepository<>)
+        node.Type == typeof(RemoteRepository<T>)
             ? Expression.Constant(newRoot)
             : node;
 }

@@ -3,10 +3,10 @@ using Undersoft.SDK.Series.Base;
 
 namespace Undersoft.SDK.Estimating
 {
-    public class EstimatorSeries : RegistryBase<EstimatorItem>
+    public class EstimatorSeries : RegistryBase<IEstimatorItem>
     {
         public EstimatorSeries() : base() { }
 
-        public EstimatorSeries(IEnumerable<EstimatorItem> range) : base(range) { }
+        public EstimatorSeries(IEnumerable<IEstimatorItem> range) : base(range) { }
     }    
 }

@@ -11,10 +11,11 @@
     using System.Threading.Channels;
     using static System.Runtime.InteropServices.JavaScript.JSType;
     using Microsoft.Win32;
+    using System.Linq.Expressions;
 
     public static class SeriesLinqExtensions
     {
-        #region Methods
+        #region Methods       
 
         public static TResult[] DoEach<TItem, TResult>(this IEnumerable<TItem> items, Func<TItem, TResult> action)
         {
@@ -180,39 +181,43 @@
 
         public static Task<List<TItem>> ToListAsync<TItem>(this IEnumerable<TItem> items, IInvoker callback = null)
         {
-            return Task.Run(() =>
+            return Task.Factory.StartNew(() =>
             {
-                var list = items.ToList();
-                if (callback != null)
-                    callback.InvokeAsync(list);
-                return list;
-            });
+                List<TItem> list;
+                using (TransactionScope ts = CreateLockTransaction())
+                {
+                    list = items.ToList();
+                    ts.Complete();
+                    if(callback != null)
+                        callback.InvokeAsync(list).ConfigureAwait(false);
+                }
+                return list;              
+            }, TaskCreationOptions.AttachedToParent);
         }
 
         public static Task<TItem[]> ToArrayAsync<TItem>(this IEnumerable<TItem> items, IInvoker callback = null)
         {
-            return Task.Run(() =>
+            return Task.Factory.StartNew(() =>
             {
-                var list = items.ToArray();
-                if (callback != null)
-                    callback.InvokeAsync(list);
-                return list;
+                if(callback != null)
+                    return items.Commit(a => callback.InvokeAsync(a));                
+                return items.ToArray();
             });
         }
 
         public static Task<Registry<TItem>> ToRegistryAsync<TItem>(this IEnumerable<TItem> items, bool repeatable = false, IInvoker callback = null)
         {
-            return Task.Run(() => items.ToRegistry(repeatable, callback));
+            return Task.Factory.StartNew(() => items.ToRegistry(repeatable, callback));
         }
 
         public static Task<Catalog<TItem>> ToCatalogAsync<TItem>(this IEnumerable<TItem> items, IInvoker callback = null)
         {
-            return Task.Run(() => items.ToCatalog(callback));
+            return Task.Factory.StartNew(() => items.ToCatalog(callback));
         }
 
         public static Task<Listing<TItem>> ToListingAsync<TItem>(this IEnumerable<TItem> items, IInvoker callback = null)
         {
-            return Task.Run(() => items.ToListing(callback));
+            return Task.Factory.StartNew(() => items.ToListing(callback));
         }
 
         public static Listing<TItem> ToListing<TItem>(this IEnumerable<TItem> items, IInvoker callback = null)
@@ -301,9 +306,9 @@
         {
             var options = new TransactionOptions
             {
-                IsolationLevel = IsolationLevel.RepeatableRead
+                IsolationLevel = IsolationLevel.RepeatableRead,                
             };
-            return new TransactionScope(TransactionScopeOption.Required, options);
+            return new TransactionScope(TransactionScopeOption.RequiresNew, options, TransactionScopeAsyncFlowOption.Enabled);
         }
 
         public static T[] ToArray<T>(this IQueryable<T> query)

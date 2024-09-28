@@ -9,6 +9,9 @@ namespace Undersoft.SDK
     public interface IOrigin : IIdentifiable
     {
         long TenantId { get; set; }
+        int ServiceId { get; set; }
+        int CategoryId { get; set; }
+        int ClusterId { get; set; }
         string CodeNo { get; set; }
         DateTime Created { get; set; }
         string Creator { get; set; }

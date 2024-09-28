@@ -6,15 +6,15 @@ namespace Undersoft.SDK.Series.Base
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
     using Undersoft.SDK;
     using Undersoft.SDK.Extracting;
     using Undersoft.SDK.Uniques;
 
-    public abstract class SeriesBase<V> : Identifiable, IIdentifiable, ISeries<V>, ISet<V>, IList, IAsyncDisposable, IListSource
+    public abstract class SeriesBase<V> : Origin, IIdentifiable, ISeries<V>, IAsyncDisposable, IListSource
     {
-
         internal const float RESIZING_VECTOR = 2.333F;
         internal const float CONFLICTS_PERCENT_LIMIT = 0.22F;
         internal const float REMOVED_PERCENT_LIMIT = 0.45F;
@@ -145,10 +145,10 @@ namespace Undersoft.SDK.Series.Base
             get => InnerGet(unique.Key(key));
             set => InnerSet(unique.Key(key), (V)value);
         }
-        object IList.this[int index] 
-        { 
-            get => this[index]; 
-            set => this[index] = (V)value; 
+        object IList.this[int index]
+        {
+            get => this[index];
+            set => this[index] = (V)value;
         }
 
         protected virtual V InnerGet(long key)
@@ -167,7 +167,7 @@ namespace Undersoft.SDK.Series.Base
 
             return default(V);
         }
-        
+
         public virtual V Get(long key)
         {
             return InnerGet(key);
@@ -194,7 +194,7 @@ namespace Undersoft.SDK.Series.Base
             }
             return false;
         }
-        
+
         public virtual bool TryGet(long key, out ISeriesItem<V> output)
         {
             return InnerTryGet(key, out output);
@@ -253,7 +253,7 @@ namespace Undersoft.SDK.Series.Base
 
             return mem;
         }
-        
+
         public virtual ISeriesItem<V> GetItem(long key)
         {
             return InnerGetItem(key);
@@ -305,7 +305,7 @@ namespace Undersoft.SDK.Series.Base
             if (item != null) item.Value = value;
             return item;
         }
-        
+
         public virtual ISeriesItem<V> Set(object key, V value)
         {
             return InnerSet(unique.Key(key), value);
@@ -362,7 +362,7 @@ namespace Undersoft.SDK.Series.Base
         protected abstract ISeriesItem<V> InnerPut(long key, V value);
         protected abstract ISeriesItem<V> InnerPut(V value);
         protected abstract ISeriesItem<V> InnerPut(ISeriesItem<V> value);
-        
+
         public virtual ISeriesItem<V> Put(long key, object value)
         {
             return InnerPut(key, (V)value);
@@ -422,7 +422,7 @@ namespace Undersoft.SDK.Series.Base
         protected abstract bool InnerAdd(long key, V value);
         protected abstract bool InnerAdd(V value);
         protected abstract bool InnerAdd(ISeriesItem<V> value);
-        
+
         public virtual bool Add(long key, object value)
         {
             return InnerAdd(key, (V)value);
@@ -502,7 +502,7 @@ namespace Undersoft.SDK.Series.Base
         }
 
         protected abstract void InnerInsert(int index, ISeriesItem<V> item);
-        
+
         public virtual void Insert(int index, ISeriesItem<V> seriesItem)
         {
 
@@ -627,7 +627,7 @@ namespace Undersoft.SDK.Series.Base
             }
             return default(V);
         }
-        
+
         public virtual bool TryDequeue(out V output)
         {
             output = default(V);
@@ -732,7 +732,7 @@ namespace Undersoft.SDK.Series.Base
 
             return false;
         }
-        
+
         public virtual bool ContainsKey(object key)
         {
             return InnerContainsKey(unique.Key(key));
@@ -809,7 +809,7 @@ namespace Undersoft.SDK.Series.Base
             }
             return default(V);
         }
-        
+
         public virtual bool Remove(V item)
         {
             return InnerRemove(unique.Key(item)).Equals(default(V)) ? false : true;
@@ -958,21 +958,23 @@ namespace Undersoft.SDK.Series.Base
             return -1;
         }
 
+        private IQueryable<V> _query;
+        public IQueryable<V> Query => _query ??= this.AsQueryable<V>();
+
         public virtual IEnumerable<V> AsValues()
         {
-            foreach (var item in (IEnumerable<V>)this)
+            foreach (var item in ((IEnumerable<V>)this))
             {
                 yield return item;
             }
         }
         public virtual IEnumerable<ISeriesItem<V>> AsItems()
         {
-            foreach (var item in this)
+            foreach (ISeriesItem<V> item in this)
             {
                 yield return item;
             }
         }
-
         public virtual IEnumerator<ISeriesItem<V>> GetEnumerator()
         {
             return new SeriesItemEnumerator<V>(this);
@@ -980,15 +982,16 @@ namespace Undersoft.SDK.Series.Base
         public virtual IAsyncEnumerator<V> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             return new SeriesItemAsyncEnumerator<V>(this);
-        }
+        }        
         public virtual IEnumerator<long> GetKeyEnumerator()
         {
             return new SeriesItemUniqueKeyEnumerator<V>(this);
         }
+
         IEnumerator<V> IEnumerable<V>.GetEnumerator()
         {
             return new SeriesItemEnumerator<V>(this);
-        }
+        }        
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new SeriesItemEnumerator<V>(this);
@@ -1272,7 +1275,7 @@ namespace Undersoft.SDK.Series.Base
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        
+
         public virtual async ValueTask DisposeAsyncCore()
         {
             await new ValueTask(Task.Run(() =>
@@ -1290,16 +1293,6 @@ namespace Undersoft.SDK.Series.Base
             GC.SuppressFinalize(this);
         }
 
-        public int CompareTo(IUnique other)
-        {
-            return Id.CompareTo(other.Id);
-        }
-
-        public bool Equals(IUnique other)
-        {
-            return Id.Equals(other.Id);
-        }
-
         public byte[] GetBytes()
         {
             return Id.GetBytes();
@@ -1308,12 +1301,6 @@ namespace Undersoft.SDK.Series.Base
         {
             return Id.GetBytes();
         }
-
-        public DateTime Created { get; set; }
-        public string Creator { get; set; }
-
-        public DateTime Modified { get; set; }
-        public string Modifier { get; set; }
 
         public Type ElementType => typeof(V);
 
@@ -1363,6 +1350,10 @@ namespace Undersoft.SDK.Series.Base
         }
 
         bool IList.IsFixedSize => false;
+
+        public Expression Expression => Query.Expression;
+
+        public IQueryProvider Provider => Query.Provider;
 
         public IList GetList()
         {

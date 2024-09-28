@@ -3,23 +3,30 @@ using System.Text;
 
 namespace Undersoft.SDK.Estimating
 {
+    using System.Linq;
     using Undersoft.SDK.Series;
 
     public class AdaptiveResonainceTheoryEstimator
     {
+        private int nextClusterId = 0;
+        private int nextHyperClusterId = 0;
+
         public ISeries<string> NameList { get; set; }
 
         public int ItemSize { get; set; }
 
-        public EstimatorSeries Items { get; set; }
+        public ISeries<IEstimatorItem> Items { get; set; }
 
-        public ISeries<EstimatorCluster> Clusters { get; set; }
+        public ISeries<IEstimatorCluster> Clusters { get; set; }
 
-        public ISeries<EstimatorHyperCluster> HyperClusters { get; set; }
+        public ISeries<IEstimatorCluster<IEstimatorCluster>> HyperClusters { get; set; }
 
-        private ISeries<EstimatorCluster> ItemsToClusters;
+        private ISeries<IEstimatorCluster> ItemsToClusters;
 
-        private ISeries<(EstimatorCluster, EstimatorHyperCluster)> ClustersToHyperClusters;
+        private ISeries<(
+            IEstimatorCluster,
+            IEstimatorCluster<IEstimatorCluster>
+        )> ClustersToClusters;
 
         public double bValue = 0.2f;
 
@@ -37,14 +44,21 @@ namespace Undersoft.SDK.Estimating
         {
             NameList = new Listing<string>();
             Items = new EstimatorSeries();
-            Clusters = new Listing<EstimatorCluster>();
-            HyperClusters = new Listing<EstimatorHyperCluster>();
-            ItemsToClusters = new Listing<EstimatorCluster>();
-            ClustersToHyperClusters = new Listing<(EstimatorCluster, EstimatorHyperCluster)>();
+            Clusters = new Listing<IEstimatorCluster>();
+            HyperClusters = new Listing<IEstimatorCluster<IEstimatorCluster>>();
+            ItemsToClusters = new Listing<IEstimatorCluster>();
+            ClustersToClusters =
+                new Listing<(IEstimatorCluster, IEstimatorCluster<IEstimatorCluster>)>();
+        }
 
-            LoadFile(tempHardFileName);
-            Items = NormalizeItemList(Items);
-            Create();
+        public int NextClusterId()
+        {
+            return Interlocked.Increment(ref nextClusterId);
+        }
+
+        public int NextHyperClusterId()
+        {
+            return Interlocked.Increment(ref nextHyperClusterId);
         }
 
         public void Create()
@@ -52,38 +66,32 @@ namespace Undersoft.SDK.Estimating
             Clusters.Clear();
             HyperClusters.Clear();
             ItemsToClusters.Clear();
-            ClustersToHyperClusters.Clear();
+            ClustersToClusters.Clear();
 
             for (int i = 0; i < Items.Count; i++)
             {
-                AssignCluster(Items[i]);
+                Assign(Items[i]);
             }
 
-            for (int i = 0; i < HyperClusters.Count; i++)
-            {
-                HyperClusters[i].GetHyperClusterItems();
-            }
+            Aggregate(HyperClusters.FirstOrDefault());
         }
 
-        public void Create(ICollection<EstimatorItem> itemCollection)
+        public void Create(IEnumerable<EstimatorItem> itemCollection)
         {
             Items.Add(itemCollection);
 
             Clusters.Clear();
             HyperClusters.Clear();
             ItemsToClusters.Clear();
-            ClustersToHyperClusters.Clear();
+            ClustersToClusters.Clear();
 
             for (int i = 0; i < Items.Count; i++)
             {
                 Items[i].Id = i;
-                AssignCluster(Items[i]);
+                Assign(Items[i]);
             }
 
-            for (int i = 0; i < HyperClusters.Count; i++)
-            {
-                HyperClusters[i].GetHyperClusterItems();
-            }
+            Aggregate(HyperClusters.FirstOrDefault());
         }
 
         public void Append(ICollection<EstimatorItem> itemCollection)
@@ -95,84 +103,81 @@ namespace Undersoft.SDK.Estimating
             for (int i = currentCount; i < Items.Count; i++)
             {
                 Items[i].Id = i;
-                AssignCluster(Items[i]);
+                Assign(Items[i]);
             }
 
-            for (int i = 0; i < HyperClusters.Count; i++)
-            {
-                HyperClusters[i].GetHyperClusterItems();
-            }
+            Aggregate(HyperClusters.FirstOrDefault());
         }
 
-        public void Append(EstimatorItem item)
+        public void Append(IEstimatorItem item)
         {
             item.Id = Items.Count;
             Items.Add(item);
-            AssignCluster(item);
+            Assign(item);
 
-            for (int i = 0; i < HyperClusters.Count; i++)
+            Aggregate(HyperClusters.FirstOrDefault());
+        }
+
+        public void Aggregate(IEstimatorCluster<IEstimatorCluster> hyperCluster)
+        {
+            var children = hyperCluster.HyperClusters;
+            if (children != null)
             {
-                HyperClusters[i].GetHyperClusterItems();
+                if (HyperClusters.TryGet(children, out var childCluster))
+                    Aggregate(childCluster.Value);
+
+                foreach (var child in children)
+                    child.MergeItems();
             }
         }
 
-        public void AssignCluster(EstimatorItem item)
+        public void Assign(IEstimatorItem item)
         {
             int iterationCounter = IterationLimit;
             bool isAssignementChanged = true;
             double itemVectorMagnitude = CalculateVectorMagnitude(item.Vector);
 
-            while (isAssignementChanged && iterationCounter > 0)
+            while (isAssignementChanged && iterationCounter-- > 0)
             {
                 isAssignementChanged = false;
 
-                List<KeyValuePair<EstimatorCluster, double>> clusterToProximityList =
-                    new List<KeyValuePair<EstimatorCluster, double>>();
+                var clusterToProximityList = new List<(IEstimatorCluster, double)>();
+
                 double proximityThreshold = itemVectorMagnitude / (bValue + rangeLimit * ItemSize);
 
-                for (int i = 0; i < Clusters.Count; i++)
+                foreach (var cluster in Clusters)
                 {
-                    double clusterVectorMagnitude = CalculateVectorMagnitude(
-                        Clusters[i].ClusterVector
-                    );
+                    double clusterVectorMagnitude = CalculateVectorMagnitude(cluster.Vector);
                     double proximity =
-                        CaulculateVectorIntersectionMagnitude(
-                            item.Vector,
-                            Clusters[i].ClusterVector
-                        ) / (bValue + clusterVectorMagnitude);
+                        CaulculateVectorIntersectionMagnitude(item.Vector, cluster.Vector)
+                        / (bValue + clusterVectorMagnitude);
+
                     if (proximity > proximityThreshold)
                     {
-                        clusterToProximityList.Add(
-                            new KeyValuePair<EstimatorCluster, double>(Clusters[i], proximity)
-                        );
+                        clusterToProximityList.Add((cluster, proximity));
                     }
                 }
-
+                IEstimatorCluster newCluster = null;
                 if (clusterToProximityList.Count > 0)
                 {
-                    clusterToProximityList.Sort((x, y) => -1 * x.Value.CompareTo(y.Value));
+                    clusterToProximityList.Sort((x, y) => -1 * x.Item2.CompareTo(y.Item2));
 
-                    for (int i = 0; i < clusterToProximityList.Count; i++)
+                    foreach (var clusterToProximity in clusterToProximityList)
                     {
-                        EstimatorCluster newCluster = clusterToProximityList[i].Key;
+                        newCluster = clusterToProximity.Item1;
                         double vigilance =
-                            CaulculateVectorIntersectionMagnitude(
-                                newCluster.ClusterVector,
-                                item.Vector
-                            ) / itemVectorMagnitude;
+                            CaulculateVectorIntersectionMagnitude(newCluster.Vector, item.Vector)
+                            / itemVectorMagnitude;
                         if (vigilance >= pValue)
                         {
-                            if (ItemsToClusters.ContainsKey(item.Id))
+                            if (ItemsToClusters.TryGet(item.Id, out var previousCluster))
                             {
-                                EstimatorCluster previousCluster = ItemsToClusters[item.Id];
                                 if (ReferenceEquals(newCluster, previousCluster))
                                     break;
-                                if (previousCluster.RemoveItemFromCluster(item) == false)
-                                {
+                                if (!previousCluster.RemoveFromCluster(item))
                                     Clusters.Remove(previousCluster);
-                                }
                             }
-                            newCluster.AddItemToCluster(item);
+                            newCluster.AddToCluster(item);
                             ItemsToClusters[item.Id] = newCluster;
                             isAssignementChanged = true;
                             break;
@@ -180,87 +185,92 @@ namespace Undersoft.SDK.Estimating
                     }
                 }
 
-                if (ItemsToClusters.ContainsKey(item.Id) == false)
+                if (!ItemsToClusters.TryGet(item.Id, out newCluster))
                 {
-                    EstimatorCluster newCluster = new EstimatorCluster(item);
+                    newCluster = new EstimatorCluster(item, NextClusterId());
                     Clusters.Add(newCluster);
                     ItemsToClusters.Add(item.Id, newCluster);
                     isAssignementChanged = true;
                 }
-
-                iterationCounter--;
             }
 
-            AssignHyperCluster();
+            Assign(Clusters);
         }
 
-        public void AssignHyperCluster()
+        public void Assign(ISeries<IEstimatorCluster> clusters)
         {
+            if (!HyperClusters.TryGet(clusters, out var hyperClusterNode))
+                hyperClusterNode.Value = HyperClusters
+                    .Put(clusters, new EstimatorHyperCluster(clusters, NextHyperClusterId()))
+                    .Value;
+
+            var hyperClusters = hyperClusterNode.Value.HyperClusters;
+
             int iterationCounter = IterationLimit;
             bool isAssignementChanged = true;
 
-            while (isAssignementChanged && iterationCounter > 0)
+            while (isAssignementChanged && iterationCounter-- > 0)
             {
                 isAssignementChanged = false;
-                for (int j = 0; j < Clusters.Count; j++)
+                foreach (var cluster in Clusters)
                 {
-                    List<KeyValuePair<EstimatorHyperCluster, double>> hyperClusterToProximityList =
-                        new List<KeyValuePair<EstimatorHyperCluster, double>>();
-                    EstimatorCluster cluster = Clusters[j];
-                    double clusterVectorMagnitude = CalculateVectorMagnitude(cluster.ClusterVector);
+                    var hyperClusterToProximityList =
+                        new List<(IEstimatorCluster<IEstimatorCluster>, double)>();
+
+                    double clusterVectorMagnitude = CalculateVectorMagnitude(cluster.Vector);
                     double proximityThreshold =
                         clusterVectorMagnitude / (bValue + rangeLimit * ItemSize);
 
-                    for (int i = 0; i < HyperClusters.Count; i++)
+                    foreach (var hyperCluster in hyperClusters)
                     {
                         double hyperClusterVectorMagnitude = CalculateVectorMagnitude(
-                            HyperClusters[i].HyperClusterVector
+                            hyperCluster.Vector
                         );
                         double proximity =
                             CaulculateVectorIntersectionMagnitude(
-                                cluster.ClusterVector,
-                                HyperClusters[i].HyperClusterVector
+                                cluster.Vector,
+                                hyperCluster.Vector
                             ) / (bValue + hyperClusterVectorMagnitude);
                         if (proximity > proximityThreshold)
                         {
-                            hyperClusterToProximityList.Add(
-                                new KeyValuePair<EstimatorHyperCluster, double>(
-                                    HyperClusters[i],
-                                    proximity
-                                )
-                            );
+                            hyperClusterToProximityList.Add((hyperCluster, proximity));
                         }
                     }
 
+                    IEstimatorCluster<IEstimatorCluster> newHyperCluster = null;
                     if (hyperClusterToProximityList.Count > 0)
                     {
-                        hyperClusterToProximityList.Sort((x, y) => -1 * x.Value.CompareTo(y.Value));
+                        hyperClusterToProximityList.Sort((x, y) => -1 * x.Item2.CompareTo(y.Item2));
 
-                        for (int i = 0; i < hyperClusterToProximityList.Count; i++)
+                        foreach (var HyperClusterToProximity in hyperClusterToProximityList)
                         {
-                            EstimatorHyperCluster newHyperCluster = hyperClusterToProximityList[i].Key;
+                            newHyperCluster = HyperClusterToProximity.Item1;
                             double vigilance =
                                 CaulculateVectorIntersectionMagnitude(
-                                    newHyperCluster.HyperClusterVector,
-                                    cluster.ClusterVector
+                                    newHyperCluster.Vector,
+                                    cluster.Vector
                                 ) / clusterVectorMagnitude;
+
                             if (vigilance >= p2Value)
                             {
-                                if (ClustersToHyperClusters.ContainsKey(cluster))
+                                if (
+                                    ClustersToClusters.TryGet(
+                                        cluster,
+                                        out var previousHyperClusterPair
+                                    )
+                                )
                                 {
-                                    EstimatorHyperCluster previousHyperCluster = ClustersToHyperClusters[cluster].Item2;
+                                    IEstimatorCluster previousHyperCluster =
+                                        previousHyperClusterPair.Value.Item2;
                                     if (ReferenceEquals(newHyperCluster, previousHyperCluster))
                                         break;
-                                    if (
-                                        previousHyperCluster.RemoveClusterFromHyperCluster(cluster)
-                                        == false
-                                    )
+                                    if (previousHyperCluster.RemoveFromCluster(cluster) == false)
                                     {
                                         HyperClusters.Remove(previousHyperCluster);
                                     }
                                 }
-                                newHyperCluster.AddClusterToHyperCluster(cluster);
-                                ClustersToHyperClusters[cluster] = (cluster, newHyperCluster);
+                                newHyperCluster.AddToCluster(cluster);
+                                ClustersToClusters[cluster] = (cluster, newHyperCluster);
                                 isAssignementChanged = true;
 
                                 break;
@@ -268,45 +278,38 @@ namespace Undersoft.SDK.Estimating
                         }
                     }
 
-                    if (ClustersToHyperClusters.ContainsKey(cluster) == false)
+                    if (!ClustersToClusters.TryGet(cluster, out var newHyperClusterPair))
                     {
-                        EstimatorHyperCluster newHyperCluster = new EstimatorHyperCluster(cluster);
+                        newHyperCluster = new EstimatorHyperCluster(cluster, nextHyperClusterId++);
                         HyperClusters.Add(newHyperCluster);
-                        ClustersToHyperClusters.Add(cluster, (cluster, newHyperCluster));
+                        ClustersToClusters.Add(cluster, (cluster, newHyperCluster));
                         isAssignementChanged = true;
                     }
                 }
-
-                iterationCounter--;
             }
         }
 
-        public EstimatorItem SimilarTo(EstimatorItem item)
+        public IEstimatorItem SimilarTo(IEstimatorItem item)
         {
             StringBuilder outputText = new StringBuilder();
             double tempItemSimilarSum = 0;
             double itemSimilarSum = 0;
-            EstimatorItem itemSimilar = null;
-            EstimatorCluster cluster = null;
+            IEstimatorItem itemSimilar = null;
+            IEstimatorCluster cluster = null;
 
-            ItemsToClusters.TryGet(item.Id, out cluster);
-            if (cluster == null) { }
-            else
+            if (ItemsToClusters.TryGet(item.Id, out cluster))
             {
-                EstimatorSeries clusterItemList = cluster.ClusterItems;
-                for (int i = 0; i < clusterItemList.Count; i++)
+                foreach (var clusterItem in cluster.Items.AsValues())
                 {
-                    if (!ReferenceEquals(item, clusterItemList[i]))
+                    if (!ReferenceEquals(item, clusterItem))
                     {
                         tempItemSimilarSum =
-                            CaulculateVectorIntersectionMagnitude(
-                                item.Vector,
-                                clusterItemList[i].Vector
-                            ) / CalculateVectorMagnitude(clusterItemList[i].Vector);
-                        if (itemSimilarSum == 0 || itemSimilarSum < tempItemSimilarSum)
+                            CaulculateVectorIntersectionMagnitude(item.Vector, clusterItem.Vector)
+                            / CalculateVectorMagnitude(clusterItem.Vector);
+                        if (itemSimilarSum < tempItemSimilarSum)
                         {
                             itemSimilarSum = tempItemSimilarSum;
-                            itemSimilar = clusterItemList[i];
+                            itemSimilar = clusterItem;
                         }
                     }
                 }
@@ -327,33 +330,33 @@ namespace Undersoft.SDK.Estimating
             return itemSimilar;
         }
 
-        public EstimatorItem SimilarInGroupsTo(EstimatorItem item)
+        public IEstimatorItem SimilarInGroupsTo(IEstimatorItem item)
         {
             StringBuilder outputText = new StringBuilder();
             double tempItemSimilarSum = 0;
             double itemSimilarSum = 0;
-            EstimatorItem itemSimilar = null;
-            EstimatorCluster cluster = null;
+            IEstimatorItem itemSimilar = null;
+            IEstimatorCluster cluster = null;
 
-            ItemsToClusters.TryGet(item.Id, out cluster);
-            if (cluster == null) { }
-            else
+            if (ItemsToClusters.TryGet(item.Id, out cluster))
             {
-                EstimatorHyperCluster hyperCluster = ClustersToHyperClusters[cluster].Item2;
-                EstimatorSeries hyperClusterItemList = hyperCluster.GetHyperClusterItems();
-                for (int i = 0; i < hyperClusterItemList.Count; i++)
+                foreach (
+                    var hyperClusterItem in ClustersToClusters[cluster]
+                        .Item2.MergeItems()
+                        .AsValues()
+                )
                 {
-                    if (!ReferenceEquals(item, hyperClusterItemList[i]))
+                    if (!ReferenceEquals(item, hyperClusterItem))
                     {
                         tempItemSimilarSum =
                             CaulculateVectorIntersectionMagnitude(
                                 item.Vector,
-                                hyperClusterItemList[i].Vector
-                            ) / CalculateVectorMagnitude(hyperClusterItemList[i].Vector);
-                        if (itemSimilarSum == 0 || itemSimilarSum < tempItemSimilarSum)
+                                hyperClusterItem.Vector
+                            ) / CalculateVectorMagnitude(hyperClusterItem.Vector);
+                        if (itemSimilarSum < tempItemSimilarSum)
                         {
                             itemSimilarSum = tempItemSimilarSum;
-                            itemSimilar = hyperClusterItemList[i];
+                            itemSimilar = hyperClusterItem;
                         }
                     }
                 }
@@ -378,35 +381,30 @@ namespace Undersoft.SDK.Estimating
             return itemSimilar;
         }
 
-        public EstimatorItem SimilarInOtherGroupsTo(EstimatorItem item)
+        public IEstimatorItem SimilarInOtherGroupsTo(IEstimatorItem item)
         {
             StringBuilder outputText = new StringBuilder();
             double tempItemSimilarSum = 0;
             double itemSimilarSum = 0;
-            EstimatorItem itemSimilar = null;
+            IEstimatorItem itemSimilar = null;
 
-            if (!ItemsToClusters.TryGet(item.Id, out EstimatorCluster cluster)) { }
-            else
+            if (ItemsToClusters.TryGet(item.Id, out IEstimatorCluster cluster))
             {
-                EstimatorHyperCluster hyperCluster = ClustersToHyperClusters[cluster].Item2;
-                for (int j = 0; j < hyperCluster.Clusters.Count; j++)
+                foreach (var checkCluster in ClustersToClusters[cluster].Item2.Clusters.AsValues())
                 {
-                    if (!ReferenceEquals(cluster, hyperCluster.Clusters[j]))
+                    if (!ReferenceEquals(cluster, checkCluster))
                     {
-                        EstimatorSeries clusterItemList = hyperCluster.Clusters[
-                            j
-                        ].ClusterItems;
-                        for (int i = 0; i < clusterItemList.Count; i++)
+                        foreach (var clusterItem in checkCluster.Items.AsValues())
                         {
                             tempItemSimilarSum =
                                 CaulculateVectorIntersectionMagnitude(
                                     item.Vector,
-                                    clusterItemList[i].Vector
-                                ) / CalculateVectorMagnitude(clusterItemList[i].Vector);
-                            if (itemSimilarSum == 0 || itemSimilarSum < tempItemSimilarSum)
+                                    clusterItem.Vector
+                                ) / CalculateVectorMagnitude(clusterItem.Vector);
+                            if (itemSimilarSum < tempItemSimilarSum)
                             {
                                 itemSimilarSum = tempItemSimilarSum;
-                                itemSimilar = clusterItemList[i];
+                                itemSimilar = clusterItem;
                             }
                         }
                     }
@@ -434,7 +432,8 @@ namespace Undersoft.SDK.Estimating
             return itemSimilar;
         }
 
-        public static double[] CalculateIntersection(EstimatorSeries input, double[] output)
+        public static double[] CalculateIntersection<T>(ISeries<T> input, double[] output)
+            where T : IEstimatorItem
         {
             for (int i = 0; i < output.Length; i++)
             {
@@ -447,7 +446,8 @@ namespace Undersoft.SDK.Estimating
             return output;
         }
 
-        public static double[] CalculateSummary(EstimatorSeries input, double[] output)
+        public static double[] CalculateSummary<T>(ISeries<T> input, double[] output)
+            where T : IEstimatorItem
         {
             for (int i = 0; i < output.Length; i++)
             {
@@ -461,7 +461,8 @@ namespace Undersoft.SDK.Estimating
             return output;
         }
 
-        public static double[] UpdateIntersectionByLast(EstimatorSeries input, double[] output)
+        public static double[] UpdateIntersectionByLast<T>(ISeries<T> input, double[] output)
+            where T : IEstimatorItem
         {
             int n = input.Count - 1;
             for (int i = 0; i < output.Length; i++)
@@ -471,7 +472,8 @@ namespace Undersoft.SDK.Estimating
             return output;
         }
 
-        public static double[] UpdateSummaryByLast(EstimatorSeries input, double[] output)
+        public static double[] UpdateSummaryByLast<T>(ISeries<T> input, double[] output)
+            where T : IEstimatorItem
         {
             int n = input.Count - 1;
             for (int i = 0; i < output.Length; i++)
@@ -481,78 +483,34 @@ namespace Undersoft.SDK.Estimating
             return output;
         }
 
-        public static double[] CalculateClusterIntersection(ISeries<EstimatorCluster> input, double[] output)
+        public static ISeries<IEstimatorItem> NormalizeItemList(
+            ISeries<IEstimatorItem> featureItems
+        )
         {
-            for (int i = 0; i < output.Length; i++)
+            EstimatorSeries normalizedItems = new EstimatorSeries();
+
+            var average = featureItems.SelectMany(f => f.Vector).Average();
+            var extremes = featureItems.SelectMany(f => f.Vector).Extremes();
+            var bias = Math.Abs(extremes.Item1);
+            var rangeValue = bias + extremes.Item2;
+            var margin = (rangeValue / 2) - average;
+            rangeValue += margin;
+            bias += margin;
+
+            foreach (var item in featureItems)
             {
-                output[i] = input[0].ClusterVector[i];
-                for (int j = 1; j < input.Count; j++)
-                {
-                    output[i] = Math.Min(output[i], input[j].ClusterVector[i]);
-                }
-            }
-            return output;
-        }
+                double[] featureVector = item
+                    .Vector.ForEach((v, i) => (v + bias) / rangeValue)
+                    .ToArray();
 
-        public static double[] CalculateClusterSummary(ISeries<EstimatorCluster> input, double[] output)
-        {
-            for (int i = 0; i < output.Length; i++)
-            {
-                output[i] = 0;
-                for (int j = 0; j < input.Count; j++)
-                {
-                    output[i] += input[j].ClusterVector[i];
-                }
-            }
-
-            return output;
-        }
-
-        public static double[] UpdateClusterIntersectionByLast(ISeries<EstimatorCluster> input, double[] output)
-        {
-            int n = input.Count - 1;
-            for (int i = 0; i < output.Length; i++)
-            {
-                output[i] = Math.Min(output[i], input[n].ClusterVector[i]);
-            }
-            return output;
-        }
-
-        public static double[] UpdateClusterSummaryByLast(ISeries<EstimatorCluster> input, double[] output)
-        {
-            int n = input.Count - 1;
-            for (int i = 0; i < output.Length; i++)
-            {
-                output[i] += input[n].ClusterVector[i];
-            }
-            return output;
-        }
-
-        public static EstimatorSeries NormalizeItemList(EstimatorSeries featureItemList)
-        {
-            EstimatorSeries normalizedItemList = new EstimatorSeries();
-
-            int length;
-            for (int i = 0; i < featureItemList.Count; i++)
-            {
-                length = featureItemList[0].Vector.Length;
-                double[] featureVector = new double[length];
-                for (int j = 0; j < length; j++)
-                {
-                    featureVector[j] = featureItemList[i].Vector[j] / 10.00;
-                }
-                normalizedItemList.Add(
-                    new EstimatorItem(
-                        featureItemList[i].Id,
-                        (string)featureItemList[(int)i].Name,
-                        featureVector
-                    )
+                normalizedItems.Add(
+                    new EstimatorItem(item.Id, item.Name, featureVector, item.Target)
                 );
             }
-            return normalizedItemList;
+            return normalizedItems;
         }
 
-        static public double CalculateVectorMagnitude(double[] vector)
+        public static double CalculateVectorMagnitude(double[] vector)
         {
             double result = 0;
             for (int i = 0; i < vector.Length; ++i)
@@ -562,7 +520,7 @@ namespace Undersoft.SDK.Estimating
             return result;
         }
 
-        static public double CaulculateVectorIntersectionMagnitude(
+        public static double CaulculateVectorIntersectionMagnitude(
             double[] vector1,
             double[] vector2
         )
@@ -621,8 +579,7 @@ namespace Undersoft.SDK.Estimating
                     int i = 0;
                     while ((line != null) && (line != "--"))
                     {
-                        featureVector[i] = Int32.Parse(line);
-                        ++i;
+                        featureVector[i++] = Int32.Parse(line);
                         line = file.ReadLine();
                     }
 

@@ -34,9 +34,8 @@ namespace Undersoft.SDK
             }
         }
 
-        [IdentityRubric(Order = 4)]
+        [NotMapped]
         [DataMember(Order = 4)]
-        [Column(Order = 4)]
         public virtual int ServiceId
         {
             get
@@ -77,36 +76,36 @@ namespace Undersoft.SDK
             }
         }
 
-        [Column(TypeName = "timestamp", Order = 7)]
-        [DataMember(Order = 7)]
+        [Column(TypeName = "timestamp", Order = 5)]
+        [DataMember(Order = 8)]
         [InstantAs(UnmanagedType.I8, SizeConst = 8)]
         public virtual DateTime Modified { get => Time; set => Time = value; }
 
         [StringLength(128)]
-        [Column(Order = 5)]
-        [DataMember(Order = 8)]
+        [Column(Order = 6)]
+        [DataMember(Order = 9)]
         [InstantAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         public virtual string Modifier { get; set; } = "";
 
-        [Column(TypeName = "timestamp", Order = 6)]
-        [DataMember(Order = 9)]
+        [Column(TypeName = "timestamp", Order = 7)]
+        [DataMember(Order = 10)]
         [InstantAs(UnmanagedType.I8, SizeConst = 8)]
         public virtual DateTime Created { get; set; }
 
         [StringLength(128)]
-        [Column(Order = 7)]
-        [DataMember(Order = 10)]
+        [Column(Order = 8)]
+        [DataMember(Order = 11)]
         [InstantAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         public virtual string Creator { get; set; } = "";
 
-        [DataMember(Order = 11)]
-        [Column(Order = 8)]
+        [DataMember(Order = 12)]
+        [Column(Order = 9)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public virtual int Index { get; set; } = -1;
 
-        [Column(Order = 9)]
+        [Column(Order = 10)]
         [StringLength(256)]
-        [DataMember(Order = 12)]
+        [DataMember(Order = 13)]
         [InstantAs(UnmanagedType.ByValTStr, SizeConst = 256)]
         public virtual string Label { get; set; } = "";
 

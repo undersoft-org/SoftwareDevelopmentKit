@@ -1,13 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.OData.Client;
+using System.Data.Common;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.ServiceModel.Channels;
 using Undersoft.SDK.Utilities;
 
 namespace Undersoft.SDK.Service.Data.Remote.Repository;
 
 public class RemoteRepositoryExpressionProvider<TEntity> : IAsyncQueryProvider
-    where TEntity : class, IOrigin
+    where TEntity : class, IOrigin, IInnerProxy
 {
     private readonly Type queryType;
     private IQueryable<TEntity> query;
@@ -55,7 +57,7 @@ public class RemoteRepositoryExpressionProvider<TEntity> : IAsyncQueryProvider
     public TResult Execute<TResult>(Expression expression)
     {
         IQueryable<TEntity> newRoot = query;
-        var treeCopier = new RemoteRepositoryExpressionVisitor(newRoot);
+        var treeCopier = new RemoteRepositoryExpressionVisitor<TEntity>(newRoot);
         var newExpressionTree = treeCopier.Visit(expression);
         var isEnumerable =
             typeof(TResult).IsGenericType

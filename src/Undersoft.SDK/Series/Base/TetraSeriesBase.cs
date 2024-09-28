@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 namespace Undersoft.SDK.Series.Base
 {
     using Enumerators;
+    using System.Linq.Expressions;
     using Tetra;
     using Undersoft.SDK;
     using Undersoft.SDK.Extracting;
@@ -11,11 +12,7 @@ namespace Undersoft.SDK.Series.Base
 
     public abstract class TetraSeriesBase<V>
         : Identifiable,
-            ICollection<V>,
-            IList<V>,
             ISeries<V>,
-            ICollection<ISeriesItem<V>>,
-            IList<ISeriesItem<V>>,
             IProducerConsumerCollection<V>,
             IList,
             IDisposable,
@@ -117,11 +114,6 @@ namespace Undersoft.SDK.Series.Base
         public virtual object SyncRoot { get; set; }
         public virtual Func<V, V, bool> ValueEquals { get; }
 
-        ISeriesItem<V> IList<ISeriesItem<V>>.this[int index]
-        {
-            get => GetItem(index);
-            set => GetItem(index).Set(value);
-        }
         public virtual V this[int index]
         {
             get => GetItem(index).Value;
@@ -485,6 +477,11 @@ namespace Undersoft.SDK.Series.Base
         {
             foreach (V item in items)
                 Add(item);
+        }
+
+        bool ISet<V>.Add(V value)
+        {
+            return InnerAdd(value);
         }
 
         public virtual bool TryAdd(V value)
@@ -952,6 +949,13 @@ namespace Undersoft.SDK.Series.Base
             return new SeriesItemEnumerator<V>(this);
         }
 
+        private IQueryable<V> _query;
+        public IQueryable<V> Query => _query ??= this.AsQueryable<V>();
+
+        public Expression Expression => Query.Expression;
+
+        public IQueryProvider Provider => Query.Provider;
+
         protected static uint getTetraId(long key)
         {
             return (uint)(((long)key & 1L) - (((long)key & -1L) * 2));
@@ -1192,6 +1196,59 @@ namespace Undersoft.SDK.Series.Base
         void IList.Remove(object value)
         {
             this.Remove((V)value);
+        }
+
+
+        public virtual void ExceptWith(IEnumerable<V> other)
+        {
+            this.AsItems().ForOnly(e => other.Contains(e.Value), e => Remove(e));
+        }
+
+        public virtual void IntersectWith(IEnumerable<V> other)
+        {
+            this.AsItems().ForOnly(e => !other.Contains(e.Value), (e) => Remove(e));
+        }
+
+        public virtual bool IsProperSubsetOf(IEnumerable<V> other)
+        {
+            return (this.Count < other.Count()) && this.All(e => other.Contains(e));
+        }
+
+        public virtual bool IsProperSupersetOf(IEnumerable<V> other)
+        {
+            return (this.Count > other.Count()) && other.All(e => this.Contains(e));
+        }
+
+        public virtual bool IsSubsetOf(IEnumerable<V> other)
+        {
+            return (this.Count <= other.Count()) && this.All(e => other.Contains(e));
+        }
+
+        public virtual bool IsSupersetOf(IEnumerable<V> other)
+        {
+            return (this.Count >= other.Count()) && other.All(e => this.Contains(e));
+        }
+
+        public virtual bool Overlaps(IEnumerable<V> other)
+        {
+            return this.Any(e => other.Contains(e));
+        }
+
+        public virtual bool SetEquals(IEnumerable<V> other)
+        {
+            return ReferenceEquals(this, other) || (this.Count == other.Count()) && this.All(e => other.Contains(e));
+        }
+
+        public virtual void SymmetricExceptWith(IEnumerable<V> other)
+        {
+            var toRemove = this.AsItems().ForOnly(e => other.Contains(e.Value), (e) => e).ToListing();
+            other.ForOnly(e => !this.Contains(e), e => this.Add(e));
+            toRemove.ForEach(r => Remove(r));
+        }
+
+        public virtual void UnionWith(IEnumerable<V> other)
+        {
+            this.Add(other);
         }
     }
 }

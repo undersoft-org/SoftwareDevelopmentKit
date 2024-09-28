@@ -2,6 +2,7 @@
 {
     using Collections.Generic;
     using Expressions;
+    using System.ComponentModel.DataAnnotations;
     using Undersoft.SDK;
 
     public static class LinqExtensions
@@ -19,6 +20,15 @@
                 ),
                 param
             );
+        }
+
+        public static IQueryable<T> InterceptWith<T>(this IQueryable<T> source, params ExpressionVisitor[] visitors)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
+            return new QueryTranslator<T>(source, visitors);
         }
 
         public static IQueryable<T> ToQueryable<T>(this T entity)
@@ -320,6 +330,19 @@
             public IEqualityComparer<TKey> Comparer { get; private set; }
 
             public IEnumerable<T> Inner { get; private set; }
+        }
+
+        public static (T, T) Extremes<T>(this IEnumerable<T> source) 
+        {
+            var extremes = (default(T), default(T));
+            source.ForEach(s =>
+            {
+                if (Comparer<T>.Default.Compare(s, extremes.Item1) < 0)
+                    extremes.Item1 = s;
+                else if (Comparer<T>.Default.Compare(s, extremes.Item2) > 0)
+                    extremes.Item2 = s;
+            });
+            return extremes;
         }
     }
 }

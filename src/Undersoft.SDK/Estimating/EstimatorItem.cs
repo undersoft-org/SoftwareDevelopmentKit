@@ -4,38 +4,62 @@ namespace Undersoft.SDK.Estimating
 {
     using Uniques;
 
-    public class EstimatorItem : Identifiable
+    public class EstimatorItem<T> : EstimatorItem
+        where T : class, IIdentifiable
     {
-        public string Name;
-        public double[] Vector;
-        public EstimatorObjectMode Mode;
-
-        public EstimatorItem()
+        public new T Target
         {
-            Id = Unique.NewId;
+            get => (T)base.Target;
+            set => base.Target = value;
         }
 
-        public EstimatorItem(long id, string name, object vector)
+        public EstimatorItem(long id, string name, object vector, T target = null)
+            : base(id, name, vector, target) { }
+
+        public EstimatorItem(EstimatorItem item)
+            : base(item) { }
+    }
+
+    public class EstimatorItem : Origin, IEstimatorItem
+    {
+        public string Name
+        {
+            get => base.Label;
+            set => base.Label = value;
+        }
+        public double[] Vector { get; set; }
+
+        public EstimatorObjectMode Mode { get; set; }
+
+        public virtual object Target { get; set; }
+
+        public EstimatorItem()
+            : base() { }
+
+        public EstimatorItem(long id, string name, object vector, object target = null)
         {
             Id = id;
             Name = name;
+            Target = target;
             SetVector(vector);
         }
 
         public EstimatorItem(EstimatorItem item)
         {
+            Target = item.Target;
             Vector = item.Vector;
             Mode = item.Mode;
             Name = item.Name;
             Id = item.Id;
         }
 
-        public EstimatorItem(object vector) : this()
+        public EstimatorItem(object vector)
+            : this()
         {
             SetVector(vector);
         }
 
-        public void SetVector(object vector)
+        public virtual void SetVector(object vector)
         {
             var type = vector.GetType();
             if (type.IsValueType)
@@ -71,6 +95,7 @@ namespace Undersoft.SDK.Estimating
     public enum EstimatorObjectMode
     {
         Multi,
-        Single
+        Single,
+        Cluster,
     }
 }

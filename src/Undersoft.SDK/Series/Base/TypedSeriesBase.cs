@@ -5,11 +5,12 @@
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Linq;
+    using System.Linq.Expressions;
     using Undersoft.SDK;
     using Undersoft.SDK.Extracting;
     using Undersoft.SDK.Uniques;
 
-    public abstract class TypedSeriesBase<V> : Identifiable, IIdentifiable, ISet<V>, IAsyncDisposable, IList, IListSource, ITypedSeries<V> where V : IIdentifiable
+    public abstract class TypedSeriesBase<V> : Identifiable, IIdentifiable, IAsyncDisposable, IListSource, ITypedSeries<V> where V : IIdentifiable
     {
         internal const float RESIZING_VECTOR = 2.333f;
         internal const float CONFLICTS_PERCENT_LIMIT = 0.22f;
@@ -34,25 +35,21 @@
         {
             return (((int)(size * RESIZING_VECTOR)) ^ 3);
         }
-
         protected int previousSize()
         {
             return (int)(size * (1 - REMOVED_PERCENT_LIMIT)) ^ 3;
         }
-
         protected void countIncrement()
         {
             if ((++count + 7) > size)
                 Rehash(nextSize());
         }
-
         protected void conflictIncrement()
         {
             countIncrement();
             if (++conflicts > (size * CONFLICTS_PERCENT_LIMIT))
                 Rehash(nextSize());
         }
-
         protected void removedIncrement()
         {
             --count;
@@ -64,7 +61,6 @@
                     Rehash(size);
             }
         }
-
         protected void removedDecrement()
         {
             ++count;
@@ -154,7 +150,7 @@
         }
         public virtual object SyncRoot { get; set; }
         public virtual Func<V, V, bool> ValueEquals { get; }
-
+    
         public virtual V this[int index]
         {
             get => GetItem(index).Value;
@@ -259,7 +255,6 @@
         {
             return InnerGet(key);
         }
-
         public virtual V Get(object key)
         {
             if (key is IUnique)
@@ -270,17 +265,14 @@
             else
                 throw new NotSupportedException();
         }
-
         public virtual V Get(object key, long seed)
         {
             return InnerGet(unique.Key(key, seed));
         }
-
         public virtual V Get(IIdentifiable key)
         {
             return InnerGet(unique.Key(key, key.TypeId));
         }
-
         public virtual V Get(IUnique<V> key)
         {
             return InnerGet(unique.Key(key, key.TypeId));
@@ -311,7 +303,6 @@
         {
             return InnerTryGet(key, out output);
         }
-
         public virtual bool TryGet(object key, out ISeriesItem<V> output)
         {
             if (key is IIdentifiable)
@@ -322,7 +313,6 @@
             else
                 throw new NotSupportedException();
         }
-
         public virtual bool TryGet(object key, out V output)
         {
             if (key is IIdentifiable)
@@ -340,12 +330,10 @@
             else
                 throw new NotSupportedException();
         }
-
         public virtual bool TryGet(object key, long seed, out ISeriesItem<V> output)
         {
             return InnerTryGet(unique.Key(key, seed), out output);
         }
-
         public virtual bool TryGet(object key, long seed, out V output)
         {
             output = default(V);
@@ -357,7 +345,6 @@
             }
             return false;
         }
-
         public virtual bool TryGet(long key, out V output)
         {
             if (InnerTryGet(key, out ISeriesItem<V> item))
@@ -368,12 +355,10 @@
             output = default(V);
             return false;
         }
-
         public bool TryGet(IIdentifiable key, out ISeriesItem<V> output)
         {
             return InnerTryGet(unique.Key(key, key.TypeId), out output);
         }
-
         public bool TryGet(IUnique<V> key, out ISeriesItem<V> output)
         {
             return InnerTryGet(unique.Key(key, key.TypeId), out output);
@@ -404,16 +389,29 @@
         {
             return InnerGetItem(key);
         }
-
         public ISeriesItem<V> GetItem(IIdentifiable key)
         {
             return InnerGetItem(unique.Key(key, key.TypeId));
         }
-
         public ISeriesItem<V> GetItem(IUnique<V> key)
         {
             return InnerGetItem(unique.Key(key, key.TypeId));
         }
+        public virtual ISeriesItem<V> GetItem(object key)
+        {
+            if (key is IUnique)
+            {
+                IUnique ukey = (IUnique)key;
+                return InnerGetItem(unique.Key(ukey, ukey.TypeId));
+            }
+            else
+                throw new NotSupportedException();
+        }
+        public virtual ISeriesItem<V> GetItem(object key, long seed)
+        {
+            return InnerGetItem(unique.Key(key, seed));
+        }
+        public abstract ISeriesItem<V> GetItem(int index);
 
         protected virtual ISeriesItem<V> InnerSet(long key, V value)
         {
@@ -422,7 +420,6 @@
                 item.Value = value;
             return item;
         }
-
         protected virtual ISeriesItem<V> InnerSet(ISeriesItem<V> value)
         {
             var item = GetItem(value);
@@ -435,32 +432,26 @@
         {
             return InnerSet(unique.Key(key, (long)value.TypeId), value);
         }
-
         public ISeriesItem<V> Set(long key, V value)
         {
             return InnerSet(key, value);
         }
-
         public ISeriesItem<V> Set(IIdentifiable key, V value)
         {
             return InnerSet(unique.Key(key, key.TypeId), value);
         }
-
         public ISeriesItem<V> Set(IUnique<V> key, V value)
         {
             return InnerSet(unique.Key(key, key.TypeId), value);
         }
-
         public ISeriesItem<V> Set(V value)
         {
             return InnerSet(unique.Key(value, value.TypeId), value);
         }
-
         public ISeriesItem<V> Set(IUnique<V> value)
         {
             return InnerSet(unique.Key(value, value.TypeId), value.UniqueValue);
         }
-
         public ISeriesItem<V> Set(ISeriesItem<V> value)
         {
             return InnerSet(value);
@@ -477,7 +468,6 @@
 
             return count;
         }
-
         public int Set(IList<V> values)
         {
             int count = 0;
@@ -489,7 +479,6 @@
 
             return count;
         }
-
         public int Set(IEnumerable<ISeriesItem<V>> values)
         {
             int count = 0;
@@ -501,7 +490,6 @@
 
             return count;
         }
-
         public int Set(IEnumerable<IUnique<V>> values)
         {
             int count = 0;
@@ -533,39 +521,18 @@
             return item;
         }
 
-        public virtual ISeriesItem<V> GetItem(object key)
-        {
-            if (key is IUnique)
-            {
-                IUnique ukey = (IUnique)key;
-                return InnerGetItem(unique.Key(ukey, ukey.TypeId));
-            }
-            else
-                throw new NotSupportedException();
-        }
-
-        public virtual ISeriesItem<V> GetItem(object key, long seed)
-        {
-            return InnerGetItem(unique.Key(key, seed));
-        }
-
-        public abstract ISeriesItem<V> GetItem(int index);
-
         protected virtual ISeriesItem<V> InnerPut(long key, long seed, V value)
         {
             value.TypeId = (long)seed;
             value.Id = (long)key;
             return InnerPut(value);
         }
-
         protected abstract ISeriesItem<V> InnerPut(long key, V value);
-
         protected virtual ISeriesItem<V> InnerPut(V value, long seed)
         {
             value.TypeId = (long)seed;
             return InnerPut(value);
         }
-
         protected abstract ISeriesItem<V> InnerPut(V value);
         protected abstract ISeriesItem<V> InnerPut(ISeriesItem<V> value);
 
@@ -622,26 +589,21 @@
         {
             return InnerPut(value);
         }
-
         public virtual void Put(IList<V> items)
         {
-            int i = 0,
-                c = items.Count;
-            while (i < c)
-                InnerPut(items[i++]);
+            int i = items.Count;
+            while (i > 0)
+                InnerPut(items[--i]);
         }
-
         public virtual void Put(IEnumerable<V> items)
         {
             foreach (V item in items)
                 Put(item);
         }
-
         public virtual ISeriesItem<V> Put(V value, long seed)
         {
             return InnerPut(value, seed);
         }
-
         public virtual void Put(object value, long seed)
         {
             if (value is IUnique)
@@ -652,7 +614,6 @@
             else if (value is V)
                 Put((V)value, seed);
         }
-
         public virtual void Put(IList<V> items, long seed)
         {
             int c = items.Count;
@@ -661,18 +622,15 @@
                 InnerPut(items[i], seed);
             }
         }
-
         public virtual void Put(IEnumerable<V> items, long seed)
         {
             foreach (V item in items)
                 InnerPut(item, seed);
         }
-
         public virtual ISeriesItem<V> Put(IUnique<V> value)
         {
             return InnerPut(unique.Key(value, value.TypeId), value.UniqueValue);
         }
-
         public virtual void Put(IList<IUnique<V>> value)
         {
             foreach (IUnique<V> item in value)
@@ -680,7 +638,6 @@
                 Put(item);
             }
         }
-
         public virtual void Put(IEnumerable<IUnique<V>> value)
         {
             foreach (IUnique<V> item in value)
@@ -695,15 +652,12 @@
             value.Id = (long)key;
             return InnerAdd(value);
         }
-
         protected abstract bool InnerAdd(long key, V value);
-
         protected virtual bool InnerAdd(V value, long seed)
         {
             value.TypeId = (long)seed;
             return InnerAdd(value);
         }
-
         protected abstract bool InnerAdd(V value);
         protected abstract bool InnerAdd(ISeriesItem<V> value);
 
@@ -712,23 +666,20 @@
             V o = (V)value;
             return InnerAdd(key, (long)o.TypeId, o);
         }
-
         public virtual bool Add(long key, V value)
         {
             return InnerAdd(key, value);
         }
-
         public virtual bool Add(object key, V value)
         {
             return InnerAdd(unique.Key(key, (long)value.TypeId), value);
         }
-
         public virtual bool Add(object key, long seed, V value)
         {
             value.TypeId = (long)seed;
             return InnerAdd(unique.Key(key, seed), value);
         }
-
+       
         public virtual void Add(ISeriesItem<V> item)
         {
             InnerAdd(item);
@@ -742,7 +693,6 @@
                 InnerAdd(itemList[i]);
             }
         }
-
         public virtual void Add(IEnumerable<ISeriesItem<V>> itemTable)
         {
             foreach (ISeriesItem<V> item in itemTable)
@@ -753,12 +703,10 @@
         {
             InnerAdd(value);
         }
-
         bool ISet<V>.Add(V value)
         {
             return InnerAdd(value);
         }
-
         public virtual void Add(IList<V> items)
         {
             int c = items.Count;
@@ -767,18 +715,15 @@
                 Add(items[i]);
             }
         }
-
         public virtual void Add(IEnumerable<V> items)
         {
             foreach (V item in items)
                 Add(item);
         }
-
         public virtual bool Add(V value, long seed)
         {
             return InnerAdd(value, seed);
         }
-
         public virtual void Add(IList<V> items, long seed)
         {
             int c = items.Count;
@@ -787,18 +732,15 @@
                 Add(items[i], seed);
             }
         }
-
         public virtual void Add(IEnumerable<V> items, long seed)
         {
             foreach (V item in items)
                 Add(item, seed);
         }
-
         public virtual void Add(IUnique<V> value)
         {
             InnerAdd(unique.Key(value, value.TypeId), value.UniqueValue);
         }
-
         public virtual void Add(IList<IUnique<V>> value)
         {
             foreach (IUnique<V> item in value)
@@ -806,7 +748,6 @@
                 Add(item);
             }
         }
-
         public virtual void Add(IEnumerable<IUnique<V>> value)
         {
             foreach (IUnique<V> item in value)
@@ -1419,7 +1360,7 @@
         {
             return new SeriesItemUniqueKeyEnumerator<V>(this);
         }
-
+       
         IEnumerator<V> IEnumerable<V>.GetEnumerator()
         {
             return new SeriesItemEnumerator<V>(this);
@@ -1429,6 +1370,13 @@
         {
             return new SeriesItemEnumerator<V>(this);
         }
+        
+        private IQueryable<V> _query;
+        public IQueryable<V> Query => _query ??= this.AsQueryable<V>();
+
+        public Expression Expression => Query.Expression;
+
+        public IQueryProvider Provider => Query.Provider;
 
         protected ulong getPosition(long key)
         {
