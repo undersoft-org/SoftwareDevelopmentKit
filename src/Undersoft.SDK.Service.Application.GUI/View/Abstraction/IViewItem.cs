@@ -1,4 +1,5 @@
 ﻿using Microsoft.FluentUI.AspNetCore.Components;
+using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Series;
 using Undersoft.SDK.Service.Application.GUI.Models;
 
@@ -26,6 +27,8 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Abstraction
         StateFlags StateFlags { get; set; }
 
         IViewRubric Rubric { get; set; }
+
+        IInnerProxy Model { get; }
 
         IViewData Data { get; set; }
 

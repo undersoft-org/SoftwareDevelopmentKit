@@ -6,40 +6,26 @@ public static class ProxyFactory
 {
     public static IProxy CreateProxy(object item)
     {
-        var t = item.GetType();
-        if (!TryGetInnerProxy(item, t, out var proxy))
-        {
-            var key = t.UniqueKey32();
-            if (!ProxyGeneratorFactory.Cache.TryGet(key, out ProxyGenerator _proxy))
-                ProxyGeneratorFactory.Cache.Add(key, _proxy = new ProxyGenerator(t));
-
-            return _proxy.Generate(item);
-        }
-        return proxy;
+        return TryCreateInnerProxy(item, item.GetType());
     }
 
     public static IProxy CreateProxy<T>(T item)
     {
-        var t = typeof(T);
-        if (!TryGetInnerProxy(item, t, out var proxy))
-        {
-            var key = t.UniqueKey32();
-            if (!ProxyGeneratorFactory.Cache.TryGet(key, out ProxyGenerator _proxy))
-                ProxyGeneratorFactory.Cache.Add(key, _proxy = new ProxyGenerator<T>());
-
-            return _proxy.Generate(item);
-        }
-        return proxy;
+        return TryCreateInnerProxy(item, typeof(T));
     }
 
     public static IProxy CreateProxy<T>(object item)
     {
-        var t = typeof(T);
-        if (!TryGetInnerProxy(item, t, out var proxy))
+        return TryCreateInnerProxy(item, typeof(T));
+    }
+
+    private static IProxy TryCreateInnerProxy(object item, Type type)
+    {
+        if (!TryGetInnerProxy(item, type, out var proxy))
         {
             var key = t.UniqueKey32();
             if (!ProxyGeneratorFactory.Cache.TryGet(key, out ProxyGenerator _proxy))
-                ProxyGeneratorFactory.Cache.Add(key, _proxy = new ProxyGenerator<T>());
+                ProxyGeneratorFactory.Cache.Add(key, _proxy = new ProxyGenerator(type));
 
             return _proxy.Generate(item);
         }

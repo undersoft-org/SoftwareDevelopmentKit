@@ -4,8 +4,6 @@
 @typeparam TValidator where TValidator : class, IValidator<IViewData<TModel>>
 
 @implements IDialogContentComponent<IViewData<TModel>>
-@implements IView
-
 
 <CascadingValue Value="@Content">
     <CascadingValue Value="Form">

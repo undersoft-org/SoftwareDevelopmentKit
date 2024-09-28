@@ -19,6 +19,7 @@ public partial class GenericDialog<TModel> : ViewItem<TModel>, IGenericDialog
     [CascadingParameter]
     public FluentDialog Dialog { get; set; } = default!;
 
+    [CascadingParameter]
     public virtual IViewItem Form
     {
         get => _form ??= this;

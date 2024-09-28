@@ -1,0 +1,50 @@
+﻿@inject NavigationManager _navigation
+
+@inherits GenericDialog<TModel>
+
+@typeparam TModel where TModel : class, IOrigin, IInnerProxy
+@typeparam TValidator where TValidator : class, IValidator<IViewData<TModel>>
+
+@implements IDialogContentComponent<IViewData<TModel>>
+@implements IView
+
+<CascadingValue Value="@Content">
+        <!-- Header -->
+        <GenericFormDialogHeader TModel="TModel" />
+
+        <!-- Body -->
+        <GenericFormDialogBody TValidator="TValidator" TModel="TModel" />
+
+    </CascadingValue>
+
+<!-- Footer -->
+<FluentDialogFooter>
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+        <FluentSpacer />
+        <FluentButton OnClick="@OnSignIn" Appearance="Appearance.Lightweight">
+            Sign in
+        </FluentButton>
+        <FluentButton Appearance="Appearance.Accent"        
+                      OnClick="@SaveAsync">
+            Sign up
+        </FluentButton>
+    </FluentStack>
+</FluentDialogFooter>
+
+@code
+{
+    private async Task OnSignIn(MouseEventArgs e)
+    {
+        Content.NextHref = "access/sign_in";
+
+        await Dialog.CloseAsync(Content);
+    }
+
+    private async Task SaveAsync()
+    {
+        if ((await Content.Validator!.ValidateAsync()).IsValid)
+        {
+            await Dialog.CloseAsync(Content);
+        }
+    }
+}
