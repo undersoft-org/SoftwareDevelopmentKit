@@ -221,10 +221,7 @@
 
         public static double[][] CreateMatrix(int rows, int cols)
         {
-            double[][] result = new double[rows][];
-            for (int i = 0; i < rows; ++i)
-                result[i] = new double[cols];
-            return result;
+            return (double[][])Array.CreateInstance(typeof(double), rows, cols);
         }
     }
 }

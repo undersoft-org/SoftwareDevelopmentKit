@@ -14,7 +14,6 @@
 
         public override void Create()
         {
-
         }
 
         public override EstimatorItem Evaluate(object x)

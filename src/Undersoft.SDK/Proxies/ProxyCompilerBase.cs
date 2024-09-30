@@ -12,6 +12,7 @@ using Uniques;
 public abstract class ProxyCompilerBase : InstantCompilerBase
 {
     protected int rubricCount;
+    protected FieldBuilder targetField;
     protected InstantType instantType;
     protected ProxyGenerator proxyCreator;
     protected MethodBuilder raisePropertyChanged;
@@ -372,9 +373,9 @@ public abstract class ProxyCompilerBase : InstantCompilerBase
                     && p.Property.SetMethod.IsVirtual && !p.Property.SetMethod.IsFinal
                     && (p.Property.SetMethod.IsPublic || p.Property.SetMethod.IsFamily)
             )
-            .Select(p => p.Property);
+            .Select(p => (p.Property, p.Member));
 
-        props.ToList().ForEach((item) => WrapMethod(item, raisePropertyChanged, tb));
+        props.ToList().ForEach((item) => WrapMethod(item.Item1, item.Item2, raisePropertyChanged, tb));
     }
 
     private FieldBuilder CreatePropertyChangedEvent(TypeBuilder tb)
@@ -500,6 +501,7 @@ public abstract class ProxyCompilerBase : InstantCompilerBase
 
     private void WrapMethod(
         PropertyInfo item,
+        MemberRubric rubric,
         MethodBuilder raisePropertyChanged,
         TypeBuilder tb
     )
@@ -522,6 +524,27 @@ public abstract class ProxyCompilerBase : InstantCompilerBase
         setMethodWrapperIl.Emit(OpCodes.Ldarg_0);
         setMethodWrapperIl.Emit(OpCodes.Ldarg_1);
         setMethodWrapperIl.EmitCall(OpCodes.Call, setMethod, null);
+
+        setMethodWrapperIl.Emit(OpCodes.Ldarg_0);
+        setMethodWrapperIl.Emit(OpCodes.Ldfld, targetField);
+        setMethodWrapperIl.Emit(OpCodes.Ldarg_2);
+
+        setMethodWrapperIl.Emit(
+            rubric.RubricType.IsValueType
+                ? OpCodes.Unbox_Any
+                : OpCodes.Castclass,
+            rubric.RubricType
+        );
+
+        var rubricBuilder = rubricBuilders[rubric.RubricId];
+
+                if (
+            rubricBuilder.Field == null
+            || rubricBuilder.Field.IsBackingField
+        )
+            setMethodWrapperIl.EmitCall(OpCodes.Call, rubricBuilder.Setter, null);
+        else
+            setMethodWrapperIl.Emit(OpCodes.Stfld, rubricBuilder.Field.RubricInfo);
 
         // RaisePropertyChanged("[PropertyName]");
         setMethodWrapperIl.Emit(OpCodes.Ldarg_0);

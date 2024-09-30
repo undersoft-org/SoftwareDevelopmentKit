@@ -37,7 +37,7 @@ namespace Undersoft.SDK.Series.Complex
             set { this[neighbor.Id] = value; }
         }
 
-        public int Index { get; set; } = -1;
+        public override int Index { get; set; } = -1;
         public override long Id
         {
             get => Value.Id;

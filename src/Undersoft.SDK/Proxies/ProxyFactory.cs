@@ -23,7 +23,7 @@ public static class ProxyFactory
     {
         if (!TryGetInnerProxy(item, type, out var proxy))
         {
-            var key = t.UniqueKey32();
+            var key = type.UniqueKey32();
             if (!ProxyGeneratorFactory.Cache.TryGet(key, out ProxyGenerator _proxy))
                 ProxyGeneratorFactory.Cache.Add(key, _proxy = new ProxyGenerator(type));
 

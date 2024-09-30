@@ -14,7 +14,7 @@ using Uniques;
 public class ProxyCompiler : ProxyCompilerBase
 {
     protected FieldInfo codeField;
-    protected FieldBuilder targetField;
+
     protected FieldBuilder rubricsField;
     protected FieldBuilder changesField;
     public bool hasSerialCode;
