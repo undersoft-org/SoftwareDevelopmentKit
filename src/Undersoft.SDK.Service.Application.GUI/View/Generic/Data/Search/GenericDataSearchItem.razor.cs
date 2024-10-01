@@ -39,19 +39,19 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
             _name = Data.ModelType.Name;
             _label = _name;
             _parent = ((GenericDataSearch)Parent!);
-            _searchFilters = Data.SearchFilters = new Listing<Filter>();
+            _searchFilters = Data.SearchFilters ??= new Listing<Filter>();
             base.OnInitialized();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
-                await JSRuntime!.InvokeVoidAsync("GenericUtilites.setFocusById", "genericsearchbar");
+                await JSRuntime!.InvokeVoidAsync("GenericUtilities.setFocusById", "genericsearchbar");
 
             await base.OnAfterRenderAsync(firstRender);
         }
 
-        public virtual string? SearchValue { get; set; }
+        public virtual string? SearchValue { get => Data.SearchValue; set => Data.SearchValue = value; }
 
         [CascadingParameter]
         public override IViewData Data
@@ -67,15 +67,23 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
             set => base.Root = value;
         }
 
-        async Task KeyDownHandlerAsync(FluentKeyCodeEventArgs e)
+        void KeyDownHandlerAsync(FluentKeyCodeEventArgs e)
         {
             if (e.Key == KeyCode.Enter)
-                await HandleSearchAsync();
+                HandleSearchAsync();
         }
 
-        private async Task HandleSearchAsync()
+        private void HandleSearchAsync()
         {
-            if (SearchValue != null && SearchValue.Length > 2)
+            if(string.IsNullOrEmpty(SearchValue))
+            {
+                if (_searchFilters.Any())
+                {
+                    _searchFilters.Clear();
+                    _ = _parent!.LoadViewAsync();
+                }
+            }
+            else if (SearchValue.Length > 2)
             {
                 _searchFilters.Clear();
                 _searchFilters.Add(SearchValue.Split(' ').SelectMany(w =>
@@ -84,11 +92,11 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
                         f.Member,
                         w.Trim(),
                         CompareOperand.Contains,
-                        LinkOperand.Or
+                        LinkOperand.And
                     ));                
                 }));
 
-                await _parent!.LoadViewAsync();
+                _ = _parent!.LoadViewAsync();
             }
         }
 

@@ -20,7 +20,8 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Access.Base;
 /// <summary>
 /// The register base.
 /// </summary>
-public partial class RegisterBase<TAccount, TValidator> : ComponentBase
+public partial class RegisterBase<TLogo, TAccount, TValidator> : ComponentBase
+    where TLogo : Icon, new()
     where TAccount : class, IAuthorization
     where TValidator : class, IValidator<IViewData<TAccount>>
 {
@@ -70,7 +71,7 @@ public partial class RegisterBase<TAccount, TValidator> : ComponentBase
     protected override void OnInitialized()
     {
         _dialog = _servicer.Initialize<
-            AccessDialog<RegisterDialog<TAccount, TValidator>, TAccount>
+            AccessDialog<TLogo, RegisterDialog<TAccount, TValidator>, TAccount>
         >(DialogService);
     }
 

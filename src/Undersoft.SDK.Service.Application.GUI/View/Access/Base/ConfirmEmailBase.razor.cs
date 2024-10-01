@@ -1,9 +1,5 @@
 using Microsoft.FluentUI.AspNetCore.Components;
-
-using Undersoft.SDK;
-using Undersoft.SDK.Service;
 using Undersoft.SDK.Service.Access;
-using Undersoft.SDK.Service.Application.GUI.View;
 using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 using Undersoft.SDK.Service.Application.GUI.View.Access.Dialog;
 using Undersoft.SDK.Updating;
@@ -13,7 +9,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Access.Base;
 /// <summary>
 /// The confirm email base.
 /// </summary>
-public partial class ConfirmEmailBase<TAccount> : ComponentBase where TAccount : class, IAuthorization, new()
+public partial class ConfirmEmailBase<TLogo, TAccount> : ComponentBase where TAccount : class, IAuthorization, new() where TLogo : Icon, new()
 {
     /// <summary>
     /// Gets or sets the access.
@@ -68,7 +64,7 @@ public partial class ConfirmEmailBase<TAccount> : ComponentBase where TAccount :
     protected override void OnInitialized()
     {
         _dialog = _servicer.Initialize<
-            AccessDialog<ConfirmEmailDialog<Credentials, AccessValidator>, Credentials>
+            AccessDialog<TLogo, ConfirmEmailDialog<Credentials, AccessValidator>, Credentials>
         >(DialogService);
     }
 

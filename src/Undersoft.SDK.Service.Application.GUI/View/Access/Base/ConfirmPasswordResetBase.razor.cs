@@ -19,7 +19,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Access.Base;
 /// <summary>
 /// The confirm password reset base.
 /// </summary>
-public partial class ConfirmPasswordResetBase<TAccount> : ComponentBase where TAccount : class, IAuthorization, new()
+public partial class ConfirmPasswordResetBase<TLogo, TAccount> : ComponentBase where TAccount : class, IAuthorization, new() where TLogo : Icon, new()
 {
     /// <summary>
     /// Gets or sets the access.
@@ -67,7 +67,7 @@ public partial class ConfirmPasswordResetBase<TAccount> : ComponentBase where TA
     protected override void OnInitialized()
     {
         _dialog = _servicer.Initialize<
-            AccessDialog<GenericFormDialog<Credentials, AccessValidator>, Credentials>
+            AccessDialog<TLogo, GenericFormDialog<Credentials, AccessValidator>, Credentials>
         >(DialogService);
     }
 

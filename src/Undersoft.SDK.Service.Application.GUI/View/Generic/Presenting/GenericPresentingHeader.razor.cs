@@ -14,6 +14,9 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Presenting
         where TModel : class, IOrigin, IInnerProxy, IAuthorization
         where TValidator : class, IValidator<IViewData<TModel>>
     {
+        [Inject]
+        private AppearanceState appearance { get; set; } = default!;
+
         private IJSObjectReference _jsModule = default!;
 
         [Inject]

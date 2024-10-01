@@ -16,7 +16,7 @@ using Undersoft.SDK.Updating;
 namespace Undersoft.SDK.Service.Application.GUI.View.Access.Base;
 
 
-public partial class SignInBase<TAccount> : ComponentBase where TAccount : class, IAuthorization, new ()
+public partial class SignInBase<TLogo, TAccount> : ComponentBase where TAccount : class, IAuthorization, new () where TLogo : Icon, new()
 {
     [Inject]
     private IAccess _access { get; set; } = default!;
@@ -35,7 +35,7 @@ public partial class SignInBase<TAccount> : ComponentBase where TAccount : class
     protected override void OnInitialized()
     {
         _dialog = _servicer.Initialize<
-            AccessDialog<SignInDialog<Credentials, AccessValidator>, Credentials>
+            AccessDialog<TLogo, SignInDialog<Credentials, AccessValidator>, Credentials>
         >(DialogService);
     }
 

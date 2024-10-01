@@ -13,7 +13,7 @@ using Undersoft.SDK.Service.Application.GUI.View.Model;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Access.Dialog;
 
-public class AccessDialog<TDialog, TModel> : ViewDialog<TDialog, TModel> where TDialog : IDialogContentComponent<IViewData<TModel>> where TModel : class, IOrigin, IInnerProxy
+public class AccessDialog<TLogo, TDialog, TModel> : ViewDialog<TDialog, TModel> where TDialog : IDialogContentComponent<IViewData<TModel>> where TModel : class, IOrigin, IInnerProxy where TLogo : Icon, new()
 {
     public AccessDialog(IDialogService dialogService, IViewAnimations animations) : base(dialogService, animations)
     {
@@ -23,7 +23,7 @@ public class AccessDialog<TDialog, TModel> : ViewDialog<TDialog, TModel> where T
     {
         if (Service != null)
         {
-            data.Logo = new ViewGraphic.AppLogo.Dynamic.NameWithModule("Vaccination", "center");
+            data.Logo = new TLogo();
             Reference = await Service.ShowDialogAsync<TDialog>(data, new DialogParameters<IViewData<TModel>>()
             {
                 Height = data.Height,

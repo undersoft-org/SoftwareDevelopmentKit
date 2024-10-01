@@ -288,6 +288,8 @@ public class ViewData<TModel> : ListingBase<IViewData>, IViewData<TModel>
 
     public IViewData? Parent { get; set; }
 
+    public string? SearchValue { get; set; }
+
     public string[]? SearchMembers { get; set; }
 
     public ISeries<Filter>? SearchFilters { get; set; }

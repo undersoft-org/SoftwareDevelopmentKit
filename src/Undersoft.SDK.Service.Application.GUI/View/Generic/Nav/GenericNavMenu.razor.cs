@@ -10,9 +10,6 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
         private DotNetObjectReference<GenericNavMenu<TMenu>>? _dotNetHelper = null;
         private IJSObjectReference _jsModule = default!;
 
-        [Inject]
-        private IJSRuntime JSRuntime { get; set; } = default!;
-
         protected override void OnInitialized()
         {
             if (Content == null)

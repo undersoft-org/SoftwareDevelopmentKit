@@ -3,6 +3,7 @@
 @inherits LayoutComponentBase
 @layout GenericLayout
 
+@typeparam TLogo where TLogo : Icon, new()
 @typeparam TMenu where TMenu : class, IOrigin, IInnerProxy
 @typeparam TAccount where TAccount : class, IOrigin, IInnerProxy
 @typeparam TModel where TModel : class, IOrigin, IInnerProxy, IAuthorization
@@ -20,6 +21,6 @@
 <GenericPresentingFooter />
 
 @code
-{   
-    public Icon? Logo { get; set; } = new();
+{
+    public TLogo? Logo { get; set; } = new();
 }

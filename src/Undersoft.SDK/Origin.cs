@@ -79,7 +79,7 @@ namespace Undersoft.SDK
         [Column(TypeName = "timestamp", Order = 5)]
         [DataMember(Order = 8)]
         [InstantAs(UnmanagedType.I8, SizeConst = 8)]
-        public virtual DateTime Modified { get => Time; set => Time = value; }
+        public virtual DateTime Modified { get; set; }
 
         [StringLength(128)]
         [Column(Order = 6)]
@@ -116,6 +116,8 @@ namespace Undersoft.SDK
                 origin = entity;
 
             origin.AutoId();
+            if (!HaveTime())
+                entity.Time = Log.Clock;
             Stamp(origin);
             origin.Created = origin.Time;
             return default;

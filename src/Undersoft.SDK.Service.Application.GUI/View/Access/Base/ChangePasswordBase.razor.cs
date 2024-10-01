@@ -19,7 +19,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Access.Base;
 /// <summary>
 /// The change password base.
 /// </summary>
-public partial class ChangePasswordBase<TAccount> : ComponentBase where TAccount : class, IAuthorization, new()
+public partial class ChangePasswordBase<TLogo, TAccount> : ComponentBase where TAccount : class, IAuthorization, new() where TLogo : Icon, new()
 {
     /// <summary>
     /// Gets or sets the access.
@@ -60,7 +60,7 @@ public partial class ChangePasswordBase<TAccount> : ComponentBase where TAccount
     protected override void OnInitialized()
     {
         _dialog = _servicer.Initialize<
-            AccessDialog<GenericFormDialog<Credentials, AccessValidator>, Credentials>
+            AccessDialog<TLogo, GenericFormDialog<Credentials, AccessValidator>, Credentials>
         >(DialogService);
     }
 
