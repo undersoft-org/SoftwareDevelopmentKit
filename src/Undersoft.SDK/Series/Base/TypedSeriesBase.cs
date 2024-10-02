@@ -1369,14 +1369,7 @@
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new SeriesItemEnumerator<V>(this);
-        }
-        
-        private IQueryable<V> _query;
-        public IQueryable<V> Query => _query ??= this.AsQueryable<V>();
-
-        public Expression Expression => Query.Expression;
-
-        public IQueryProvider Provider => Query.Provider;
+        }       
 
         protected ulong getPosition(long key)
         {

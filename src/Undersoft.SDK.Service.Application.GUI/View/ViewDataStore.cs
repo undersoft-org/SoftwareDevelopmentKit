@@ -173,7 +173,7 @@ public class ViewDataStore<TStore, TDto, TModel> : ViewData<TModel>, IViewDataSt
         }
     }
 
-    public new IQueryParameters? Query { get; set; }
+    public IQueryParameters? Query { get; set; }
 
     public virtual void LoadSingle(TModel single)
     {

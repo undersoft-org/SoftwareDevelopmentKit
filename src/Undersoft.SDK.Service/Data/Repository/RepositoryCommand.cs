@@ -366,7 +366,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         var listing = entities.ToListing();
         var items = listing.ForEach(e => cache.Lookup<TEntity>(e.Id)).Where(e => e != null).ToListing();
         if (items.Any())
-            ((IDataStoreContext)InnerContext).AttachRange(items.AsValues());
+            items.ForEach(item => ((IDataStoreContext)InnerContext).Attach(item)).Commit();
         if (items.Count < listing.Count)
             items.Add(
                 this[

@@ -32,6 +32,10 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Abstraction
 
         IViewData Data { get; set; }
 
+        IViewItem? Root { get; set; }
+
+        IViewItem? Parent { get; set; }
+
         ISeries<IViewItem>? Children { get; set; }
     }
 }

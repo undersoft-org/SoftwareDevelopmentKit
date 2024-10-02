@@ -102,7 +102,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Menu
                 if (ExpandData != null)
                 {
                     ExpandData.StateFlags.Expanded = true;
-                    RenderView();
+                    Parent?.Parent?.RenderView();
                 }
             }
             IsOpen = false;

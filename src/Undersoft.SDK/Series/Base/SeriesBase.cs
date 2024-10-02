@@ -958,9 +958,6 @@ namespace Undersoft.SDK.Series.Base
             return -1;
         }
 
-        private IQueryable<V> _query;
-        public IQueryable<V> Query => _query ??= this.AsQueryable<V>();
-
         public virtual IEnumerable<V> AsValues()
         {
             foreach (var item in ((IEnumerable<V>)this))
@@ -1350,10 +1347,6 @@ namespace Undersoft.SDK.Series.Base
         }
 
         bool IList.IsFixedSize => false;
-
-        public Expression Expression => Query.Expression;
-
-        public IQueryProvider Provider => Query.Provider;
 
         public IList GetList()
         {

@@ -9,12 +9,12 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid
 
         private int RubricOrdinalSeed = 1;
 
-        protected override void OnInitialized()
-        {
+        protected override void OnParametersSet()
+        {                            
             RubricOrdinalSeed = CalculateOrdinalSeed();
             GridTemplateColumns = CalculateTemplateColumns();
             Title = DataStore.Title ?? DataStore.ModelType.Name;
-            base.OnInitialized();
+            base.OnParametersSet();
         }
 
         private int CalculateOrdinalSeed()
