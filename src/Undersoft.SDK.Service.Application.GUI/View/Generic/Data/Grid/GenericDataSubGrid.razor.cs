@@ -1,3 +1,4 @@
+using Undersoft.SDK.Service.Application.GUI.Models;
 using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid
@@ -12,7 +13,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid
         {
             RubricOrdinalSeed = CalculateOrdinalSeed();
             GridTemplateColumns = CalculateTemplateColumns();
-            Title = DataStore.ModelType.Name;
+            Title = DataStore.Title ?? DataStore.ModelType.Name;
             base.OnInitialized();
         }
 

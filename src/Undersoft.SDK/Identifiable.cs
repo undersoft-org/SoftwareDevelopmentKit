@@ -108,13 +108,13 @@ namespace Undersoft.SDK
         [IgnoreDataMember]
         private bool IsNew { get; set; }
 
-        public virtual void SetTenantId(long tenantId)
+        public virtual void SetOriginId(long tenantId)
         {
-            code.SetTenantId(tenantId);
+            code.SetOriginId(tenantId);
         }
-        public virtual long GetTenantId()
+        public virtual long GetOriginId()
         {
-            return code.TenantId;
+            return code.OriginId;
         }
 
         public virtual void SetServiceId(int serviceId)

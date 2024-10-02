@@ -33,20 +33,22 @@ public class ViewDataStore<TStore, TDto, TModel> : ViewData<TModel>, IViewDataSt
         Pagination = new Pagination();
     }
 
-    public ViewDataStore(TModel model)
+    public ViewDataStore(TModel model, IViewData? root = null)
         : base(model)
     {
         Pagination = new Pagination();
-        LoadSingle(model);
+        Root = root;
         MapRubrics();
+        LoadSingle(model);
     }
 
-    public ViewDataStore(ISeries<TModel> models)
+    public ViewDataStore(ISeries<TModel> models, IViewData? root = null)
         : base(models.FirstOrDefault())
     {
         Pagination = new Pagination();
-        Load(models);
+        Root = root;
         MapRubrics();
+        Load(models);
     }
 
     public ViewDataStore(IViewStore? store)
@@ -171,7 +173,7 @@ public class ViewDataStore<TStore, TDto, TModel> : ViewData<TModel>, IViewDataSt
         }
     }
 
-    public IQueryParameters? Query { get; set; }
+    public new IQueryParameters? Query { get; set; }
 
     public virtual void LoadSingle(TModel single)
     {
@@ -484,9 +486,10 @@ public class ViewDataStore<TStore, TDto, TModel> : ViewData<TModel>, IViewDataSt
 
                     IViewDataStore extend = typeof(ViewDataStore<,>)
                         .MakeGenericType(typeof(TStore), type)
-                        .New<IViewDataStore>(value);
+                        .New<IViewDataStore>(value, this.Root);
 
-                    extend.Root = this.Root;
+                    extend.Title = r.DisplayName ?? r.RubricName;
+
                     return extend;
 
                 })
@@ -530,9 +533,13 @@ public class ViewDataStore<TStore, TDto, TModel> : ViewData<TModel>, IViewDataSt
                     if (type.IsAssignableTo(typeof(IEnumerable)))
                         type = type.GetEnumerableElementType();
 
-                    return typeof(ViewDataStore<,>)
+                    IViewDataStore extend = typeof(ViewDataStore<,>)
                           .MakeGenericType(typeof(TStore), type)
-                          .New<IViewData>(value);
+                          .New<IViewDataStore>(value, this.Root);
+
+                    extend.Title = r.DisplayName ?? r.RubricName;
+
+                    return extend;
                 })
                 .Commit();
 
@@ -664,11 +671,11 @@ public class ViewDataStore<TModel> : ViewDataStore<IDataStore, TModel>
     {
     }
 
-    public ViewDataStore(TModel model)
-        : base(model) { }
+    public ViewDataStore(TModel model, IViewData? root = null)
+        : base(model, root) { }
 
-    public ViewDataStore(ISeries<TModel> models)
-        : base(models) { }
+    public ViewDataStore(ISeries<TModel> models, IViewData? root = null)
+        : base(models, root) { }
 
     public ViewDataStore(IViewStore? store)
         : base(store) { }
@@ -691,11 +698,11 @@ public class ViewDataStore<TStore, TModel> : ViewDataStore<TStore, TModel, TMode
         MapRubrics(t => t.Rubrics, p => p.Visible);
     }
 
-    public ViewDataStore(TModel model)
-        : base(model) { }
+    public ViewDataStore(TModel model, IViewData? root = null)
+        : base(model, root) { }
 
-    public ViewDataStore(ISeries<TModel> models)
-        : base(models) { }
+    public ViewDataStore(ISeries<TModel> models, IViewData? root = null)
+        : base(models, root) { }
 
     public ViewDataStore(IViewStore? store)
         : base(store) { }

@@ -226,7 +226,7 @@
             set { if (VirtualInfo != null) VirtualInfo.RubricAttributes = value; }
         }
 
-        public int RubricId { get => (int)TenantId; set => TenantId = value; }
+        public int RubricId { get => (int)OriginId; set => OriginId = value; }
 
         public int RubricOrdinal { get; set; }
 
@@ -278,7 +278,7 @@
 
         public string CodeNo { get => code.CodeNo; set => code.CodeNo = value; }
 
-        public long TenantId { get => code.TenantId; set => code.TenantId = value; }
+        public long OriginId { get => code.OriginId; set => code.OriginId = value; }
 
         public int ServiceId { get => code.ServiceId; set => code.ServiceId = value; }
 

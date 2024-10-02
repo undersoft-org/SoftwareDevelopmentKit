@@ -22,15 +22,15 @@ namespace Undersoft.SDK
         [IdentityRubric(Order = 3)]
         [DataMember(Order = 3)]
         [Column(Order = 3)]
-        public virtual long TenantId
+        public virtual long OriginId
         {
             get
             {
-                return GetTenantId();
+                return GetOriginId();
             }
             set
             {
-                SetTenantId(value);
+                SetOriginId(value);
             }
         }
 

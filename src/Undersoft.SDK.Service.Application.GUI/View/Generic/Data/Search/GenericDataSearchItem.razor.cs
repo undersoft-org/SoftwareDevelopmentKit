@@ -1,5 +1,4 @@
 using Microsoft.FluentUI.AspNetCore.Components;
-using System.Runtime.CompilerServices;
 using Undersoft.SDK.Series;
 using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 
@@ -13,8 +12,6 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
         private string? _label { get; set; }
         private GenericDataSearch _parent = default!;
         ISeries<Filter> _searchFilters { get; set; } = default!;
-        private List<Option<string>>? _operandOptions { get; set; }
-        private List<Option<string>>? _linkOptions { get; set; }
 
         public FluentSearch? FluentSearch { get; set; }
 

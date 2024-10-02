@@ -58,7 +58,7 @@
             }
         }
 
-        public long TenantId
+        public long OriginId
         {
             get
             {
@@ -470,9 +470,9 @@
             return TypeId = seed;
         }
 
-        public long SetTenantId(long key)
+        public long SetOriginId(long key)
         {
-            return TenantId = key;
+            return OriginId = key;
         }
 
         public long GetTypeId()
@@ -480,9 +480,9 @@
             return TypeId;
         }
 
-        public long GetTenantId()
+        public long GetOriginId()
         {
-            return TenantId;
+            return OriginId;
         }
 
         public ulong GetBlockId()

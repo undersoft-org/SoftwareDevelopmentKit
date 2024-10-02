@@ -83,7 +83,7 @@
     foreach (var data in Data.Where(d => d.StateFlags.Expanded))
     {
         <tr>
-            <GenericDataSubGrid FeatureFlags="@Root!.FeatureFlags" Data="@(data)" />
+            <GenericDataSubGrid FeatureFlags="@Root!.FeatureFlags" Data="@(data)" EditMode="@EditMode" EntryMode="EntryMode.FormTabs" />
         </tr>
     }
 }

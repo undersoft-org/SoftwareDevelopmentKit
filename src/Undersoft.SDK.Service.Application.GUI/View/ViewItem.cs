@@ -202,10 +202,10 @@ namespace Undersoft.SDK.Service.Application.GUI.View
             }
         }
 
-        public long TenantId
+        public long OriginId
         {
-            get => code.TenantId;
-            set => code.TenantId = value;
+            get => code.OriginId;
+            set => code.OriginId = value;
         }
 
         public int ServiceId

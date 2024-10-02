@@ -11,6 +11,8 @@ public class DataObject : InnerProxy, IDataObject
 {
     public DataObject() : base() { }
 
+    public DataObject(bool autoId) : base(autoId) { }
+
     protected override IProxy CreateProxy()
     {
         Type type = this.GetDataType();
