@@ -21,12 +21,14 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
     protected ODataConventionModelBuilder odataBuilder;
     protected IEdmModel edmModel;
     protected static bool actionSetAdded;
+    protected StoreRoutesOptions storeRoutes;
 
     public OpenDataServerBuilder(IServiceRegistry registry) : base()
     {
         _registry = registry;
         odataBuilder = new ODataConventionModelBuilder();
         StoreType = typeof(TStore);
+        storeRoutes = _registry.GetObject<StoreRoutesOptions>(); 
     }
 
     public OpenDataServerBuilder(IServiceRegistry registry, string routePrefix, int pageLimit)
@@ -48,6 +50,8 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
         if (ets != null)
             return ets;
 
+        SubEntitySet(entityType);
+
         var entitySetName = entityType.Name;
         if (entityType.IsGenericType && entityType.IsAssignableTo(typeof(Identifier)))
             entitySetName = entityType.GetGenericArguments().FirstOrDefault().Name + "Identifier";
@@ -56,9 +60,7 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
         etc.Name = entitySetName;
         ets = odataBuilder.AddEntitySet(entitySetName, etc);
         ets.EntityType.HasKey(entityType.GetProperty("Id"));
-
-        SubEntitySet(entityType);
-
+        
         return ets;
     }
 
@@ -67,11 +69,11 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
         return odataBuilder.EntitySet<TDto>(typeof(TDto).Name);
     }
 
-    public void AddInvocations(Type entityType)
+    public object AddInvocations(Type entityType)
     {
         var method = this.GetType().GetGenericMethod("AddInvocations");
         var methodInfo = method.MakeGenericMethod(entityType);
-        methodInfo.Invoke(this, new object[0]);
+        return methodInfo.Invoke(this, Array.Empty<object>());
     }
 
     public void SubEntitySet(Type subEntityType)
@@ -122,34 +124,41 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
         foreach (var controllerType in controllerTypes)
         {
             var genTypes = controllerType.BaseType.GenericTypeArguments;
-
+            Type genType = null;
             if (
                 genTypes.Length > 4
-                && genTypes[1].IsAssignableTo(StoreType)
-                && genTypes[2].IsAssignableTo(StoreType)
+                &&  genTypes[1].IsAssignable(StoreType)
+                && genTypes[2].IsAssignable(StoreType)
             )
-                EntitySet(genTypes[4]);
+            {
+                genType = genTypes[4];
+            }
             else if (genTypes.Length > 3)
             {
+                genType = genTypes[3];
                 if (
-                    genTypes[3].IsAssignableTo(typeof(IIdentifiable))
-                    && (
-                        genTypes[1].IsAssignableTo(StoreType)
-                        || genTypes[0].IsAssignableTo(StoreType)
+                    !genType.IsAssignableTo(typeof(IIdentifiable))
+                    || !(
+                        genTypes[1].IsAssignable(StoreType)
+                        || genTypes[0].IsAssignable(StoreType)
                     )
                 )
-                    EntitySet(genTypes[3]);
-                else
                     continue;
             }
             else if (genTypes.Length > 2)
+            {
+                genType = genTypes[2];
                 if (
-                    genTypes[2].IsAssignableTo(typeof(IIdentifiable))
-                    && genTypes[0].IsAssignableTo(StoreType)
+                    !genType.IsAssignableTo(typeof(IIdentifiable))
+                    || !genTypes[0].IsAssignable(StoreType)
                 )
-                    EntitySet(genTypes[2]);
-                else
                     continue;
+            }
+            if (genType == null)
+                continue;
+
+            EntitySet(genType);
+            AddInvocations(genType);
         }
     }
 
@@ -221,17 +230,25 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
 
     protected override string GetRoutes()
     {
+
+        if(storeRoutes != null)
+        {
+            var route = storeRoutes.ValueOf(StoreType.Name.Substring(1))?.ToString();
+            if (route != null)
+                return route;
+        }
+
         if (StoreType == typeof(IEventStore))
         {
-            return StoreRoutes.OpenEventRoute;
+            return storeRoutes?.OpenEventRoute ?? StoreRoutes.OpenEventRoute;
         }
         else if (StoreType == typeof(IAccountStore))
         {
-            return StoreRoutes.OpenAuthRoute;
+            return storeRoutes?.OpenAuthRoute ?? StoreRoutes.OpenAuthRoute;
         }
         else
         {
-            return StoreRoutes.OpenDataRoute;
+            return storeRoutes?.OpenDataRoute ?? StoreRoutes.OpenDataRoute;
         }
     }
 

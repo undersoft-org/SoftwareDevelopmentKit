@@ -190,6 +190,12 @@ public static class OpenDataRegistry
         return iface;
     }
 
+    public static Type GetLinkedContextType(Type storeType)
+    {
+        Stores.TryGet(storeType, out Type contextType);                
+        return contextType;
+    }
+
     public static Type GetMappedType(string name)
     {
         string sn = name.Split('.').Last();

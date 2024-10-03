@@ -48,14 +48,14 @@ public class GrpcDataServerBuilder<TServiceStore>
 
             if (
                 genTypes.Length > 4
-                && genTypes[1].IsAssignableTo(StoreType)
-                && genTypes[2].IsAssignableTo(StoreType)
+                && genTypes[1].IsAssignable(StoreType)
+                && genTypes[2].IsAssignable(StoreType)
             )
                 contractType = typeof(IStreamDataController<>).MakeGenericType(new[] { genTypes[4] });
             else if (genTypes.Length > 3)
                 if (
                     genTypes[3].IsAssignableTo(typeof(IContract))
-                    && genTypes[1].IsAssignableTo(StoreType)
+                    && genTypes[1].IsAssignable(StoreType)
                 )
                     contractType = typeof(IStreamDataController<>).MakeGenericType(
                         new[] { genTypes[3] }

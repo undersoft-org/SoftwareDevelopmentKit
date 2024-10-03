@@ -223,6 +223,11 @@ namespace System
             return AssemblyUtilities.FindTypes(seqType);
         }
 
+        public static bool IsAssignable(this Type type, Type assignableType)
+        {
+            return type.IsAssignableFrom(assignableType) || type.IsAssignableTo(assignableType);
+        }
+
         public static IList<Type> GetAssignableTypes(this Type seqType)
         {
             return AssemblyUtilities.FindTypes(new Type[] { seqType });

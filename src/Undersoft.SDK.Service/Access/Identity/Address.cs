@@ -14,7 +14,9 @@ namespace Undersoft.SDK.Service.Access.Identity
 {
     public class Address : DataObject, IContract
     {
-        public AddressType AddressType { get; set; }
+        [VisibleRubric]
+        [RequiredRubric]
+        public AddressType Type { get; set; }
 
         [VisibleRubric]
         [RequiredRubric]
@@ -44,6 +46,7 @@ namespace Undersoft.SDK.Service.Access.Identity
         [RequiredRubric]
         public string Apartment { get; set; }
 
+        [VisibleRubric]
         public string Notes { get; set; }
     }
 }

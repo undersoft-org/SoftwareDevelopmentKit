@@ -46,5 +46,5 @@ public class Personal : DataObject, IPersonal
 
     public string Websites { get; set; }
 
-    public string Gender { get; set; }
+    public Gender Gender { get; set; }
 }

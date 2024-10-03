@@ -10,11 +10,13 @@ using Undersoft.SDK.Service.Server.Controller.Api;
 public class RestDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuilder<TStore> where TStore : IDataStore
 {
     IServiceRegistry _registry;
+    protected StoreRoutesOptions storeRoutes;
 
     public RestDataServerBuilder(IServiceRegistry registry) : base()
     {
         _registry = registry;
         StoreType = typeof(TStore);
+        storeRoutes = _registry.GetObject<StoreRoutesOptions>();
     }
 
     public void AddControllers()
@@ -41,10 +43,10 @@ public class RestDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
             Type ifaceType = null;
             var genTypes = controllerType.BaseType.GenericTypeArguments;
 
-            if (genTypes.Length > 4 && genTypes[1].IsAssignableTo(StoreType) && genTypes[2].IsAssignableTo(StoreType))
+            if (genTypes.Length > 4 && genTypes[1].IsAssignable(StoreType) && genTypes[2].IsAssignable(StoreType))
                 ifaceType = typeof(IApiDataController<,,>).MakeGenericType(new[] { genTypes[0], genTypes[3], genTypes[4] });
             else if (genTypes.Length > 3)
-                if (genTypes[3].IsAssignableTo(typeof(IDataObject)) && genTypes[1].IsAssignableTo(StoreType))
+                if (genTypes[3].IsAssignableTo(typeof(IDataObject)) && genTypes[1].IsAssignable(StoreType))
                     ifaceType = typeof(IApiDataController<,,>).MakeGenericType(new[] { genTypes[0], genTypes[2], genTypes[3] });
                 else
                     continue;
@@ -59,13 +61,20 @@ public class RestDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
 
     protected override string GetRoutes()
     {
+        if (storeRoutes != null)
+        {
+            var route = storeRoutes.ValueOf(StoreType.Name.Substring(1))?.ToString();
+            if (route != null)
+                return route;
+        }
+
         if (StoreType == typeof(IEventStore))
         {
-            return StoreRoutes.ApiEventRoute;
+            return storeRoutes?.ApiEventRoute ?? StoreRoutes.ApiEventRoute;
         }
         else
         {
-            return StoreRoutes.ApiDataRoute;
+            return storeRoutes?.ApiDataRoute ?? StoreRoutes.ApiDataRoute;
         }
     }
 }

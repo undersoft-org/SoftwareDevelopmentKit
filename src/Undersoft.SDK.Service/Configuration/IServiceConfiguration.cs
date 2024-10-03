@@ -21,6 +21,7 @@ public interface IServiceConfiguration : IConfiguration
     IEnumerable<IConfigurationSection> Clients();
 
     string StoreRoutes(string name);
+    Type StoreTypes(string name);
     IConfigurationSection Source(string name);
     int SourcePoolSize(IConfigurationSection endpoint);
     string SourceConnectionString(IConfigurationSection endpoint);

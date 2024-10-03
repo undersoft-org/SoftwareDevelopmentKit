@@ -84,6 +84,9 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid
         [Parameter]
         public string? RowStyle { get; set; }
 
+        [Parameter]
+        public bool StatelessOperations { get; set; } = true;
+
         [CascadingParameter]
         public bool Resizable { get; set; }
 

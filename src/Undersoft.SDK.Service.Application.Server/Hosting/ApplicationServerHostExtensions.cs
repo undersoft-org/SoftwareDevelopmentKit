@@ -42,7 +42,7 @@ public static class ApplicationServerHostExtensions
                 ip = context.Connection?.RemoteIpAddress?.ToIPv4String();
             }
 
-            context.Response.Headers.Add("Content-TypeName", new Microsoft.Extensions.Primitives.StringValues("application/json; charset=utf-8"));
+            context.Response.Headers.Append("Content-TypeName", new Microsoft.Extensions.Primitives.StringValues("application/json; charset=utf-8"));
             await context.Response.WriteAsync(JsonSerializer.Serialize(new { Id = context.TraceIdentifier, Ip = ip }));
         }));
         return app;

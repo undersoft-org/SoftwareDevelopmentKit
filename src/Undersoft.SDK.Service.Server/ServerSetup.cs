@@ -455,11 +455,13 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
         foreach (IConfigurationSection source in sources)
         {
             string connectionString = config.SourceConnectionString(source);
+            
             if (_tenant != null)
                 connectionString = connectionString.Replace(
                     "-db;",
                     $"-{_tenant.Id.ToString()}-db;"
                 );
+
             SourceProvider provider = config.SourceProvider(source);
             int poolsize = config.SourcePoolSize(source);
             Type contextType = storeTypes.Where(t => t.FullName == source.Key).FirstOrDefault();

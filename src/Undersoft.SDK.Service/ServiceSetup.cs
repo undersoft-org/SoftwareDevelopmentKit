@@ -36,6 +36,7 @@ public partial class ServiceSetup : IServiceSetup
     public ServiceSetup(IServiceCollection services)
     {
         manager = new ServiceManager(services);
+        AddStoreRoutes();
         registry.MergeServices(true);
     }
 
@@ -65,6 +66,14 @@ public partial class ServiceSetup : IServiceSetup
             AddStoreCache(item);
         }
 
+        return this;
+    }
+
+    public IServiceSetup AddStoreRoutes()
+    {
+        var storeRoutesOptions = new StoreRoutesOptions();
+        configuration.Bind("StoreRoutes", storeRoutesOptions);
+        registry.AddObject(storeRoutesOptions);
         return this;
     }
 
@@ -120,6 +129,7 @@ public partial class ServiceSetup : IServiceSetup
         registry.AddScoped<IServicer, Servicer>();
         registry.AddTransient<IInvoker, Invoker>();
         registry.AddScoped<IAuthorization, Authorization>();
+  
 
         IServiceCollection deck = registry
             .AddTransient<ISeries<IEntity>, Listing<IEntity>>()
@@ -314,29 +324,38 @@ public partial class ServiceSetup : IServiceSetup
 
     protected string GetStoreRoutes(Type iface, string routePrefix = null)
     {
+        var sro = registry.GetObject<StoreRoutesOptions>();
+
+        if (sro != null)
+        {
+            var route = sro.ValueOf(iface.Name.Substring(1))?.ToString();
+            if (route != null)
+                return route;
+        }
+
         if (iface == typeof(IEntryStore))
         {
-            return StoreRoutes.EntryStoreRoute;
+            return sro?.EntryStoreRoute ?? StoreRoutes.EntryStoreRoute;
         }
         else if (iface == typeof(IEventStore))
         {
-            return StoreRoutes.EventStoreRoute;
+            return sro?.EventStoreRoute ?? StoreRoutes.EventStoreRoute;
         }
         else if (iface == typeof(IReportStore))
         {
-            return StoreRoutes.ReportStoreRoute;
+            return sro?.ReportStoreRoute ?? StoreRoutes.ReportStoreRoute;
         }
         else if (iface == typeof(IDataStore))
         {
-            return StoreRoutes.DataStoreRoute;
+            return sro?.DataStoreRoute ?? StoreRoutes.DataStoreRoute;
         }
         else if (iface == typeof(IAccountStore))
         {
-            return StoreRoutes.AuthStoreRoute;
+            return sro?.AuthStoreRoute ?? StoreRoutes.AuthStoreRoute;
         }
         else
         {
-            return StoreRoutes.DataStoreRoute;
+            return sro?.DataStoreRoute ?? StoreRoutes.DataStoreRoute;
         }
     }
 }

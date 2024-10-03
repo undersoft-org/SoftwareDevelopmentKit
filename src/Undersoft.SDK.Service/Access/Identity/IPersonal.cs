@@ -5,7 +5,7 @@
         DateTime Birthdate { get; set; }
         string Email { get; set; }
         string FirstName { get; set; }
-        string Gender { get; set; }
+        Gender Gender { get; set; }
         string Image { get; set; }
         byte[] ImageData { get; set; }
         string LastName { get; set; }

@@ -143,7 +143,7 @@ public class ServerHostSetup : IServerHostSetup
         return this;
     }
 
-    public IServerHostSetup UseServiceServer(string[] apiVersions = null)
+    public IServerHostSetup UseServiceServer(string[] apiVersions = null, bool useMultinancy = false)
     {
         UseHeaderForwarding();
 
@@ -163,8 +163,9 @@ public class ServerHostSetup : IServerHostSetup
 
         _builder.UseAuthentication()
             .UseAuthorization();
-        
-        UseMultitenancy();        
+
+        if(useMultinancy)
+            UseMultitenancy();
 
         UseEndpoints();
 
@@ -223,6 +224,12 @@ public class ServerHostSetup : IServerHostSetup
     public IServerHostSetup UseMultitenancy()
     {
         _builder.UseMiddleware<MultiTenancyMiddleware>();
+        return this;
+    }
+
+    public IServerHostSetup UseServiceRouter()
+    {
+        _builder.UseMiddleware<ServiceRouterMiddleware>();
         return this;
     }
 

@@ -4,10 +4,12 @@ using Microsoft.Extensions.Primitives;
 
 namespace Undersoft.SDK.Service.Configuration;
 
+using System.Reflection;
 using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Data.Client;
 using Undersoft.SDK.Service.Data.Repository;
 using Undersoft.SDK.Service.Data.Store;
+using Undersoft.SDK.Utilities;
 
 public class ServiceConfiguration : IServiceConfiguration
 {
@@ -78,6 +80,14 @@ public class ServiceConfiguration : IServiceConfiguration
     public string StoreRoutes(string name)
     {
         return config.GetSection("StoreRoutes")[name];
+    }
+
+    public Type StoreTypes(string name)
+    {
+        var typeName = config.GetSection("StoreRoutes").GetChildren().Where(c => c.Value.Contains(name)).FirstOrDefault()?.Key;
+        if (typeName != null)
+            return AssemblyUtilities.FindType($"I{typeName}");
+        return null;
     }
 
     public string UserSecretsId => config.GetSection("General")["UserSecretsId"];

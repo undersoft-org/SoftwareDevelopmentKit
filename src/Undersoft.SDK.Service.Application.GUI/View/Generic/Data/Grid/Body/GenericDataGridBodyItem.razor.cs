@@ -63,9 +63,12 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid.Body
         [Parameter]
         public IViewRubrics? MenuRubrics { get; set; }
 
+        [CascadingParameter]
+        public bool StatelessOperations { get; set; }
+
         private IViewData? GetOperationsData()
         {
-            if (_operations != null)
+            if (_operations != null && !StatelessOperations)
                 return _operations;
 
             Data.EntryMode = EntryMode;

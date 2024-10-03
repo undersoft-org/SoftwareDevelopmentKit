@@ -16,7 +16,7 @@ public class ApplicationServerHostSetup : ServerHostSetup, IApplicationServerHos
         IWebHostEnvironment environment
     ) : base(application, environment) { }
 
-    public IApplicationServerHostSetup UseServiceApplication()
+    public IApplicationServerHostSetup UseServiceApplication(bool useMultitenancy)
     {
         UseHeaderForwarding();       
 
@@ -44,8 +44,8 @@ public class ApplicationServerHostSetup : ServerHostSetup, IApplicationServerHos
         _builder.UseAuthentication()
             .UseAuthorization();
 
-        UseJwtMiddleware();
-        UseMultitenancy();
+        if (useMultitenancy)
+            UseMultitenancy();
 
         _builder.UseApplicationTracking();
 

@@ -121,11 +121,15 @@ public partial class ConfirmEmailBase<TLogo, TAccount> : ComponentBase where TAc
         }
 
         var result = await _access.ConfirmEmail(new TAccount() { Credentials = content!.Model });
-
-        if (result.Notes.Status == AccessStatus.EmailConfirmed)
+        if (result != null)
         {
-            _navigation.NavigateTo("access/register");
-            return null;
+            if (result.Notes.Status == AccessStatus.EmailConfirmed)
+            {
+                _navigation.NavigateTo("access/register");
+                return null;
+            }
+            else if( result.Notes.Errors == null)
+                return null;
         }
 
         return result;

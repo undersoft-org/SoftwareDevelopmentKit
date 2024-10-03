@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Undersoft.SDK.Service.Application.GUI.Models;
 using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 using Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid.Body;
@@ -51,10 +52,13 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid
         [Parameter]
         public bool Multiline { get; set; } = false;
 
+        [CascadingParameter]
+        public bool StatelessOperations { get; set; }
+
         public IViewRubrics? MenuRubrics { get; set; }
 
         private void Initialize()
-        {
+        { 
             IViewData? data = null;
             if (FeatureFlags.Editable && EditMode != EditMode.None)
                 data = typeof(ViewData<>)
@@ -68,6 +72,13 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid
             {
                 MenuRubrics = data.MapRubrics(t => t.ExtendedRubrics, p => p.Extended);
             }
+        }
+
+        protected override void OnParametersSet()
+        {
+            if (StatelessOperations)           
+                Initialize();            
+            base.OnParametersSet();
         }
     }
 }

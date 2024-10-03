@@ -4,6 +4,6 @@ namespace Undersoft.SDK.Service.Application.Server.Hosting
 {
     public interface IApplicationServerHostSetup : IServerHostSetup
     {
-        IApplicationServerHostSetup UseServiceApplication();
+        IApplicationServerHostSetup UseServiceApplication(bool useMultitenancy = true);
     }
 }

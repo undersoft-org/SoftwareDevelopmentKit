@@ -4,11 +4,13 @@
     {
         IServerHostSetup UseHeaderForwarding();
 
-        IServerHostSetup UseServiceServer(string[] apiVersions);
+        IServerHostSetup UseServiceServer(string[] apiVersions, bool useMultitenancy);
 
         IServerHostSetup UseCustomSetup(Action<IServerHostSetup> action);
 
         IServerHostSetup UseServiceClients(int delayInSeconds = 0);
+
+        IServerHostSetup UseServiceRouter();
 
         IServerHostSetup UseDefaultProvider();
 
