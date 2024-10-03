@@ -100,7 +100,6 @@ public class GrpcDataServerBuilder<TServiceStore>
                         .CompressionLevel
                         .Optimal;
                 });
-            //.AddJsonTranscoding();
 
             _registry.AddSingleton(
                 BinderConfiguration.Create(binder: new GrpcDataServerBinder(_registry))
