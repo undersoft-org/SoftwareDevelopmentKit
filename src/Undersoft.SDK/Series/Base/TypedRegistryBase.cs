@@ -86,7 +86,7 @@
         protected void acquireRehash()
         {
             if (!rehashAccess.Wait(WAIT_REHASH_TIMEOUT))
-                throw new TimeoutException("Wait rehash Timeout");
+                throw new TimeoutException("Wait InnerRehash Timeout");
             readAccess.Reset();
         }
         protected void acquireWriter()

@@ -51,13 +51,13 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
 
     public IRemoteRepository<TDto> RemoteSet<TDto>() where TDto : class, IOrigin, IInnerProxy
     {
-        return RemoteSet<TDto>(OpenDataRegistry.GetContextTypes<TDto>().FirstOrDefault());
+        return RemoteSet<TDto>(DataClientRegistry.GetContextTypes<TDto>().FirstOrDefault());
     }
     public IRemoteRepository<TDto> RemoteSet<TDto>(Type contextType)
        where TDto : class, IOrigin, IInnerProxy
     {
         return (IRemoteRepository<TDto>)Manager.GetService(typeof(IRemoteRepository<,>)
-                                                 .MakeGenericType(OpenDataRegistry
+                                                 .MakeGenericType(DataClientRegistry
                                                  .Stores[contextType],
                                                   typeof(TDto)));
     }
@@ -77,7 +77,7 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
     public IRepositoryClient GetClient<TStore, TEntity>()
     where TEntity : class, IOrigin, IInnerProxy
     {
-        var contextType = OpenDataRegistry.GetContextType<TStore, TEntity>();
+        var contextType = DataClientRegistry.GetContextType<TStore, TEntity>();
 
         return Clients.Get(contextType);
     }
@@ -108,11 +108,11 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
         return (IRepositoryClient)repotype.New(client);
     }
     public static IRepositoryClient<TContext> CreateClient<TContext>(IRepositoryClient<TContext> client)
-        where TContext : OpenDataContext
+        where TContext : DataClientContext
     {
         return new RepositoryClient<TContext>(client);
     }
-    public static IRepositoryClient<TContext> CreateClient<TContext>(Uri serviceRoot) where TContext : OpenDataContext
+    public static IRepositoryClient<TContext> CreateClient<TContext>(Uri serviceRoot) where TContext : DataClientContext
     {
         return new RepositoryClient<TContext>(serviceRoot);
     }
@@ -127,7 +127,7 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
         return client;
     }
 
-    public bool TryGetClient<TContext>(out IRepositoryClient<TContext> source) where TContext : OpenDataContext
+    public bool TryGetClient<TContext>(out IRepositoryClient<TContext> source) where TContext : DataClientContext
     {
         return Clients.TryGet(out source);
     }

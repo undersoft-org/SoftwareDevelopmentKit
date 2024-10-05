@@ -5,7 +5,7 @@ using Undersoft.SDK.Service.Server;
 public partial interface IApplicationServerSetup : IServerSetup
 {
     IServerSetup ConfigureApplicationServer(
-        bool includeSwagger,
+        bool includeSwagger = false,
         Type[]? sourceTypes = null,
         Type[]? clientTypes = null
     );

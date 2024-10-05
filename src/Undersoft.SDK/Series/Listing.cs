@@ -11,7 +11,7 @@ public class Listing<V> : ListingBase<V>
 
     public Listing(bool repeatable = false, int capacity = 17) : base(repeatable, capacity) { }
 
-    public Listing(IEnumerable<ISeriesItem<V>> items, int capacity = 17, bool repeatable = false) : base(items, capacity) { }
+    public Listing(IEnumerable<ISeriesItem<V>> items, int capacity = 17, bool repeatable = false) : base(items, capacity, repeatable) { }
 
     public override ISeriesItem<V> EmptyItem()
     {

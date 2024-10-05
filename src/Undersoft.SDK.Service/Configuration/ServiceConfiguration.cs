@@ -5,6 +5,7 @@ using Microsoft.Extensions.Primitives;
 namespace Undersoft.SDK.Service.Configuration;
 
 using System.Reflection;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Data.Client;
 using Undersoft.SDK.Service.Data.Repository;
@@ -50,7 +51,8 @@ public class ServiceConfiguration : IServiceConfiguration
         Services = services;
     }
 
-    public IServiceConfiguration Configure<TOptions>(string sectionName) where TOptions : class
+    public IServiceConfiguration Configure<TOptions>(string sectionName)
+        where TOptions : class
     {
         Services.Configure<TOptions>(config.GetSection(sectionName));
         return this;
@@ -59,7 +61,8 @@ public class ServiceConfiguration : IServiceConfiguration
     public IServiceConfiguration Configure<TOptions>(
         string sectionName,
         Action<BinderOptions> configureOptions
-    ) where TOptions : class
+    )
+        where TOptions : class
     {
         Services.Configure<TOptions>(config.GetSection(sectionName), configureOptions);
         return this;
@@ -77,14 +80,52 @@ public class ServiceConfiguration : IServiceConfiguration
     public string TypeName => config.GetSection("General")["TypeName"];
     public string BaseUrl => config.GetSection("General")["BaseUrl"];
 
-    public string StoreRoutes(string name)
+    public IEnumerable<(Type, (Type, string))> StoreTypeRoutes()
+    {
+        return config
+            .GetSection("StoreRoutes")
+            .GetChildren()
+            .Select(s =>
+            {
+                var type = AssemblyUtilities.FindType($"I{s.Key}");
+                return (type, (type, s.Value));
+            });
+    }
+
+    public IEnumerable<(string, (Type, string))> StoreRouteTypes()
+    {
+        return config
+            .GetSection("StoreRoutes")
+            .GetChildren()
+            .Select(s => (s.Value, (AssemblyUtilities.FindType($"I{s.Key}"), s.Value)));
+    }
+
+    public IEnumerable<ISeriesItem<(Type, string)>> StoreRoutes()
+    {
+        return
+            StoreTypeRoutes()
+                .Where(s => s.Item1 != null)
+                .ForEach(s => new SeriesItem<(Type, string)>(s.Item1.FullName, s.Item2))
+                .Concat(
+                    StoreRouteTypes()
+                        .Where(s => s.Item2.Item1 != null)
+                        .ForEach(s => new SeriesItem<(Type, string)>(s.Item1, s.Item2))
+                );        
+    }
+
+    public string StoreRoute(string name)
     {
         return config.GetSection("StoreRoutes")[name];
     }
 
-    public Type StoreTypes(string name)
+    public Type StoreType(string route)
     {
-        var typeName = config.GetSection("StoreRoutes").GetChildren().Where(c => c.Value.Contains(name)).FirstOrDefault()?.Key;
+        var typeName = config
+            .GetSection("StoreRoutes")
+            .GetChildren()
+            .Where(c => c.Value.Contains(route))
+            .FirstOrDefault()
+            ?.Key;
         if (typeName != null)
             return AssemblyUtilities.FindType($"I{typeName}");
         return null;

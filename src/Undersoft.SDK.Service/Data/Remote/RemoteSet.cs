@@ -234,7 +234,7 @@ namespace Undersoft.SDK.Service.Data.Remote
             )
         {
             this.context = context;
-            name = OpenDataRegistry.MappedNames[typeof(TEntity)];
+            name = DataClientRegistry.MappedNames[typeof(TEntity)];
             if (name != null)
                 _query = context.CreateQuery<TEntity>(typeof(TEntity).Name);
 

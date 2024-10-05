@@ -13,7 +13,7 @@ using Undersoft.SDK.Service.Data.Remote;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Utilities;
 
-public static class OpenDataRegistry
+public static class DataClientRegistry
 {
     const int RECONNECT_INITIAL_COUNT = 30;
     const int RECONNECT_INITIAL_INTERVAL = 6000;
@@ -29,13 +29,13 @@ public static class OpenDataRegistry
     public static ISeries<Type> Stores = new Registry<Type>();
     public static ISeries<RemoteRelation> Remotes = new Registry<RemoteRelation>(true);
 
-    public static async Task<IEdmModel> GetEdmModel(this OpenDataContext context)
+    public static async Task<IEdmModel> GetEdmModel(this DataClientContext context)
     {
         IEdmModel model = await context.GetEdmModelAsync();
         return model;
     }
 
-    public static async Task<IEdmModel> GetEdmModelAsync(this OpenDataContext context)
+    public static async Task<IEdmModel> GetEdmModelAsync(this DataClientContext context)
     {
         // Get the service metadata's Uri
         var metadataUri = context.GetMetadataUri();
@@ -130,7 +130,7 @@ public static class OpenDataRegistry
         return null;
     }
 
-    public static ISeries<IEdmEntityType> GetEdmEntityTypes(this OpenDataContext context)
+    public static ISeries<IEdmEntityType> GetEdmEntityTypes(this DataClientContext context)
     {
         var contextType = context.GetType();
 
@@ -166,7 +166,7 @@ public static class OpenDataRegistry
         return dsEntities;
     }
 
-    public static Type GetLinkedStoreType(this OpenDataContext context)
+    public static Type GetLinkedStoreType(this DataClientContext context)
     {
         return GetLinkedStoreType(context.GetType());
     }
@@ -207,19 +207,19 @@ public static class OpenDataRegistry
         return t;
     }
 
-    public static Type GetMappedType(this OpenDataContext context, string name)
+    public static Type GetMappedType(this DataClientContext context, string name)
     {
         return GetMappedType(name);
     }
 
-    public static string GetMappedName(this OpenDataContext context, Type type)
+    public static string GetMappedName(this DataClientContext context, Type type)
     {
         if (MappedNames.TryGet(type, out string name))
             return name;
         return type.Name;
     }
 
-    public static string GetMappedFullName(this OpenDataContext context, Type type)
+    public static string GetMappedFullName(this DataClientContext context, Type type)
     {
         if (MappedFullNames.TryGet(type, out string name))
             return name;

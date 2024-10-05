@@ -27,7 +27,7 @@ namespace Undersoft.SDK.Service.Data.Repository
             where TStore : IDataServiceStore
             where TDto : class, IOrigin, IInnerProxy;
         bool TryGetClient(Type contextType, out IRepositoryClient source);
-        bool TryGetClient<TContext>(out IRepositoryClient<TContext> source) where TContext : OpenDataContext;
+        bool TryGetClient<TContext>(out IRepositoryClient<TContext> source) where TContext : DataClientContext;
         bool TryGetSource(Type contextType, out IRepositorySource source);
         bool TryGetSource<TContext>(out IRepositorySource<TContext> source) where TContext : DbContext;
         IStoreRepository<TEntity> StoreSet<TEntity>() where TEntity : class, IOrigin, IInnerProxy;

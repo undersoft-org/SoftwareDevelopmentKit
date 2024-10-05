@@ -59,21 +59,21 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
 
     public virtual Uri Route => uri;
 
-    public virtual OpenDataContext Context => (OpenDataContext)InnerContext;
+    public virtual DataClientContext Context => (DataClientContext)InnerContext;
 
     public virtual object CreateContext()
     {
-        return ContextType.New<OpenDataContext>(uri);
+        return ContextType.New<DataClientContext>(uri);
     }
 
     public virtual object CreateContext(Type contextType, Uri serviceRoot)
     {
         uri ??= serviceRoot;
         this.contextType ??= contextType;
-        return (OpenDataContext)contextType.New(uri);
+        return (DataClientContext)contextType.New(uri);
     }
 
-    public virtual TContext GetContext<TContext>() where TContext : OpenDataContext
+    public virtual TContext GetContext<TContext>() where TContext : DataClientContext
     {
         return (TContext)InnerContext;
     }
@@ -85,7 +85,7 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
     }
 
     public virtual TContext CreateContext<TContext>(Uri serviceRoot)
-        where TContext : OpenDataContext
+        where TContext : DataClientContext
     {
         uri = serviceRoot;
         contextType ??= typeof(TContext);
@@ -290,7 +290,7 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
     }
 
     private async Task<int> saveAsTransaction(
-        OpenDataContext context,
+        DataClientContext context,
         CancellationToken token = default
     )
     {
@@ -310,7 +310,7 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
         return -1;
     }
 
-    private async Task<int> saveChanges(OpenDataContext context, CancellationToken token = default)
+    private async Task<int> saveChanges(DataClientContext context, CancellationToken token = default)
     {
         try
         {

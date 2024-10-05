@@ -8,7 +8,7 @@
 
 using Undersoft.SDK.Service.Access;
 
-namespace Undersoft.SVC.Service.Application.GUI.Compound.Access
+namespace Undersoft.SDK.Service.Application.GUI.View.Access.Base
 {
     public partial class SignOutBase : ComponentBase
     {

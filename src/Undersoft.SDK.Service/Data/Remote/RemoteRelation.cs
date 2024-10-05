@@ -16,8 +16,8 @@ public abstract class RemoteRelation<TOrigin, TTarget> : RemoteRelation, IRemote
         Name = typeof(TOrigin).FullName + "__&__" + typeof(TTarget).FullName;
         Id = Name.UniqueKey();
 
-        OpenDataRegistry.Remotes.Add(Name, this);
-        OpenDataRegistry.Remotes.Add(typeof(TOrigin), this);
+        DataClientRegistry.Remotes.Add(Name, this);
+        DataClientRegistry.Remotes.Add(typeof(TOrigin), this);
 
     }
 

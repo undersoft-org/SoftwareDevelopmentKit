@@ -17,10 +17,10 @@ public class ServiceRouterMiddleware
         var originalUrl = new Uri(context.Request.GetDisplayUrl());
         var path = originalUrl.AbsolutePath.Substring(1);
 
-        var storeType = _servicer.Configuration.StoreTypes(path);
+        var storeType = _servicer.Configuration.StoreType(path);
         if (storeType != null)
         {
-            var contextType = OpenDataRegistry.GetLinkedContextType(storeType);
+            var contextType = DataClientRegistry.GetLinkedContextType(storeType);
             if (contextType != null)
             {
                 var connectionString = _servicer.Configuration.ClientConnectionString(contextType.FullName);

@@ -143,7 +143,7 @@ public class ServerHostSetup : IServerHostSetup
         return this;
     }
 
-    public IServerHostSetup UseServiceServer(string[] apiVersions = null, bool useMultinancy = false)
+    public IServerHostSetup UseServiceServer(bool useMultinancy = true, string[] apiVersions = null)
     {
         UseHeaderForwarding();
 

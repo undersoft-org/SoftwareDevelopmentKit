@@ -21,7 +21,7 @@ public class RepositoryLink<TStore, TOrigin, TTarget>
     IRemoteRelation<TOrigin, TTarget> relation;
 
     public RepositoryLink(
-        IRepositoryContextPool<OpenDataClient<TStore>> pool,
+        IRepositoryContextPool<DataClient<TStore>> pool,
         IEntityCache<TStore, TTarget> cache,
         IRemoteRelation<TOrigin, TTarget> relation,
         IRemoteSynchronizer synchronizer
@@ -41,12 +41,12 @@ public class RepositoryLink<TStore, TOrigin, TTarget>
         Load(origin, RemoteContext);
     }
 
-    public void Load<T>(IEnumerable<T> origins, OpenDataContext context) where T : class
+    public void Load<T>(IEnumerable<T> origins, DataClientContext context) where T : class
     {
         origins.ForEach((o) => Load(o, context));
     }
 
-    public void Load(object origin, OpenDataContext context)
+    public void Load(object origin, DataClientContext context)
     {
         IInnerProxy _entity = (IInnerProxy)origin;
         int rubricId = RemoteRubric.RubricId;
@@ -92,7 +92,7 @@ public class RepositoryLink<TStore, TOrigin, TTarget>
 
     public async ValueTask LoadAsync(
         object origin,
-        OpenDataContext context,
+        DataClientContext context,
         CancellationToken token
     )
     {

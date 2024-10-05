@@ -71,8 +71,7 @@ public partial class ServiceSetup : IServiceSetup
 
     public IServiceSetup AddStoreRoutes()
     {
-        var storeRoutesOptions = new StoreRoutesOptions();
-        configuration.Bind("StoreRoutes", storeRoutesOptions);
+        var storeRoutesOptions = new StoreRouteRegistry(configuration.StoreRoutes());        
         registry.AddObject(storeRoutesOptions);
         return this;
     }
@@ -179,9 +178,8 @@ public partial class ServiceSetup : IServiceSetup
     }
 
     public IServiceSetup AddRepositoryClients()
-    {
-        var clientTypes = configuration.Clients().ForEach(c => AssemblyUtilities.FindType(c.Key)).Commit();
-        return AddRepositoryClients(clientTypes);
+    {        
+        return AddRepositoryClients(configuration.Clients().ForEach(c => AssemblyUtilities.FindType(c.Key)).Commit());
     }
 
     public IServiceSetup AddRepositoryClients(Type[] serviceTypes)
@@ -227,9 +225,9 @@ public partial class ServiceSetup : IServiceSetup
 
             IRepositoryClient repoClient = (IRepositoryClient)repoType.New(_connectionString);
 
-            Type storeType = OpenDataRegistry.GetLinkedStoreType(contextType);
+            Type storeType = DataClientRegistry.GetLinkedStoreType(contextType);
 
-            Type storeDbType = typeof(OpenDataClient<>).MakeGenericType(
+            Type storeDbType = typeof(DataClient<>).MakeGenericType(
                 storeType
             );
             Type storeRepoType = typeof(RepositoryClient<>).MakeGenericType(storeDbType);
@@ -318,44 +316,32 @@ public partial class ServiceSetup : IServiceSetup
 
     private string AddDataClientPrefix(Type contextType, string routePrefix = null)
     {
-        Type iface = OpenDataRegistry.GetLinkedStoreType(contextType);
-        return GetStoreRoutes(iface, routePrefix);
+        Type iface = DataClientRegistry.GetLinkedStoreType(contextType);
+        return GetStoreRoute(iface, routePrefix);
     }
 
-    protected string GetStoreRoutes(Type iface, string routePrefix = null)
+    protected string GetStoreRoute(Type iface, string routePrefix = null)
     {
-        var sro = registry.GetObject<StoreRoutesOptions>();
+        var sro = registry.GetObject<StoreRouteRegistry>();
 
         if (sro != null)
         {
-            var route = sro.ValueOf(iface.Name.Substring(1))?.ToString();
-            if (route != null)
-                return route;
+            if(sro.TryGet(iface, out (Type, string) route))            
+                return route.Item2;
         }
 
-        if (iface == typeof(IEntryStore))
+        switch (iface)
         {
-            return sro?.EntryStoreRoute ?? StoreRoutes.EntryStoreRoute;
-        }
-        else if (iface == typeof(IEventStore))
-        {
-            return sro?.EventStoreRoute ?? StoreRoutes.EventStoreRoute;
-        }
-        else if (iface == typeof(IReportStore))
-        {
-            return sro?.ReportStoreRoute ?? StoreRoutes.ReportStoreRoute;
-        }
-        else if (iface == typeof(IDataStore))
-        {
-            return sro?.DataStoreRoute ?? StoreRoutes.DataStoreRoute;
-        }
-        else if (iface == typeof(IAccountStore))
-        {
-            return sro?.AuthStoreRoute ?? StoreRoutes.AuthStoreRoute;
-        }
-        else
-        {
-            return sro?.DataStoreRoute ?? StoreRoutes.DataStoreRoute;
-        }
+            case IEntryStore:
+                return StoreRoutes.EntryStore;
+            case IReportStore:
+                return StoreRoutes.ReportStore;
+            case IEventStore:
+                return StoreRoutes.EventStore;
+            case IAccountStore:
+                return StoreRoutes.AccountStore;
+            default:
+                return StoreRoutes.DataStore;
+        };        
     }
 }

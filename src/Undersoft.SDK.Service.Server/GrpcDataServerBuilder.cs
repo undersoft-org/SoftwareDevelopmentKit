@@ -15,12 +15,9 @@ public class GrpcDataServerBuilder<TServiceStore>
         IDataServerBuilder<TServiceStore> where TServiceStore : IDataStore
 {
     static bool grpcadded = false;
-    IServiceRegistry _registry;
 
-    public GrpcDataServerBuilder(IServiceRegistry registry) : base()
-    {
-        _registry = registry;
-        StoreType = typeof(TServiceStore);
+    public GrpcDataServerBuilder(IServiceRegistry registry) : base("stream", typeof(TServiceStore), registry)
+    {                
     }
 
     public void AddControllers()
@@ -65,33 +62,21 @@ public class GrpcDataServerBuilder<TServiceStore>
 
             GrpcDataServerRegistry.ServiceContracts.Add(contractType);
 
-            _registry.AddSingleton(contractType, controllerType);
+            ServiceRegistry.AddSingleton(contractType, controllerType);
         }
     }
 
     public override void Build()
     {
         AddControllers();
-        _registry.MergeServices(true);
-    }
-
-    protected override string GetRoutes()
-    {
-        if (StoreType == typeof(IEventStore))
-        {
-            return StoreRoutes.StreamEventRoute;
-        }
-        else
-        {
-            return StoreRoutes.StreamDataRoute;
-        }
-    }
+        ServiceRegistry.MergeServices(true);
+    }   
 
     public virtual void AddGrpcServicer()
     {
         if (!grpcadded)
         {
-            _registry
+            ServiceRegistry
                 .AddCodeFirstGrpc(config =>
                 {
                     config.ResponseCompressionLevel = System
@@ -101,13 +86,13 @@ public class GrpcDataServerBuilder<TServiceStore>
                         .Optimal;
                 });
 
-            _registry.AddSingleton(
-                BinderConfiguration.Create(binder: new GrpcDataServerBinder(_registry))
+            ServiceRegistry.AddSingleton(
+                BinderConfiguration.Create(binder: new GrpcDataServerBinder(ServiceRegistry))
             );
 
-            _registry.AddCodeFirstGrpcReflection();
+            ServiceRegistry.AddCodeFirstGrpcReflection();
 
-            _registry.MergeServices(true);
+            ServiceRegistry.MergeServices(true);
 
             grpcadded = true;
         }

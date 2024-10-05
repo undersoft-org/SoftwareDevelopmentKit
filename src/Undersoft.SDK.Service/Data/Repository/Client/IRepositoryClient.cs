@@ -9,15 +9,15 @@ public interface IRepositoryClient
         IDisposable,
         IAsyncDisposable
 {
-    OpenDataContext Context { get; }
+    DataClientContext Context { get; }
     bool Pooled { get; }
     Uri Route { get; }
 
     Task<IEdmModel> BuildMetadata();
     object CreateContext(Type contextType, Uri serviceRoot);
-    TContext CreateContext<TContext>(Uri serviceRoot) where TContext : OpenDataContext;
+    TContext CreateContext<TContext>(Uri serviceRoot) where TContext : DataClientContext;
     void CreatePool<TContext>();
-    TContext GetContext<TContext>() where TContext : OpenDataContext;
+    TContext GetContext<TContext>() where TContext : DataClientContext;
 }
 
 public interface IRepositoryClient<TContext>

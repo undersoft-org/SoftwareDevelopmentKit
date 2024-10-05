@@ -13,7 +13,7 @@ public partial class ApplicationServerSetup : ServerSetup, IApplicationServerSet
         : base(services, configuration) { }
 
     public IServerSetup ConfigureApplicationServer(
-        bool includeSwagger = true,
+        bool includeSwagger = false,
         Type[]? sourceTypes = null,
         Type[]? clientTypes = null
     )

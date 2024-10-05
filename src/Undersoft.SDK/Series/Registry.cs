@@ -7,6 +7,9 @@
         public Registry(IEnumerable<V> collection, int capacity = 17, bool repeatable = false)
             : base(collection, capacity, repeatable) { }
 
+        public Registry(IEnumerable<ISeriesItem<V>> collection, int capacity = 17, bool repeatable = false)
+           : base(collection, capacity, repeatable) { }
+
         public Registry(bool repeatable = false, int capacity = 17) : base(repeatable, capacity) { }
 
         public override ISeriesItem<V> EmptyItem()

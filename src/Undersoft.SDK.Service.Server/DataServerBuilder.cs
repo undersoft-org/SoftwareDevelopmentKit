@@ -4,33 +4,52 @@ namespace Undersoft.SDK.Service.Server
 {
     public abstract class DataServerBuilder : Registry<Type>, IDataServerBuilder
     {
-        protected virtual Type StoreType { get; set; }
-
-        public static DataServerTypes ServiceTypes { get; set; }
-
+        protected IServiceRegistry ServiceRegistry { get; set; }
+        public StoreRouteRegistry RouteRegistry { get; set; }
+        public virtual Type StoreType { get; set; }
         public string RoutePrefix { get; set; } = "";
 
         public int PageLimit { get; set; } = 10000;
 
         protected ISeries<Type> ContextTypes { get; set; } = new Catalog<Type>();
 
-        public DataServerBuilder() : base()
+        public DataServerBuilder(string providerPrefix, Type storeType, IServiceRegistry registry) : base()
         {
-            RoutePrefix = GetRoutes();
+            ServiceRegistry = registry;
+            RouteRegistry = ServiceRegistry.GetObject<StoreRouteRegistry>();
+            StoreType = storeType;
+            RoutePrefix = GetRoute(providerPrefix);
+        }
+
+        public DataServerBuilder(Type storeType, IServiceRegistry registry) : this(null, storeType, registry)
+        {
+          
         }
 
         public abstract void Build();
 
-        protected virtual string GetRoutes()
-        {        
-            if (StoreType == typeof(IEventStore))
+        protected virtual string GetRoute(string providerPrefix = null)
+        {
+            string route = null;
+            if (RouteRegistry != null)
             {
-                return StoreRoutes.EventStoreRoute + RoutePrefix;
+                if (RouteRegistry.TryGet(StoreType, out (Type, string) routeEntry))
+                    route = routeEntry.Item2;
             }
-            else
+
+            switch (StoreType)
             {
-                return StoreRoutes.DataStoreRoute + RoutePrefix;
-            }
+                case IEventStore:
+                    route = StoreRoutes.EventStore;
+                    break;
+                case IAccountStore:
+                    route = StoreRoutes.AccountStore;
+                    break;
+                default:
+                    route = StoreRoutes.DataStore;
+                    break;
+            };
+            return $"{providerPrefix}/{route}";
         }
 
         public virtual IDataServerBuilder AddDataServices<TContext>() where TContext : DbContext

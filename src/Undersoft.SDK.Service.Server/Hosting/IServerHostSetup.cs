@@ -4,7 +4,7 @@
     {
         IServerHostSetup UseHeaderForwarding();
 
-        IServerHostSetup UseServiceServer(string[] apiVersions, bool useMultitenancy);
+        IServerHostSetup UseServiceServer(bool useMultitenancy = true, string[] apiVersions = null);
 
         IServerHostSetup UseCustomSetup(Action<IServerHostSetup> action);
 

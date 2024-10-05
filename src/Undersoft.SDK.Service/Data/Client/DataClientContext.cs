@@ -4,18 +4,20 @@ using Undersoft.SDK.Service.Access;
 
 namespace Undersoft.SDK.Service.Data.Client
 {
-    public partial class OpenDataContext : DataServiceContext
+    public partial class DataClientContext : DataServiceContext
     {
-        protected ApiDataContext ApiContext;
+        protected ApiClientContext Api;
+
+        protected StreamClientContext Stream;
 
         private IAccessString _securityString;
 
-        public OpenDataContext(Uri serviceUri) : base(serviceUri)
+        public DataClientContext(Uri serviceUri) : base(serviceUri)
         {
             if (serviceUri == null)
                 throw new ArgumentNullException(nameof(serviceUri));
 
-            ApiContext = new ApiDataContext(
+            Api = new ApiClientContext(
                 new Uri(serviceUri.OriginalString.Replace("open", "api"))
             );
 
@@ -53,8 +55,8 @@ namespace Undersoft.SDK.Service.Data.Client
         public async Task<IEdmModel> AddServiceModel()
         {
             string t = GetType().FullName;
-            if (!OpenDataRegistry.EdmModels.TryGet(t, out IEdmModel edmModel))
-                OpenDataRegistry.EdmModels.Add(
+            if (!DataClientRegistry.EdmModels.TryGet(t, out IEdmModel edmModel))
+                DataClientRegistry.EdmModels.Add(
                     t,
                     edmModel = OnModelCreating(await this.GetEdmModelAsync())
                 );
@@ -63,7 +65,7 @@ namespace Undersoft.SDK.Service.Data.Client
 
         public IEdmModel GetServiceModel()
         {
-            return OpenDataRegistry.EdmModels.Get(GetType().FullName);
+            return DataClientRegistry.EdmModels.Get(GetType().FullName);
         }
 
         protected virtual IEdmModel OnModelCreating(IEdmModel builder)
@@ -84,13 +86,13 @@ namespace Undersoft.SDK.Service.Data.Client
             {
                 var token = securityString.Split(" ").LastOrDefault();
                 _securityString = new AccessString(token);
-                ApiContext.SetAuthorization(token);
+                Api.SetAuthorization(token);
             }
         }
 
         public virtual Task CommandAsync<TEntity>(CommandType command, TEntity payload, string name)
         {
-            return ApiContext.CommandAsync(command, payload, name);
+            return Api.CommandAsync(command, payload, name);
         }
 
         public virtual Task CommandSetAsync<TEntity>(
@@ -99,12 +101,12 @@ namespace Undersoft.SDK.Service.Data.Client
             string name
         )
         {
-            return ApiContext.CommandSetAsync(command, payload, name);
+            return Api.CommandSetAsync(command, payload, name);
         }
 
         public virtual void Command<TEntity>(CommandType command, TEntity payload, string name)
         {
-            ApiContext.Command(command, payload, name);
+            Api.Command(command, payload, name);
         }
 
         public virtual void CommandSet<TEntity>(
@@ -113,12 +115,41 @@ namespace Undersoft.SDK.Service.Data.Client
             string name
         )
         {
-            ApiContext.CommandSet(command, payload, name);
+            Api.CommandSet(command, payload, name);
         }
+
+        public Task CommandAsync(CommandType command, object payload, string name)
+        {
+            return Api.CommandAsync(command, payload, name);
+        }
+
+        public Task CommandSetAsync(
+            CommandType command,
+            IEnumerable<object> payload,
+            string name
+        )
+        {
+            return Api.CommandSetAsync(command, payload, name);
+        }
+
+        public void Command(CommandType command, object payload, string name)
+        {
+            Api.Command(command, payload, name);
+        }
+
+        public void CommandSet(
+            CommandType command,
+            IEnumerable<object> payload,
+            string name
+        )
+        {
+            Api.CommandSet(command, payload, name);
+        }
+
 
         public async Task<string[]> CommitChanges(bool changesets = false)
         {
-            var responseContents = await ApiContext.SendCommands(changesets);
+            var responseContents = await Api.SendCommands(changesets);
             if (responseContents != null)
             {
                 return responseContents;

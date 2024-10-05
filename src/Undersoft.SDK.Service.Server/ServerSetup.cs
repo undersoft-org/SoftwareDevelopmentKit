@@ -63,12 +63,11 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
     }
 
     public IServerSetup AddDataServer<TServiceStore>(
-        DataServerTypes dataServerTypes,
+        DataServerTypes dataServerTypes = DataServerTypes.All,
         Action<DataServerBuilder> builder = null
     )
         where TServiceStore : IDataStore
-    {
-        DataServerBuilder.ServiceTypes = dataServerTypes;
+    {       
         if ((dataServerTypes & DataServerTypes.OData) > 0)
         {
             var ds = new OpenDataServerBuilder<TServiceStore>(registry);
@@ -100,9 +99,9 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
     public IServiceSetup ConfigureTenant(IServicer mainServicer)
     {
         var mainManager = mainServicer.GetManager();
-        mainManager.AddKeyedObject<ITenant>(_tenant.Id, _tenant);
-        mainManager.AddKeyedObject<IServiceManager>(_tenant.Id, manager);
-        manager.AddKeyedObject<ITenant>(_tenant.Id, _tenant);
+        mainManager.AddKeyedObject(_tenant.Id, _tenant);
+        mainManager.AddKeyedObject(_tenant.Id, manager);
+        manager.AddKeyedObject(_tenant.Id, _tenant);
 
         AddSourceProviderConfiguration();
 
@@ -435,11 +434,10 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
 
     public IServiceSetup AddRepositorySources()
     {
-        var sourceTypes = configuration
+        return AddRepositorySources(configuration
             .Sources()
             .ForEach(c => AssemblyUtilities.FindType(c.Key))
-            .Commit();
-        return AddRepositorySources(sourceTypes);
+            .Commit());
     }
 
     public IServiceSetup AddRepositorySources(Type[] storeTypes)
@@ -550,7 +548,7 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
     private string AddDataServiceStorePrefix(Type contextType, string routePrefix = null)
     {
         Type iface = DataStoreRegistry.GetStoreType(contextType);
-        return GetStoreRoutes(iface, routePrefix);
+        return GetStoreRoute(iface, routePrefix);
     }
 
     public IServerSetup AddApiVersions(string[] apiVersions)
@@ -560,7 +558,7 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
     }
 
     public IServerSetup ConfigureServer(
-        bool includeSwagger = true,
+        bool includeSwagger = false,
         Type[] sourceTypes = null,
         Type[] clientTypes = null
     )

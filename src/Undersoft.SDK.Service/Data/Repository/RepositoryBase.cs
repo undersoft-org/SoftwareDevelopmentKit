@@ -28,16 +28,16 @@ public abstract class Repository : IRepository
     protected Repository(object context)
     {
         InnerContext = context;
-        PatchingInvoker = new Invoker(this.TracePatching);
-        AddingInvoker = new Invoker(this.TraceAdding);
+        //PatchingInvoker = new Invoker(this.TracePatching);
+        //AddingInvoker = new Invoker(this.TraceAdding);
     }
 
     protected Repository(IRepositoryContext context)
     {
         Site = context.Site;
         context.Lease(this);
-        PatchingInvoker = new Invoker(this.TracePatching);
-        AddingInvoker = new Invoker(this.TraceAdding);
+        //PatchingInvoker = new Invoker(this.TracePatching);
+        //AddingInvoker = new Invoker(this.TraceAdding);
     }
 
     public Type ElementType { get; set; }

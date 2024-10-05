@@ -23,13 +23,13 @@ public class RemoteRepository<TStore, TEntity>
     where TEntity : class, IOrigin, IInnerProxy
     where TStore : IDataServiceStore
 {
-    public RemoteRepository(IRepositoryContextPool<OpenDataClient<TStore>> pool)
+    public RemoteRepository(IRepositoryContextPool<DataClient<TStore>> pool)
         : base(pool.ContextPool)
     {
     }
 
     public RemoteRepository(
-        IRepositoryContextPool<OpenDataClient<TStore>> pool,
+        IRepositoryContextPool<DataClient<TStore>> pool,
         IEntityCache<TStore, TEntity> cache
     ) : base(pool.ContextPool)
     {
@@ -37,7 +37,7 @@ public class RemoteRepository<TStore, TEntity>
     }
 
     public RemoteRepository(
-        IRepositoryContextPool<OpenDataClient<TStore>> pool,
+        IRepositoryContextPool<DataClient<TStore>> pool,
         IEntityCache<TStore, TEntity> cache,
         IServiceManager manager
     ) : base(pool.ContextPool)
@@ -58,7 +58,7 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
     where TEntity : class, IOrigin, IInnerProxy
 {
 
-    protected OpenDataContext RemoteContext => (OpenDataContext)InnerContext;
+    protected DataClientContext RemoteContext => (DataClientContext)InnerContext;
     protected DataServiceQuery<TEntity> RemoteQuery;
 
     public RemoteRepository() { }
@@ -73,7 +73,7 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         }
     }
 
-    public RemoteRepository(OpenDataContext context) : base(context)
+    public RemoteRepository(DataClientContext context) : base(context)
     {
         if (RemoteContext != null)
         {
@@ -154,26 +154,24 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
     {
         get
         {
-            DataServiceQuery<TEntity> query = (DataServiceQuery<TEntity>)FindQuery(keys);
+            DataServiceQuerySingle<TEntity> query = FindQuerySingle(keys);
             if (expanders != null)
                 foreach (Expression<Func<TEntity, object>> expander in expanders)
                     query = query.Expand(expander);
 
-            return query.Select(selector).FirstOrDefault();
+            return query.Select(selector);
         }
         set
         {
-            DataServiceQuery<TEntity> query = (DataServiceQuery<TEntity>)FindQuery(keys);
+            DataServiceQuerySingle<TEntity> query = FindQuerySingle(keys);
             if (expanders != null)
                 foreach (Expression<Func<TEntity, object>> expander in expanders)
                     query = query.Expand(expander);
 
-            TEntity entity = query.FirstOrDefault();
-            if (entity != null)
+            if (query != null)
             {
-                object item = entity.ToQueryable().Select(selector).FirstOrDefault();
-                RemoteContext.UpdateObject(item);
-                value.PatchTo(item, PatchingInvoker);
+                object item = query.Select(selector);
+                RemoteContext.Command(CommandType.PATCH, value.PatchTo(item), Name);                
             }
         }
     }
@@ -408,7 +406,7 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         return Query;
     }
 
-    public OpenDataContext Context => RemoteContext;
+    public DataClientContext Context => RemoteContext;
 
     public override string Name => Context.GetMappedName(ElementType);
 

@@ -56,7 +56,7 @@
         protected void AcquireRehashing()
         {
             if (!rehashingAccess.Wait(REHASHING_TIMEOUT))
-                throw new TimeoutException("Wait rehash Timeout");
+                throw new TimeoutException("Wait InnerRehash Timeout");
             readingAccess.Reset();
         }
 

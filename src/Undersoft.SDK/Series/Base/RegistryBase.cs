@@ -42,6 +42,18 @@ namespace Undersoft.SDK.Series.Base
                     InnerAdd(c);
         }
 
+        public RegistryBase(
+         IEnumerable<ISeriesItem<V>> collection,
+         int capacity = 17,
+         bool repeatable = false,
+         HashBits bits = HashBits.bit64
+        ) : base(repeatable, capacity, bits)
+        {
+            if (collection != null)
+                foreach (var c in collection)
+                    InnerAdd(c);
+        }
+
         protected void AcquireReading()
         {
             Interlocked.Increment(ref readers);
@@ -67,7 +79,7 @@ namespace Undersoft.SDK.Series.Base
             } while (!writingPass.Wait(0));
             writingAccess.Reset();
         }
-        
+
         protected void ReleaseReading()
         {
             if (0 == Interlocked.Decrement(ref readers))
@@ -315,10 +327,10 @@ namespace Undersoft.SDK.Series.Base
             return temp;
         }
 
-        protected override ISeriesItem<V> swapRepeated(ISeriesItem<V> item)
+        protected override ISeriesItem<V> SwapRepeated(ISeriesItem<V> item)
         {
             AcquireRehashing();
-            var _item = base.swapRepeated(item);
+            var _item = base.SwapRepeated(item);
             ReleaseRehashing();
             return _item;
         }

@@ -8,7 +8,7 @@ namespace Undersoft.SDK.Service.Server
     public partial interface IServerSetup : IServiceSetup
     {
         IServerSetup AddDataServer<TServiceStore>(
-            DataServerTypes dataServiceTypes,
+            DataServerTypes dataServiceTypes = DataServerTypes.All,
             Action<DataServerBuilder> builder = null
         ) where TServiceStore : IDataStore;
         IServerSetup AddAccessServer<TContext, TAccount>() where TContext : DbContext where TAccount : class, IOrigin, IAuthorization;
@@ -18,6 +18,6 @@ namespace Undersoft.SDK.Service.Server
         IServerSetup AddAuthorization();
         IServerSetup UseServiceClients();
         IServerSetup AddApiVersions(string[] apiVersions);
-        IServerSetup ConfigureServer(bool includeSwagger, Type[] sourceTypes = null, Type[] clientTypes = null);
+        IServerSetup ConfigureServer(bool includeSwagger = false, Type[] sourceTypes = null, Type[] clientTypes = null);
     }
 }

@@ -677,7 +677,7 @@ namespace Undersoft.SDK.Series.Base
             return TryDequeue(out output);
         }
 
-        protected virtual void renewClear(int capacity)
+        protected virtual void InnerRenew(int capacity)
         {
             if (capacity != size || count > 0)
             {
@@ -694,26 +694,26 @@ namespace Undersoft.SDK.Series.Base
 
         public virtual void Renew(IEnumerable<V> items)
         {
-            renewClear(minsize);
+            InnerRenew(minsize);
             Put(items);
         }
         public virtual void Renew(IList<V> items)
         {
             int capacity = items.Count;
             capacity += (int)(capacity * CONFLICTS_PERCENT_LIMIT);
-            renewClear(capacity);
+            InnerRenew(capacity);
             Put(items);
         }
         public virtual void Renew(IList<ISeriesItem<V>> items)
         {
             int capacity = items.Count;
             capacity += (int)(capacity * CONFLICTS_PERCENT_LIMIT);
-            renewClear(capacity);
+            InnerRenew(capacity);
             Put(items);
         }
         public virtual void Renew(IEnumerable<ISeriesItem<V>> items)
         {
-            renewClear(minsize);
+            InnerRenew(minsize);
             Put(items);
         }
 
@@ -1262,7 +1262,7 @@ namespace Undersoft.SDK.Series.Base
         {
             if (!disposedValue)
             {
-                renewClear(minsize);
+                InnerRenew(minsize);
 
                 disposedValue = true;
             }
@@ -1277,7 +1277,7 @@ namespace Undersoft.SDK.Series.Base
         {
             await new ValueTask(Task.Run(() =>
             {
-                renewClear(minsize);
+                InnerRenew(minsize);
 
             }));
         }

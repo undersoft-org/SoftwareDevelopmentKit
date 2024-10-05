@@ -20,8 +20,9 @@ public interface IServiceConfiguration : IConfiguration
     ClientProvider ClientProvider(string name);
     IEnumerable<IConfigurationSection> Clients();
 
-    string StoreRoutes(string name);
-    Type StoreTypes(string name);
+    IEnumerable<ISeriesItem<(Type, string)>> StoreRoutes();
+    string StoreRoute(string name);
+    Type StoreType(string name);
     IConfigurationSection Source(string name);
     int SourcePoolSize(IConfigurationSection endpoint);
     string SourceConnectionString(IConfigurationSection endpoint);

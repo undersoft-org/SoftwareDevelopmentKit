@@ -16,19 +16,14 @@ namespace Undersoft.SDK.Service.Server;
 
 public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuilder<TStore>
     where TStore : IDataStore
-{
-    IServiceRegistry _registry;
+{    
     protected ODataConventionModelBuilder odataBuilder;
     protected IEdmModel edmModel;
-    protected static bool actionSetAdded;
-    protected StoreRoutesOptions storeRoutes;
+    protected static bool actionSetAdded;    
 
-    public OpenDataServerBuilder(IServiceRegistry registry) : base()
-    {
-        _registry = registry;
-        odataBuilder = new ODataConventionModelBuilder();
-        StoreType = typeof(TStore);
-        storeRoutes = _registry.GetObject<StoreRoutesOptions>(); 
+    public OpenDataServerBuilder(IServiceRegistry registry) : base("open", typeof(TStore), registry)
+    {        
+        odataBuilder = new ODataConventionModelBuilder();     
     }
 
     public OpenDataServerBuilder(IServiceRegistry registry, string routePrefix, int pageLimit)
@@ -41,7 +36,7 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
     public override void Build()
     {
         BuildEdm();
-        _registry.MergeServices(true);
+        ServiceRegistry.MergeServices(true);
     }
 
     public object EntitySet(Type entityType)
@@ -165,7 +160,7 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
     public IMvcBuilder AddODataServicer(IMvcBuilder mvc)
     {
         var model = GetEdm();
-        var route = GetRoutes();
+        var route = RoutePrefix;
         var defaultBatchHandler = new DefaultODataBatchHandler();
         defaultBatchHandler.MessageQuotas.MaxNestingDepth = 5;
         defaultBatchHandler.MessageQuotas.MaxOperationsPerChangeset = 20;
@@ -195,7 +190,7 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
                 );
         });
         AddODataSupport(mvc);
-        _registry.MergeServices(true);
+        ServiceRegistry.MergeServices(true);
         return mvc;
     }
 
@@ -226,31 +221,7 @@ public class OpenDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
             }
         });
         return mvc;
-    }
-
-    protected override string GetRoutes()
-    {
-
-        if(storeRoutes != null)
-        {
-            var route = storeRoutes.ValueOf(StoreType.Name.Substring(1))?.ToString();
-            if (route != null)
-                return route;
-        }
-
-        if (StoreType == typeof(IEventStore))
-        {
-            return storeRoutes?.OpenEventRoute ?? StoreRoutes.OpenEventRoute;
-        }
-        else if (StoreType == typeof(IAccountStore))
-        {
-            return storeRoutes?.OpenAuthRoute ?? StoreRoutes.OpenAuthRoute;
-        }
-        else
-        {
-            return storeRoutes?.OpenDataRoute ?? StoreRoutes.OpenDataRoute;
-        }
-    }
+    }       
 
     public override IDataServerBuilder AddInvocations<TAuth>() where TAuth : class
     {

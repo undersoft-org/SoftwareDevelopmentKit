@@ -9,15 +9,7 @@ using Undersoft.SDK.Service.Server.Controller.Api;
 
 public class RestDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuilder<TStore> where TStore : IDataStore
 {
-    IServiceRegistry _registry;
-    protected StoreRoutesOptions storeRoutes;
-
-    public RestDataServerBuilder(IServiceRegistry registry) : base()
-    {
-        _registry = registry;
-        StoreType = typeof(TStore);
-        storeRoutes = _registry.GetObject<StoreRoutesOptions>();
-    }
+    public RestDataServerBuilder(IServiceRegistry registry) : base("api", typeof(TStore), registry) { }    
 
     public void AddControllers()
     {
@@ -56,25 +48,6 @@ public class RestDataServerBuilder<TStore> : DataServerBuilder, IDataServerBuild
     public override void Build()
     {
         AddControllers();
-        _registry.MergeServices(true);
-    }
-
-    protected override string GetRoutes()
-    {
-        if (storeRoutes != null)
-        {
-            var route = storeRoutes.ValueOf(StoreType.Name.Substring(1))?.ToString();
-            if (route != null)
-                return route;
-        }
-
-        if (StoreType == typeof(IEventStore))
-        {
-            return storeRoutes?.ApiEventRoute ?? StoreRoutes.ApiEventRoute;
-        }
-        else
-        {
-            return storeRoutes?.ApiDataRoute ?? StoreRoutes.ApiDataRoute;
-        }
+        ServiceRegistry.MergeServices(true);
     }
 }

@@ -16,7 +16,7 @@ public class ApplicationServerHostSetup : ServerHostSetup, IApplicationServerHos
         IWebHostEnvironment environment
     ) : base(application, environment) { }
 
-    public IApplicationServerHostSetup UseServiceApplication(bool useMultitenancy)
+    public IApplicationServerHostSetup UseServiceApplication(bool useMultitenancy = true, string[]? apiVersions = null)
     {
         UseHeaderForwarding();       
 
@@ -39,7 +39,8 @@ public class ApplicationServerHostSetup : ServerHostSetup, IApplicationServerHos
             .UseRouting()
             .UseCors(o => o.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
-        UseSwaggerSetup(new[] { "v1.0" });
+        if(apiVersions != null )
+            UseSwaggerSetup(apiVersions);
 
         _builder.UseAuthentication()
             .UseAuthorization();

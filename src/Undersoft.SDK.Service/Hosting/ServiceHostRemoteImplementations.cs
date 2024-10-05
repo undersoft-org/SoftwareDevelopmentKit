@@ -16,11 +16,11 @@ namespace Undersoft.SDK.Service.Hosting
 
             /**************************************** Data Service Remotes *********************************************/
 
-            foreach (ISeries<IEdmEntityType> contextEntityTypes in OpenDataRegistry.ContextEntities)
+            foreach (ISeries<IEdmEntityType> contextEntityTypes in DataClientRegistry.ContextEntities)
             {
                 foreach (IEdmEntityType _entityType in contextEntityTypes)
                 {
-                    Type entityType = OpenDataRegistry.GetMappedType(_entityType.Name);
+                    Type entityType = DataClientRegistry.GetMappedType(_entityType.Name);
                     if (entityType != null && duplicateCheck.Add(entityType))
                     {
                         Type callerType = DataStoreRegistry.GetRemoteType(entityType.Name);
@@ -30,10 +30,10 @@ namespace Undersoft.SDK.Service.Hosting
                             var reversedName = entityType.FullName + "__&__" + callerType.FullName;
 
                             if (
-                                OpenDataRegistry.Remotes.TryGet(
+                                DataClientRegistry.Remotes.TryGet(
                                     relationName,
                                     out ISeriesItem<RemoteRelation> relation
-                                ) || OpenDataRegistry.Remotes.TryGet(
+                                ) || DataClientRegistry.Remotes.TryGet(
                                     reversedName,
                                     out relation
                                 )
@@ -59,7 +59,7 @@ namespace Undersoft.SDK.Service.Hosting
                             /*****************************************************************************************/
                         }
 
-                        var remoteStores = OpenDataRegistry.GetEntityStoreTypes(entityType);
+                        var remoteStores = DataClientRegistry.GetEntityStoreTypes(entityType);
                         if (remoteStores != null)
                         {
                             /*****************************************************************************************/

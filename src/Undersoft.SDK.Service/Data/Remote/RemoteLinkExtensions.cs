@@ -7,7 +7,7 @@ using Undersoft.SDK.Service.Data.Client;
 
 public static class RemoteLinkExtensions
 {
-    public static OpenDataContext RemoteSetToSet<TOrigin, TTarget>(this OpenDataContext context,
+    public static DataClientContext RemoteSetToSet<TOrigin, TTarget>(this DataClientContext context,
                                                              Expression<Func<IRemoteLink<TOrigin, TTarget>, object>> middlekey,
                                                              Expression<Func<TTarget, object>> targetkey)
                                                           where TOrigin : class, IOrigin, IInnerProxy
@@ -22,7 +22,7 @@ public static class RemoteLinkExtensions
         return context;
     }
 
-    public static OpenDataContext RemoteOneToSet<TOrigin, TTarget>(this OpenDataContext context,
+    public static DataClientContext RemoteOneToSet<TOrigin, TTarget>(this DataClientContext context,
                                                              Expression<Func<TOrigin, object>> originkey,
                                                              Expression<Func<TTarget, object>> targetkey)
                                                          where TOrigin : class, IOrigin, IInnerProxy
@@ -35,7 +35,7 @@ public static class RemoteLinkExtensions
         return context;
     }
 
-    public static OpenDataContext RemoteOneToOne<TOrigin, TTarget>(this OpenDataContext context,
+    public static DataClientContext RemoteOneToOne<TOrigin, TTarget>(this DataClientContext context,
                                                             Expression<Func<TOrigin, object>> originkey,
                                                              Expression<Func<TTarget, object>> targetkey)
                                                         where TOrigin : class, IOrigin, IInnerProxy
