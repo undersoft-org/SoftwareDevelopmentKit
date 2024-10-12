@@ -16,7 +16,7 @@ using Undersoft.SDK.Service.Data.Store;
 [RemoteResult]
 [ApiDataRemote]
 [ApiController]
-[Route($"{StoreRoutes.ApiEventRoute}/Events")]
+[Route($"api/Events")]
 public abstract class ApiEventRemoteController<TKey, TStore, TDto, TModel>
     : ControllerBase,
         IApiEventRemoteController<TKey, TDto, TModel>

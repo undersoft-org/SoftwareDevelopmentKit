@@ -14,7 +14,7 @@ using Undersoft.SDK.Service.Data.Store;
 
 [ApiData]
 [ApiController]
-[Route($"{StoreRoutes.ApiEventRoute}/[controller]")]
+[Route($"api/[controller]")]
 public abstract class ApiEventController<TKey, TStore, TEntity, TDto> : ControllerBase
     where TDto : class, IOrigin, IInnerProxy
     where TEntity : class, IOrigin, IInnerProxy

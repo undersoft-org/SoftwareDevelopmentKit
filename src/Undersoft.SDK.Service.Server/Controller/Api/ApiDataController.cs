@@ -16,7 +16,7 @@ using Undersoft.SDK.Service.Data.Store;
 
 [ApiController]
 [ApiData]
-[Route($"{StoreRoutes.ApiDataRoute}/[controller]")]
+[Route($"api/data/[controller]")]
 public abstract class ApiDataController<TKey, TStore, TEntity, TDto, TService>
     : ApiServiceController<TStore, TService, TDto>,
         IApiDataController<TKey, TEntity, TDto>

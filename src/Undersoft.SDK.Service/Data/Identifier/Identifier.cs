@@ -43,8 +43,8 @@ public class Identifier<TObject> : Identifier, IIdentifier<TObject>
     }
 
     [StringLength(768)]
-    [DataMember(Order = 5)]
-    [Column(Order = 5)]
+    [DataMember(Order = 7)]
+    [Column(Order = 4)]
     [InstantAs(UnmanagedType.ByValTStr, SizeConst = 768)]
     public override string TypeName
     {
@@ -58,7 +58,7 @@ public class Identifier<TObject> : Identifier, IIdentifier<TObject>
         }
     }
 
-    [DataMember(Order = 17)]
+    [DataMember(Order = 19)]
     public virtual TObject Object { get; set; }
 }
 
@@ -79,23 +79,23 @@ public class Identifier : DataObject, IIdentifier
         Value = value.ToString();
     }
 
-    [DataMember(Order = 12)]
+    [DataMember(Order = 14)]
     public virtual long ObjectId { get; set; }
 
-    [DataMember(Order = 13)]
+    [DataMember(Order = 15)]
     public virtual IdKind Kind { get; set; }
 
-    [DataMember(Order = 14)]
+    [DataMember(Order = 16)]
     public virtual string Name { get; set; }
 
-    [DataMember(Order = 15)]
+    [DataMember(Order = 17)]
     public virtual string Value
     {
         get => _value;
         set => _value = value;
     }
 
-    [DataMember(Order = 16)]
+    [DataMember(Order = 18)]
     public long Key
     {
         get

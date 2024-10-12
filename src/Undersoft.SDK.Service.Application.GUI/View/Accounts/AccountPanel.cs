@@ -13,48 +13,48 @@ using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Accounts;
 
-using Undersoft.SDK.Service.Access;
-using Undersoft.SDK.Service.Application.GUI.View.Generic.Accounts;
-
-public class AccountPanel<TAccount> where TAccount : class, IOrigin, IAuthorization, new()
+public class AccountPanel
 {
     public AccountPanel() { }
 
-    public async Task Open(IViewPanel<TAccount> panel)
+    public virtual async Task Open(IViewPanel panel)
     {
-        IViewData<TAccount> data;
+        IViewData data;
         if (panel.Content != null)
-            data = panel.Content;
-        else
-            data = new ViewData<TAccount>(new TAccount(), OperationType.Any);
+        {
+            data = panel.Content;       
 
-        data.EntryMode = EntryMode.Tabs;
-        data.Width = "390px";
+            data.EntryMode = EntryMode.Tabs;
+            data.Width = "390px";
 
-        await panel.Show(
-            data,
-            (p) =>
-            {
-                p.Alignment = HorizontalAlignment.Right;
-                p.Title = $"Account";
-                p.PrimaryAction = "Ok";
-                p.SecondaryAction = null;
-                p.ShowDismiss = true;
-            }
-        );
+            await panel.Show(
+                data,
+                (p) =>
+                {
+                    p.Alignment = HorizontalAlignment.Right;
+                    p.Title = $"Account";
+                    p.PrimaryAction = "Ok";
+                    p.SecondaryAction = null;
+                    p.ShowDismiss = true;
+                }
+            );
 
-        HandlePanel(panel);
+            HandlePanel(panel);
+        }
     }
 
     /// <summary>
     /// </summary>
     /// <param name="result"></param>
     /// <TODO> Handle saving account panel</TODO>
-    public void HandlePanel(IViewPanel<TAccount> panel)
+    public virtual void HandlePanel(IViewPanel panel)
     {
         if (panel.Content != null && panel.Reference != null)
-            ((GenericAccountPanel<TAccount, AccountValidator<TAccount>>)panel.Reference).Access.Register(
+        {
+            dynamic reference = panel.Reference;
+            reference.Access.Register(
                 panel.Content.Model
             );
+        }            
     }
 }

@@ -7,6 +7,7 @@
 // ********************************************************
 
 using Undersoft.SDK.Rubrics.Attributes;
+using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Application.GUI.View.Attributes;
 using Undersoft.SDK.Service.Data.Object;
 
@@ -15,7 +16,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Accounts;
 /// <summary>
 /// The account menu.
 /// </summary>
-public class AccountMenu : DataObject
+public class AccountMenu<TAccount> : DataObject where TAccount : class, IOrigin, IAuthorization
 {
     /// <summary>
     /// Gets or sets the account.
@@ -23,6 +24,6 @@ public class AccountMenu : DataObject
     /// <value>An <see cref="AccountMenuItems"/></value>
     [MenuGroup]
     [Extended]
-    public AccountMenuItems Account { get; set; } = new AccountMenuItems();
+    public AccountMenuItems<TAccount> Account { get; set; } = new();
 }
 
