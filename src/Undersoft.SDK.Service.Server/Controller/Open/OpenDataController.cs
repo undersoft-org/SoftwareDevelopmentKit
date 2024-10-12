@@ -11,6 +11,7 @@ using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Store;
+using Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
 [OpenData]
 public abstract class OpenDataController<TKey, TStore, TEntity, TDto, TService>
@@ -24,6 +25,7 @@ public abstract class OpenDataController<TKey, TStore, TEntity, TDto, TService>
     protected Func<TKey, Func<TDto, object>> _keysetter = k => e => e.SetId(k);
     protected Func<TKey, Expression<Func<TEntity, bool>>> _keymatcher = k => e => k.Equals(e.Id);
     protected Func<TDto, Expression<Func<TEntity, bool>>> _predicate;
+    protected IQueryParameters<TEntity> _parameters;
     protected EventPublishMode _publishMode = EventPublishMode.PropagateCommand;
 
     public OpenDataController() { }
@@ -32,26 +34,29 @@ public abstract class OpenDataController<TKey, TStore, TEntity, TDto, TService>
 
     protected OpenDataController(
         IServicer servicer,
-        EventPublishMode publishMode = EventPublishMode.PropagateCommand
-    ) : this(servicer, null, k => e => e.SetId(k), k => e => k.Equals(e.Id), publishMode) { }
+        EventPublishMode publishMode = EventPublishMode.PropagateCommand, 
+        IQueryParameters<TEntity> parameters = null
+    ) : this(servicer, null, k => e => e.SetId(k), k => e => k.Equals(e.Id), publishMode, parameters) { }
 
     protected OpenDataController(
         IServicer servicer,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate,
         Func<TKey, Func<TDto, object>> keysetter,
         Func<TKey, Expression<Func<TEntity, bool>>> keymatcher,
-        EventPublishMode publishMode = EventPublishMode.PropagateCommand
+        EventPublishMode publishMode = EventPublishMode.PropagateCommand,
+        IQueryParameters<TEntity> parameters = null
     ) : base(servicer)
     {
         _keymatcher = keymatcher;
         _keysetter = keysetter;
         _publishMode = publishMode;
+        _parameters = parameters;
     }
 
     [EnableQuery]
     public virtual IQueryable<TDto> Get()
     {
-        return _servicer.Send(new Get<TStore, TEntity, TDto>()).Result.Result;
+        return _servicer.Send(new Get<TStore, TEntity, TDto>(_parameters)).Result.Result;
     }
 
     [EnableQuery]

@@ -9,7 +9,7 @@ using Undersoft.SDK.Utilities;
 
 public class DbStoreFactory<TContext, TSourceProvider> : IDesignTimeDbContextFactory<TContext>, IDbContextFactory<TContext> where TContext : DbContext where TSourceProvider : class, ISourceProviderConfiguration
 {
-    public TContext CreateDbContext(string[] args)
+    public TContext CreateDbContext(string[]? args)
     {
         var config = new ServiceConfiguration();
         var configSource = config.Source(typeof(TContext).FullName);

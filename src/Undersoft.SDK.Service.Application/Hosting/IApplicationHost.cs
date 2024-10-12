@@ -17,13 +17,13 @@ namespace Undersoft.SDK.Service.Application.Hosting
         string? TenantName { get; set; }
         string TypeName { get; set; }
 
-        ApplicationHost CreateHost(string[] args = null);
+        ApplicationHost CreateHost(string[]? args = null);
 
-        IHostBuilder Configure(string[] args = null);
+        IHostBuilder Configure(string[]? args = null);
 
         IHostBuilder AddWorker<TStartup>() where TStartup : BackgroundService;
 
-        Task RunAsync<TStartup>(Type[] clientServiceType) where TStartup : class, IHostedService;
+        Task RunAsync<TStartup>(Type[]? clientServiceType) where TStartup : class, IHostedService;
 
         void Dispose();
 

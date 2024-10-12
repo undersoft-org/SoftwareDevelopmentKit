@@ -227,19 +227,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
             }
         }
 
-        internal EthernetMethod SendEcho { get; set; }
-
-        public void DirSearch(string dir, List<string> jspfiles)
-        {
-            try
-            {
-                foreach (string f in Directory.GetFiles(dir))
-                    jspfiles.Add(f);
-                foreach (string d in Directory.GetDirectories(dir))
-                    DirSearch(d, jspfiles);
-            }
-            catch (Exception ex) { }
-        }
+        internal EthernetMethod SendEcho { get; set; }       
 
         public void Dispose()
         {

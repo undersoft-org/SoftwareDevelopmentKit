@@ -352,7 +352,10 @@
                     {
                         value = info.GetValue(instance, null);
                     }
-                    catch (Exception ex) { }
+                    catch (Exception ex) 
+                    {
+                        throw new Exception("see inner exception", ex);
+                    }
                     bag.Add(info.Name, value);
                 }
             }

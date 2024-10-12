@@ -12,7 +12,6 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Menu
 
         private Type _type = default!;
         private IProxy _proxy = default!;
-        private IProxy _childProxy = default!;
         private int _index;
         private string? _name { get; set; } = "";
         private string? _label { get; set; }

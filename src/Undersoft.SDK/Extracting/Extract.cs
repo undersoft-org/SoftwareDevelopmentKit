@@ -403,7 +403,7 @@ namespace Undersoft.SDK.Extracting
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("see inner exception", ex);
             }
         }
 

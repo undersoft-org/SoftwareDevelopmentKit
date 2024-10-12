@@ -68,7 +68,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic
         {
             var builder = new StyleBuilder(Style)
                 .AddStyle("width: 100%")
-                .AddStyle("height:140px")
+                .AddStyle("height:150px")
                 .AddStyle("background-color: transparent");
             return builder.Build();
         }
@@ -77,7 +77,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic
         {
             var builder = new StyleBuilder()
                 .AddStyle("width: ")
-                .AddStyle("height: 140px");
+                .AddStyle("height: 150px");
             if (Image != null)
             {
                 builder.AddStyle(GetBackgroundImage())

@@ -3,16 +3,15 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace Undersoft.SDK.Service.Server.Controller.Open;
 
+using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Service;
-using Undersoft.SDK.Service.Access.MultiTenancy;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Operation.Invocation;
+using Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
 [OpenService]
 public abstract class OpenServiceController<TStore, TService, TModel>

@@ -4,6 +4,6 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
 {
     public interface IConnectionPool : IDisposable
     {
-        IConnection Get(string connectionName = null);
+        IConnection Get(string? connectionName = null);
     }
 }

@@ -5,10 +5,7 @@ using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
 {
     public partial class GenericDataSearch : ViewStore
-    {
-        private bool _isAddable = false;
-        private bool _isOpen;
-
+    {        
         protected override void OnInitialized()
         {
             if (Parent == null)

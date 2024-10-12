@@ -5,11 +5,10 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic;
 
 public partial class GenericMarkupString : FluentComponentBase
 {
-    private string? _content;
-    private bool _raiseContentConverted;
+    private string? _content;    
 
     /// <summary>
-    /// Gets or sets the Markdown content 
+    /// Gets or sets the Markdown content
     /// </summary>
     [Parameter]
     public string? Content { get; set; }
@@ -34,8 +33,7 @@ public partial class GenericMarkupString : FluentComponentBase
             if (OnContentConverted.HasDelegate)
             {
                 OnContentConverted.InvokeAsync();
-            }
-            _raiseContentConverted = true;
+            }            
             StateHasChanged();
         }
     }

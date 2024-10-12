@@ -12,6 +12,7 @@ using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Query;
 using Undersoft.SDK.Service.Data.Response;
 using Undersoft.SDK.Service.Data.Store;
+using Undersoft.SDK.Service.Server.Controller.Stream.Abstractions;
 
 [StreamData]
 public abstract class StreamEventController<TKey, TStore, TEntity, TDto> : ControllerBase, IStreamDataController<TDto> where TDto : class, IOrigin, IInnerProxy

@@ -19,7 +19,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Abstraction
         IViewData? Data { get; }
         IViewData? Content { get; }
         IDialogReference? Reference { get; }
-        IDialogService Service { get; }
+        IDialogService? Service { get; }
 
         Task Show(IViewData data);
 

@@ -18,12 +18,12 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
             return JsonSerializer.SerializeToUtf8Bytes(obj);
         }
 
-        public object Deserialize(byte[] value, Type type)
+        public object? Deserialize(byte[] value, Type type)
         {
             return JsonSerializer.Deserialize(new ReadOnlySpan<byte>(value), type);
         }
 
-        public T Deserialize<T>(byte[] value)
+        public T? Deserialize<T>(byte[] value)
         {
             return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(value));
         }

@@ -1,4 +1,5 @@
 ﻿@using System.ComponentModel.DataAnnotations
+@using Undersoft.SDK.Service.Application.GUI.View.Generic.Time
 @using Undersoft.SDK.Proxies
 @using Undersoft.SDK.Rubrics
 @using Undersoft.SDK;
@@ -70,13 +71,13 @@ else if (_type.IsValueType)
     @if (_type.IsAssignableTo(typeof(DateTime)))
     {
         <div style="width:@Width">
-            <FluentDatePicker Name="@_name" Appearance="@Appearance" Style="width:100%" @bind-Value="@_dateValue" Label="@_label" Autofocus="@AutoFocus" DisplayName="@_name" Required="@_required" @ref="Reference" Disabled="@Rubric.Disabled" />
+            <GenericDatePicker Name="@_name" Appearance="@Appearance"   Style="width:100%" @bind-Value="@_dateValue" Label="@_label" Autofocus="@AutoFocus" DisplayName="@_name" Required="@_required" @ref="Reference" Disabled="@Rubric.Disabled" />
         </div>
     }
     else if (_type.IsAssignableTo(typeof(DateOnly)))
     {
         <div style="width:@Width">
-            <FluentDatePicker Name="@_name" Appearance="@Appearance" Style="width:100%" @bind-Value="@_dateOnlyValue" Label="@_label" Autofocus="@AutoFocus" DisplayName="@_name" Required="@_required" @ref="Reference" Disabled="@Rubric.Disabled" />
+            <GenericDatePicker Name="@_name" Appearance="@Appearance" Style="width:100%" @bind-Value="@_dateOnlyValue" Label="@_label" Autofocus="@AutoFocus" DisplayName="@_name" Required="@_required" @ref="Reference" Disabled="@Rubric.Disabled" />
         </div>
     }
     else if (_type.IsAssignableTo(typeof(TimeOnly)))
@@ -94,7 +95,7 @@ else if (_type.IsValueType)
     else if (_type.IsAssignableTo(typeof(DateTimeOffset)))
     {
         <div style="width:@Width">
-            <FluentDatePicker Name="@_name" Appearance="@Appearance" Style="width:100%" @bind-Value="@_dateOffsetValue" Label="@_label" Autofocus="@AutoFocus" DisplayName="@_name" Required="@_required" @ref="Reference" Disabled="@Rubric.Disabled" />
+            <GenericDatePicker Name="@_name" Appearance="@Appearance" Style="width:100%" @bind-Value="@_dateOffsetValue" Label="@_label" Autofocus="@AutoFocus" DisplayName="@_name" Required="@_required" @ref="Reference" Disabled="@Rubric.Disabled" />
         </div>
     }
     else if (_type.IsAssignableTo(typeof(Enum)))

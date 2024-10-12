@@ -19,7 +19,7 @@ public partial class GenericLayout : LayoutComponentBase
     public bool IsDevice;
     protected bool _mobile;
     protected string? _prevUri;
-    private GenericPageContents? _toc;
+    private GenericPageContents? _toc = null;
     private bool _menuChecked = true;
     private readonly string APPEARANCEKEY = "APPEARANCEKEY";
 
@@ -139,7 +139,8 @@ public partial class GenericLayout : LayoutComponentBase
 
     private async Task RefreshTableOfContentsAsync()
     {
-        await _toc!.RefreshAsync();
+        if(_toc != null)
+            await _toc.RefreshAsync();
     }
 
     private void HandleChecked()

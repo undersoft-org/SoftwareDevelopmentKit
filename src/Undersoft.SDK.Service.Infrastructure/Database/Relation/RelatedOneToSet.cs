@@ -13,10 +13,10 @@ public class RelatedOneToSet<TParent, TChild> where TParent : class, IOrigin, II
     readonly ModelBuilder _modelBuilder;
     readonly EntityTypeBuilder<TChild> _secondBuilder;
     readonly string CHILD_NAME = $"{typeof(TChild).Name.Replace(typeof(TParent).Name, string.Empty)}s";
-    readonly string CHILD_SCHEMA = null;
+    readonly string? CHILD_SCHEMA = null;
     readonly string CHILD_TABLE_NAME = $"{typeof(TChild).Name}s";
     readonly string PARENT_NAME = typeof(TParent).Name;
-    readonly string PARENT_SCHEMA = null;
+    readonly string? PARENT_SCHEMA = null;
     readonly string PARENT_TABLE_NAME = $"{typeof(TParent).Name}s";
 
     public RelatedOneToSet(

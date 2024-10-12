@@ -59,7 +59,7 @@
 
                 Connected.Invoke(this);
             }
-            catch (SocketException ex) { throw ex; }
+            catch (SocketException ex) { throw new Exception("see inner exception", ex); }
         }
 
         public void Dispose()
@@ -342,7 +342,10 @@
                 context.Listener.EndConnect(result);
                 connectNotice.Set();
             }
-            catch (SocketException ex) { }
+            catch (SocketException ex) 
+            {
+                throw new Exception("see inner exception", ex);
+            }
         }
     }
 }

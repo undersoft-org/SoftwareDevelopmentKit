@@ -14,7 +14,7 @@ using Operation.Remote.Query;
 using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Store;
-
+using Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
 [IgnoreApi]
 [OpenDataRemote]

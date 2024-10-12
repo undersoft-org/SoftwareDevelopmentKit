@@ -9,11 +9,12 @@ using Undersoft.SDK.Service;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Operation.Invocation;
+using Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
 [OpenServiceRemote]
 public abstract class OpenServiceRemoteController<TStore, TService, TDto>
     : ODataController,
-        IOpenDataActionRemoteController<TStore, TService, TDto>
+        IOpenServiceRemoteController<TStore, TService, TDto>
     where TService : class
     where TDto : class
     where TStore : IDataServiceStore

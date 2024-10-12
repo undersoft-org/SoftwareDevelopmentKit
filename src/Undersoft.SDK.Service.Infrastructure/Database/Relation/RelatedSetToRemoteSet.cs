@@ -16,8 +16,8 @@ public class RelatedSetToRemoteSet<TLeft, TRight>
     private readonly string RIGHT_TABLE_NAME = typeof(TRight).Name + "s";
     private readonly string LEFT_NAME = typeof(TLeft).Name + "s";
     private readonly string RIGHT_NAME = typeof(TRight).Name.Replace(typeof(TLeft).Name, "") + "s";
-    private readonly string LEFT_SCHEMA = null;
-    private readonly string RIGHT_SCHEMA = null;
+    private readonly string? LEFT_SCHEMA = null;
+    private readonly string? RIGHT_SCHEMA = null;
 
     private readonly ExpandSite _expandSite;
     private readonly ModelBuilder _modelBuilder;
@@ -28,24 +28,24 @@ public class RelatedSetToRemoteSet<TLeft, TRight>
     public RelatedSetToRemoteSet(
         ModelBuilder modelBuilder,
         ExpandSite expandSite = ExpandSite.None,
-        string dbSchema = null
+        string? dbSchema = null
     ) : this(modelBuilder, null, null, expandSite, dbSchema, dbSchema) { }
 
     public RelatedSetToRemoteSet(
         ModelBuilder modelBuilder,
-        string leftName,
+        string? leftName,
         ExpandSite expandSite = ExpandSite.None,
-        string dbSchema = null
+        string? dbSchema = null
     ) : this(modelBuilder, leftName, null, expandSite, dbSchema, dbSchema)
     { }
 
     public RelatedSetToRemoteSet(
         ModelBuilder modelBuilder,
-        string leftName,
-        string leftTableName,
+        string? leftName,
+        string? leftTableName,
         ExpandSite expandSite = ExpandSite.None,
-        string parentSchema = null,
-        string childSchema = null
+        string? parentSchema = null,
+        string? childSchema = null
     )
     {
         _modelBuilder = modelBuilder;
@@ -60,6 +60,8 @@ public class RelatedSetToRemoteSet<TLeft, TRight>
             LEFT_NAME = leftName;
         if (parentSchema != null)
             LEFT_SCHEMA = parentSchema;
+        if (childSchema != null)
+            RIGHT_SCHEMA = childSchema;
 
         RELATION_TABLE_NAME = LEFT_NAME;
     }

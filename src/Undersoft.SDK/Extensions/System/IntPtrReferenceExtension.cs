@@ -12,9 +12,9 @@
             if (obj == null)
                 return System.IntPtr.Zero;
 
-            System.TypedReference reference = __makeref(obj);
+            TypedReference reference = __makeref(obj);
 
-            System.TypedReference* pRef = &reference;
+            TypedReference* pRef = &reference;
 
             return (IntPtr)pRef;
         }

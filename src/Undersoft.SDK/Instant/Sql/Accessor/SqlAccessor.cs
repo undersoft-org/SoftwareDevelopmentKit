@@ -36,7 +36,7 @@
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("see inner exception", ex);
             }
         }
 
@@ -59,7 +59,7 @@
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("see inner exception", ex);
             }
         }
 
@@ -76,7 +76,7 @@
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("see inner exception", ex);
             }
         }
 
@@ -93,7 +93,7 @@
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new Exception("see inner exception", ex);
             }
         }
     }

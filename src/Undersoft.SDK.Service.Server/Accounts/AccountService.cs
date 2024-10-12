@@ -531,7 +531,7 @@ public class AccountService<TAccount> : IAccessService<TAccount>
         return account;
     }
 
-    public Task<ClaimsPrincipal?> RefreshAsync()
+    public Task<ClaimsPrincipal> RefreshAsync()
     {
         throw new Exception("Account service doesn't provide current state");
     }

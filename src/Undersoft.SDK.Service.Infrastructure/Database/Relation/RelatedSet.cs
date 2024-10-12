@@ -21,7 +21,7 @@ public class RelatedSet<TEntity> : KeyedCollection<long, TEntity>, IFindable whe
         return item.Id == 0 ? item.AutoId() : item.Id;
     }
 
-    public TEntity Single
+    public TEntity? Single
     {
         get => this.FirstOrDefault();
     }
@@ -30,12 +30,14 @@ public class RelatedSet<TEntity> : KeyedCollection<long, TEntity>, IFindable whe
     {
         get
         {
-            TryGetValue(key.UniqueKey64(), out TEntity result);
-            return result;
+            if(TryGetValue(key.UniqueKey64(), out TEntity? result))
+                return result;
+            return default!;
         }
         set
         {
-            Dictionary[key.UniqueKey64()] = (TEntity)value;
+            if(Dictionary != null)
+                Dictionary[key.UniqueKey64()] = (TEntity)value;
         }
     }
 }

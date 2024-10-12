@@ -19,8 +19,8 @@ public class RelatedSetToSetExplicitly<TLeft, TRight>
         typeof(TRight).Name != typeof(TLeft).Name
             ? typeof(TRight).Name.Replace(typeof(TLeft).Name, "") + "s"
             : typeof(TRight).Name + "s";
-    private readonly string LEFT_SCHEMA = null;
-    private readonly string RIGHT_SCHEMA = null;
+    private readonly string? LEFT_SCHEMA = null;
+    private readonly string? RIGHT_SCHEMA = null;
 
     private readonly ExpandSite _expandSite;
     private readonly ModelBuilder _modelBuilder;

@@ -9,6 +9,6 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
 
         Task UnbindAsync(string routingKey);
 
-        void OnMessageReceived(Func<IModel, BasicDeliverEventArgs, Task> callback);
+        void OnMessageReceived(Func<IModel?, BasicDeliverEventArgs, Task> callback);
     }
 }

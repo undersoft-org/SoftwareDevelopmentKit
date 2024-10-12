@@ -10,8 +10,8 @@ public class RelatedOneToOne<TParent, TChild>
     private readonly string CHILD_TABLE_NAME = typeof(TChild).Name + "s";
     private readonly string PARENT_NAME = typeof(TParent).Name;
     private readonly string CHILD_NAME = typeof(TChild).Name.Replace(typeof(TParent).Name, "");
-    private readonly string PARENT_SCHEMA = null;
-    private readonly string CHILD_SCHEMA = null;
+    private readonly string? PARENT_SCHEMA = null;
+    private readonly string? CHILD_SCHEMA = null;
 
     private readonly ExpandSite _expandSite;
     private readonly ModelBuilder _modelBuilder;

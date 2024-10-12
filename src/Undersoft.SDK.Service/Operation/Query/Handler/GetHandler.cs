@@ -26,10 +26,11 @@ public class GetHandler<TStore, TEntity, TDto>
     )
     {
         request.Result = await _repository
-            .GetNoTrackedQueryAsync<TDto>(
+            .FilterNoTrackedQueryAsync<TDto>(
                 request.Offset,
                 request.Limit,
-                request.Parameters.Sort,
+                request.Parameters.Filter,
+                request.Parameters.Sort,    
                 request.Parameters.Expanders
             )
             .ConfigureAwait(false);

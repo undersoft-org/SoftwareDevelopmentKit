@@ -13,7 +13,8 @@ namespace Undersoft.SDK.Service.Server
 
         protected ISeries<Type> ContextTypes { get; set; } = new Catalog<Type>();
 
-        public DataServerBuilder(string providerPrefix, Type storeType, IServiceRegistry registry) : base()
+        public DataServerBuilder(string providerPrefix, Type storeType, IServiceRegistry registry)
+            : base()
         {
             ServiceRegistry = registry;
             RouteRegistry = ServiceRegistry.GetObject<StoreRouteRegistry>();
@@ -21,10 +22,8 @@ namespace Undersoft.SDK.Service.Server
             RoutePrefix = GetRoute(providerPrefix);
         }
 
-        public DataServerBuilder(Type storeType, IServiceRegistry registry) : this(null, storeType, registry)
-        {
-          
-        }
+        public DataServerBuilder(Type storeType, IServiceRegistry registry)
+            : this(null, storeType, registry) { }
 
         public abstract void Build();
 
@@ -37,32 +36,41 @@ namespace Undersoft.SDK.Service.Server
                     route = routeEntry.Item2;
             }
 
-            switch (StoreType)
+            if (route == null)
             {
-                case IEventStore:
-                    route = StoreRoutes.EventStore;
-                    break;
-                case IAccountStore:
-                    route = StoreRoutes.AccountStore;
-                    break;
-                default:
-                    route = StoreRoutes.DataStore;
-                    break;
-            };
-            return $"{providerPrefix}/{route}";
+                switch (StoreType)
+                {
+                    case IEventStore:
+                        route = StoreRoutes.EventStore;
+                        break;
+                    case IAccountStore:
+                        route = StoreRoutes.AccountStore;
+                        break;
+                    default:
+                        route = StoreRoutes.DataStore;
+                        break;
+                }
+                ;
+            }
+            return string.Format(
+                "{0}{1}",
+                providerPrefix,
+                !string.IsNullOrEmpty(route) ? $"/{route}" : ""
+            );
         }
 
-        public virtual IDataServerBuilder AddDataServices<TContext>() where TContext : DbContext
+        public virtual IDataServerBuilder AddDataServices<TContext>()
+            where TContext : DbContext
         {
             TryAdd(typeof(TContext));
             return this;
         }
 
-        public virtual IDataServerBuilder AddInvocations<TAuth>() where TAuth : class
+        public virtual IDataServerBuilder AddInvocations<TAuth>()
+            where TAuth : class
         {
             return this;
         }
-
     }
 
     public enum DataServerTypes
@@ -71,6 +79,6 @@ namespace Undersoft.SDK.Service.Server
         Grpc = 1,
         OData = 2,
         Rest = 4,
-        All = 7
+        All = 7,
     }
 }

@@ -10,7 +10,7 @@ namespace Undersoft.SDK.Service.Application.Server.Hosting;
 
 public class ApplicationServerHost : ServiceHost, IHost, IApplicationServerHost
 {
-    private readonly HostBuilder _hostBuilder;
+    protected new HostBuilder _hostBuilder = default!;
 
     public ApplicationServerHost(Action<IWebHostBuilder> builder) : this()
     {
@@ -52,9 +52,9 @@ public class ApplicationServerHost : ServiceHost, IHost, IApplicationServerHost
         }
     }
 
-    public Registry<ApplicationHost> ApplicationHosts { get; set; } = default!;
+    public Registry<ApplicationHost>? ApplicationHosts { get; set; }
 
     private Registry<IServiceProvider>? hostedApplications;
     public Registry<IServiceProvider> HostedApplications =>
-        hostedApplications ??= ApplicationHosts.Select(s => s.Services).ToRegistry();
+        hostedApplications ??= ApplicationHosts?.Select(s => s.Services).ToRegistry() ?? default!;
 }

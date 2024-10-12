@@ -4,7 +4,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Landing
 {
     public partial class GenericLandingBody : FluentComponentBase
     {
-        private GenericPageContents? _toc;
+        private GenericPageContents? _toc = null;
 
         [CascadingParameter]
         public RenderFragment? Body { get; set; }
@@ -13,7 +13,8 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Landing
 
         private async Task RefreshTableOfContentsAsync()
         {
-            await _toc!.RefreshAsync();
+            if(_toc != null)
+                await _toc.RefreshAsync();
         }
     }
 }

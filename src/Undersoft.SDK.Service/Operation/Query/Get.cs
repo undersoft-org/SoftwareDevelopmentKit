@@ -10,21 +10,12 @@ public class Get<TStore, TEntity, TDto> : Query<TEntity, TDto>
     where TDto : class, IOrigin, IInnerProxy
 {
 
-    public Get() : base(OperationType.Get | OperationType.Query) { }
-
-    public Get(
-        int offset,
-        int limit
-    ) : base(OperationType.Get | OperationType.Query)
-    {
-        Offset = offset;
-        Limit = limit;
-    }
+    public Get(IQueryParameters<TEntity> parameters = null) : base(OperationType.Get | OperationType.Query, parameters) { }
 
     public Get(
         int offset,
         int limit,
-        IQueryParameters<TEntity> parameters
+        IQueryParameters<TEntity> parameters = null
     ) : base(OperationType.Get | OperationType.Query, parameters)
     {
         Offset = offset;

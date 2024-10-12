@@ -12,7 +12,7 @@ public class ApplicationHost : Identifiable, IHost, IApplicationHost
         _hostBuilder = new ApplicationHostBuilder(this);
     }
 
-    public virtual ApplicationHost CreateHost(string[] args = null!)
+    public virtual ApplicationHost CreateHost(string[]? args = null!)
     {
         var sh = new ApplicationHost();
         sh.Configure(args);
@@ -25,12 +25,12 @@ public class ApplicationHost : Identifiable, IHost, IApplicationHost
         return _hostBuilder.AddWorker<TStartup>();
     }
 
-    public virtual IHostBuilder Configure(string[] args = null!)
+    public virtual IHostBuilder Configure(string[]? args = null!)
     {
         return _hostBuilder.Configure(args);
     }
 
-    public virtual Task RunAsync<TStartup>(Type[] clientServiceTypes = null!) where TStartup : class, IHostedService
+    public virtual Task RunAsync<TStartup>(Type[]? clientServiceTypes = null!) where TStartup : class, IHostedService
     {
         Host = _hostBuilder.Build<TStartup>(clientServiceTypes);
 

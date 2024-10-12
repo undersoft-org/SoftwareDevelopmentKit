@@ -5,7 +5,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Presenting
 {
     public partial class GenericPresentingBody<TMenu> : FluentComponentBase where TMenu : class, IOrigin, IInnerProxy
     {
-        private GenericPageContents? _toc;
+        private GenericPageContents? _toc = null;
 
         [CascadingParameter]
         public RenderFragment? Body { get; set; }
@@ -14,7 +14,8 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Presenting
 
         private async Task RefreshTableOfContentsAsync()
         {
-            await _toc!.RefreshAsync();
+            if(_toc != null)
+                await _toc.RefreshAsync();
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Undersoft.SDK.Service.Server.Controller.Api
+namespace Undersoft.SDK.Service.Server.Controller.Api.Abstractions
 {
     public interface IApiDataSetController<TKey, TEntity, TDto> where TDto : class, IOrigin, IInnerProxy
     {

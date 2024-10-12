@@ -711,8 +711,8 @@
             if (type.IsAssignableTo(typeof(ulong)))
                 return (Id == (long)value);
             if (type.IsAssignableTo(typeof(long)))
-                return ((long)Id == (long)value);
-            return ReferenceEquals(Id, value);
+                return (Id == (long)value);
+            return false;
         }
 
         public bool Equals(IUnique g)

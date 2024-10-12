@@ -8,7 +8,6 @@ namespace Undersoft.SDK.Serialization
         private static Dictionary<string, Type> _typeMappings;
         private static Dictionary<string, IBinarySerializable> _cache;
         private static int _intHandleCounter = 0;
-        private static BinarySerializable _default = null;
         public static Dictionary<string, Type> TypeMappings
         {
             get { return _typeMappings; }
@@ -52,9 +51,9 @@ namespace Undersoft.SDK.Serialization
                     }
                 }
             }
-            catch (Exception x)
+            catch (Exception ex)
             {
-                throw x;
+                throw new Exception("see inner exception", ex);
             }
         }
 

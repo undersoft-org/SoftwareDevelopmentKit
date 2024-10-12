@@ -12,6 +12,7 @@ using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Store;
+using Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
 [OpenData]
 public abstract class OpenEventController<TKey, TStore, TEntity, TDto>

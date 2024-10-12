@@ -33,7 +33,7 @@ public static class ObjectExtractExtenstion
 
     public unsafe static Byte[] GetBytes(this IList obj, bool forKeys = false)
     {
-        int length = 256,
+        int length = 1024,
             offset = 0,
             postoffset = 0,
             count = obj.Count,
@@ -83,12 +83,7 @@ public static class ObjectExtractExtenstion
 
             if (toResize)
             {
-                i--;
-                toResize = false;
-                byte* _buffer = stackalloc byte[postoffset];
-                Extract.CopyBlock(_buffer, buffer, offset);
-                buffer = _buffer;
-                length = postoffset;
+                throw new Exception("Key list size of 1024 bytes exceeded");
             }
             else
                 offset = postoffset;
@@ -124,10 +119,7 @@ public static class ObjectExtractExtenstion
                 int fs = (s + offset);
                 if (fs > length)
                 {
-                    byte* _buffer = stackalloc byte[fs];
-                    Extract.CopyBlock(_buffer, buffer, offset);
-                    buffer = _buffer;
-                    length = fs;
+                    throw new Exception($"Key list size of {length} bytes exceeded");
                 }
 
                 fixed (char* c = (string)o)

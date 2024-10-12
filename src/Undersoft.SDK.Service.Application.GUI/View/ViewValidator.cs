@@ -11,7 +11,7 @@ using Undersoft.SDK.Service.Data.Store;
 
 public class ViewValidator<TModel> : AbstractValidator<IViewData<TModel>>, IValidator<IViewData<TModel>> where TModel : class, IOrigin, IInnerProxy
 {
-    protected static readonly string[]? SupportedLanguages;
+    protected static readonly string[] SupportedLanguages = ["pl-PL", "en-US"];
 
     protected IServicer _servicer;
 

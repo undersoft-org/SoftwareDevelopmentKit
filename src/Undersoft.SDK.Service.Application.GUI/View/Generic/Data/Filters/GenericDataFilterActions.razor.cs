@@ -6,8 +6,7 @@ public partial class GenericDataFilterActions : ViewItem
 {
     private Type _type = default!;
     private string? _name { get; set; } = "";
-    private string? _label { get; set; }
-    private IViewStore? _store;
+    private string? _label { get; set; }    
 
     [CascadingParameter]
     private bool IsOpen { get; set; }

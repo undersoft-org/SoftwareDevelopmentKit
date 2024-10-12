@@ -29,7 +29,8 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
         {
             if (firstRender)
             {
-                _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
+
+                _jsModule = await JSRuntime!.InvokeAsync<IJSObjectReference>(
                     "import",
                     "./_content/Undersoft.SDK.Service.Application.GUI/View/Generic/Nav/GenericNavMenu.razor.js"
                 );

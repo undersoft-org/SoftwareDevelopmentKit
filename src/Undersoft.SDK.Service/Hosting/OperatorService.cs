@@ -6,7 +6,7 @@ namespace Undersoft.SDK.Service.Hosting
     {
         private readonly Task _completedTask = Task.CompletedTask;
         private int _executionCount = 0;
-        private Timer? _timer;
+        private Timer _timer;
 
         public OperatorService(IServicer servicer)
         {

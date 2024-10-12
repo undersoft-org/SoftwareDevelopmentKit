@@ -38,8 +38,6 @@ namespace Undersoft.SDK.Estimating
 
         public int IterationLimit = 50;
 
-        private string tempHardFileName = "surveyResults.art";
-
         public AdaptiveResonainceTheoryEstimator()
         {
             NameList = new Listing<string>();

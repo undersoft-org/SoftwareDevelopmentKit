@@ -14,7 +14,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
         public IRabbitMqMessageConsumer Create(
             ExchangeDeclareConfiguration exchange,
             QueueDeclareConfiguration queue,
-            string connectionName = null)
+            string? connectionName = null)
         {
             var consumer = ServiceScope.ServiceProvider.GetRequiredService<RabbitMqMessageConsumer>();
             consumer.Initialize(exchange, queue, connectionName);

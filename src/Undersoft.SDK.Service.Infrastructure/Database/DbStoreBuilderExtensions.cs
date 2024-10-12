@@ -311,7 +311,7 @@ public static class DbStoreBuilderExtensions
         this ModelBuilder builder,
         ExpandSite expandSite = ExpandSite.None,
         bool autoinclude = false,
-        string dbSchema = null
+        string? dbSchema = null
     )
         where TLeft : class, IOrigin, IInnerProxy
         where TRight : class, IOrigin, IInnerProxy

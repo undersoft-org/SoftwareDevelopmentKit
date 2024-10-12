@@ -193,84 +193,73 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Byte[] UniqueBytes64(this IList obj, long seed = 0)
         {
-            int length = 256,
+            int length = 1024,
                 offset = 0,
                 postoffset = 0,
                 count = obj.Count,
                 s = 0;
-            byte[] bytes = new byte[length];
-            fixed (byte* buff = bytes)
-            {
-                byte* buffer = buff;
-                bool toResize = false;
 
-                for (int i = 0; i < count; i++)
+            byte* buffer = stackalloc byte[length];
+            bool toResize = false;
+
+            for (int i = 0; i < count; i++)
+            {
+                object o = obj[i];
+                var t = o.GetType();
+                if (t == typeof(string))
                 {
-                    object o = obj[i];
-                    var t = o.GetType();
-                    if (t == typeof(string))
+                    string str = ((string)o);
+                    s = str.Length * sizeof(char);
+                    postoffset = (s + offset);
+
+                    if (postoffset > length)
+                        toResize = true;
+                    else
+                        fixed (char* c = str)
+                            Extract.CopyBlock(buffer, (byte*)c, offset, s);
+                }
+                else
+                {
+                    if (t.IsAssignableTo(typeof(IUnique)))
                     {
-                        string str = ((string)o);
-                        s = str.Length * sizeof(char);
+                        s = 8;
                         postoffset = (s + offset);
 
                         if (postoffset > length)
                             toResize = true;
                         else
-                            fixed (char* c = str)
-                                Extract.CopyBlock(buffer, (byte*)c, offset, s);
+                            *((long*)(buffer + offset)) = ((IUnique)o).Id;
                     }
                     else
                     {
-                        if (t.IsAssignableTo(typeof(IUnique)))
+                        if (t.IsAssignableTo(typeof(Type)))
                         {
-                            s = 8;
-                            postoffset = (s + offset);
-
-                            if (postoffset > length)
-                                toResize = true;
-                            else
-                                *((long*)(buffer + offset)) = ((IUnique)o).Id;
+                            o = ((Type)o).FullName;
+                            s = ((Type)o).FullName.Length * 2;
                         }
                         else
                         {
-                            if (t.IsAssignableTo(typeof(Type)))
-                            {
-                                o = ((Type)o).FullName;
-                                s = ((Type)o).FullName.Length * 2;
-                            }
-                            else
-                            {
-                                s = o.GetSize();
-                            }
-
-                            postoffset = (s + offset);
-
-                            if (postoffset > length)
-                                toResize = true;
-                            else
-                                Extract.StructureToPointer(o, buffer + offset);
+                            s = o.GetSize();
                         }
-                    }
 
-                    if (toResize)
-                    {
-                        i--;
-                        toResize = false;
-                        byte[] b = new byte[postoffset];
-                        fixed (byte* _buffer = b)
-                        {
-                            Extract.CopyBlock(_buffer, buffer, offset);
-                            buffer = _buffer;
-                            length = postoffset;
-                        }
+                        postoffset = (s + offset);
+
+                        if (postoffset > length)
+                            toResize = true;
+                        else
+                            Extract.StructureToPointer(o, buffer + offset);
                     }
-                    else
-                        offset = postoffset;
                 }
 
-                return Hasher64.ComputeBytes(buffer, offset, seed);
+                if (toResize)
+                {
+                    throw new Exception("Key list total size of 1024 bytes exceeded");
+                }
+                else
+                    offset = postoffset;
             }
+
+            return Hasher64.ComputeBytes(buffer, offset, seed);
         }
 
         public static Byte[] UniqueBytes64(this IntPtr bytes, int length, long seed = 0)
@@ -463,86 +452,75 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Int64 UniqueKey64(this IList obj, long seed = 0)
         {
-            int length = 256,
+            int length = 1024,
                 offset = 0,
                 postoffset = 0,
                 count = obj.Count,
                 s = 0;
-            byte[] bytes = new byte[length];
-            fixed (byte* buff = bytes)
+
+            byte* buffer = stackalloc byte[length];
+            bool toResize = false;
+
+            for (int i = 0; i < count; i++)
             {
-                byte* buffer = buff;
-                bool toResize = false;
+                object o = obj[i];
+                Type t = o.GetType();
 
-                for (int i = 0; i < count; i++)
+                if (t == typeof(string))
                 {
-                    object o = obj[i];
-                    Type t = o.GetType();
-
-                    if (t == typeof(string))
+                    string str = ((string)o);
+                    s = str.Length * 2;
+                    postoffset = (s + offset);
+                    if (postoffset > length)
+                        toResize = true;
+                    else
                     {
-                        string str = ((string)o);
-                        s = str.Length * 2;
+                        fixed (char* c = str)
+                            Extract.CopyBlock(buffer, (byte*)c, offset, s);
+                    }
+                }
+                else
+                {
+                    if (t.IsAssignableTo(typeof(IUnique)))
+                    {
+                        s = 8;
                         postoffset = (s + offset);
+
                         if (postoffset > length)
                             toResize = true;
                         else
-                        {
-                            fixed (char* c = str)
-                                Extract.CopyBlock(buffer, (byte*)c, offset, s);
-                        }
+                            *((long*)(buffer + offset)) = ((IUnique)o).Id;
                     }
                     else
                     {
-                        if (t.IsAssignableTo(typeof(IUnique)))
+                        if (t.IsAssignableTo(typeof(Type)))
                         {
-                            s = 8;
-                            postoffset = (s + offset);
-
-                            if (postoffset > length)
-                                toResize = true;
-                            else
-                                *((long*)(buffer + offset)) = ((IUnique)o).Id;
+                            o = ((Type)o).FullName;
+                            s = ((Type)o).FullName.Length * 2;
                         }
                         else
                         {
-                            if (t.IsAssignableTo(typeof(Type)))
-                            {
-                                o = ((Type)o).FullName;
-                                s = ((Type)o).FullName.Length * 2;
-                            }
-                            else
-                            {
-                                s = o.GetSize();
-                            }
-
-                            postoffset = (s + offset);
-
-                            if (postoffset > length)
-                                toResize = true;
-                            else
-                                Extract.StructureToPointer(o, buffer + offset);
+                            s = o.GetSize();
                         }
-                    }
 
-                    if (toResize)
-                    {
-                        i--;
-                        toResize = false;
-                        byte[] b = new byte[postoffset];
-                        fixed (byte* _buffer = b)
-                        {
-                            Extract.CopyBlock(_buffer, buffer, offset);
-                            buffer = _buffer;
-                            length = postoffset;
-                        }
+                        postoffset = (s + offset);
+
+                        if (postoffset > length)
+                            toResize = true;
+                        else
+                            Extract.StructureToPointer(o, buffer + offset);
                     }
-                    else
-                        offset = postoffset;
                 }
 
-                return (long)Hasher64.ComputeKey(buffer, offset, seed);
+                if (toResize)
+                {
+                    throw new Exception("Key list total size of 1024 bytes exceeded");
+                }
+                else
+                    offset = postoffset;
             }
+
+            return (long)Hasher64.ComputeKey(buffer, offset, seed);
         }
 
         public static Int64 UniqueKey64(this IntPtr ptr, int length, long seed = 0)

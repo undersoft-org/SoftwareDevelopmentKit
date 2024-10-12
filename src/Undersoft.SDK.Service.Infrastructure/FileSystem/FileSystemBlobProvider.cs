@@ -22,7 +22,7 @@ public class FileSystemBlobProvider : BlobProviderBase
         }
 
         var dirname = Path.GetDirectoryName(filePath);
-        if (!Directory.Exists(dirname))
+        if (dirname != null && !Directory.Exists(dirname))
             Directory.CreateDirectory(dirname);
 
         var fileMode = args.OverrideExisting
@@ -71,7 +71,7 @@ public class FileSystemBlobProvider : BlobProviderBase
 
         if (!File.Exists(filePath))
         {
-            return null;
+            return default!;
         }
 
         return await Policy.Handle<IOException>()

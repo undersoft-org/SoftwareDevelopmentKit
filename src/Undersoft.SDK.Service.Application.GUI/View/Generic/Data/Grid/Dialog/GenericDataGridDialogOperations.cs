@@ -150,13 +150,13 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid.Dialog
         protected virtual async Task SaveAsync(IViewData item, bool changesets = false)
         {
             var vs = ((IViewDataStore)item.Root!).ViewStore;
-            await vs.DataStore.SaveAsync(changesets);
+            await vs!.DataStore.SaveAsync(changesets);
         }
 
         protected virtual async Task StageAsync(IViewData item, bool changesets = false)
         {
             var vs = ((IViewDataStore)item.Root!).ViewStore;
-            await vs.DataStore.StageAsync(changesets);
+            await vs!.DataStore.StageAsync(changesets);
         }
     }
 }

@@ -27,7 +27,8 @@ public abstract class ApiCqrsController<TKey, TEntry, TReport, TEntity, TDto, TS
 
     protected ApiCqrsController(
         IServicer servicer,
-        EventPublishMode publishMode = EventPublishMode.PropagateCommand
+        EventPublishMode publishMode = EventPublishMode.PropagateCommand,
+        IQueryParameters<TEntity> parameters = null
     ) : this(servicer, null, k => e => e.SetId(k), null, publishMode) { }
 
     protected ApiCqrsController(
@@ -35,12 +36,14 @@ public abstract class ApiCqrsController<TKey, TEntry, TReport, TEntity, TDto, TS
         Func<TDto, Expression<Func<TEntity, bool>>> predicate,
         Func<TKey, Func<TDto, object>> keysetter,
         Func<TKey, Expression<Func<TEntity, bool>>> keymatcher,
-        EventPublishMode publishMode = EventPublishMode.PropagateCommand
+        EventPublishMode publishMode = EventPublishMode.PropagateCommand,
+        IQueryParameters<TEntity> parameters = null
     ) : base(servicer)
     {
         _keymatcher = keymatcher;
         _keysetter = keysetter;
         _publishMode = publishMode;
+        _parameters = parameters;
     }
 
     [HttpGet]
@@ -48,7 +51,7 @@ public abstract class ApiCqrsController<TKey, TEntry, TReport, TEntity, TDto, TS
     {
         return Ok(
             (
-                await _servicer.Send(new Get<TReport, TEntity, TDto>((page - 1) * limit, limit))
+                await _servicer.Send(new Get<TReport, TEntity, TDto>((page - 1) * limit, limit, _parameters))
             ).Result.Commit()
         );
     }

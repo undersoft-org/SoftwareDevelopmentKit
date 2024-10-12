@@ -16,7 +16,7 @@ namespace Undersoft.SDK.Service.Application.Hosting
             _applicationHost = applicationHost;
         }
 
-        public IHostBuilder Configure(string[] args = null)
+        public IHostBuilder Configure(string[]? args = null)
 
         {
             var config = ServiceConfigurationHelper.BuildConfiguration();
@@ -31,7 +31,7 @@ namespace Undersoft.SDK.Service.Application.Hosting
             return _hostBuilder;
         }
 
-        public IHost Build<TStartup>(Type[] serviceClients = null!) where TStartup : class, IHostedService
+        public IHost Build<TStartup>(Type[]? serviceClients = null!) where TStartup : class, IHostedService
         {
             _hostBuilder.ConfigureServices(
              (hostContext, services) =>

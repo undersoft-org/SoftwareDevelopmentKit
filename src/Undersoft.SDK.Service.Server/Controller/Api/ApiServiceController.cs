@@ -8,6 +8,7 @@ using Undersoft.SDK.Service;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Operation.Invocation;
+using Undersoft.SDK.Service.Server.Controller.Api.Abstractions;
 
 [ApiService]
 public abstract class ApiServiceController<TStore, TService, TModel>

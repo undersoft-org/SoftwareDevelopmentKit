@@ -16,7 +16,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
         //TODO: Accessing to the List<IEventHandlerFactory> may not be thread-safe!
         protected Registry<Type> EventTypes { get; }
         protected IRabbitMqMessageConsumerFactory MessageConsumerFactory { get; }
-        protected IRabbitMqMessageConsumer Consumer { get; private set; }
+        protected IRabbitMqMessageConsumer? Consumer { get; private set; }
 
         private bool _exchangeCreated;
 
@@ -45,12 +45,12 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
         {
             Consumer = MessageConsumerFactory.Create(
                 new ExchangeDeclareConfiguration(
-                    rabbitMqEventBusOptions.ExchangeName,
+                    rabbitMqEventBusOptions.ExchangeName!,
                     type: rabbitMqEventBusOptions.GetExchangeTypeOrDefault(),
                     durable: true
                 ),
                 new QueueDeclareConfiguration(
-                    rabbitMqEventBusOptions.ClientName,
+                    rabbitMqEventBusOptions.ClientName!,
                     durable: true,
                     exclusive: false,
                     autoDelete: false,
@@ -64,7 +64,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
             SubscribeHandlers(new EventBusOptions().Handlers);
         }
 
-        private async Task ProcessEventAsync(IModel channel, BasicDeliverEventArgs ea)
+        private async Task ProcessEventAsync(IModel? channel, BasicDeliverEventArgs ea)
         {
             var eventName = ea.RoutingKey;
             var eventType = EventTypes.Get(eventName);
@@ -80,7 +80,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
             await TriggerHandlersAsync(eventType, eventData);
         }
 
-        public override IDisposable Subscribe(Type eventType, IEventHandlerFactory factory)
+        public override IDisposable? Subscribe(Type eventType, IEventHandlerFactory factory)
         {
             var handlerFactories = GetOrCreateHandlerFactories(eventType);
 
@@ -93,7 +93,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
 
             if (handlerFactories.Count == 1) //TODO: Multi-threading!
             {
-                Consumer.BindAsync(EventNameAttribute.GetNameOrDefault(eventType));
+                Consumer?.BindAsync(EventNameAttribute.GetNameOrDefault(eventType));
             }
 
             return new EventHandlerFactoryUnregistrar(this, eventType, factory);
@@ -127,7 +127,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
             GetOrCreateHandlerFactories(eventType).RemoveAll(
                         factory =>
                             factory is EventHandlerSingletonFactory &&
-                            (factory as EventHandlerSingletonFactory).HandlerInstance == handler
+                            (factory as EventHandlerSingletonFactory)?.HandlerInstance == handler
                     );
             ;
         }
@@ -157,8 +157,8 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
         public Task PublishAsync(
             Type eventType,
             object eventData,
-            IBasicProperties properties,
-            Dictionary<string, object> headersArguments = null)
+            IBasicProperties? properties,
+            Dictionary<string, object>? headersArguments = null)
         {
             var eventName = EventNameAttribute.GetNameOrDefault(eventType);
             var body = Serializer.Serialize(eventData);
@@ -169,8 +169,8 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
         protected virtual Task PublishAsync(
             string eventName,
             byte[] body,
-            IBasicProperties properties,
-            Dictionary<string, object> headersArguments = null,
+            IBasicProperties? properties,
+            Dictionary<string, object>? headersArguments = null,
             long? eventId = null)
         {
             using (var channel = ConnectionPool.Get(rabbitMqEventBusOptions.ConnectionName).CreateModel())
@@ -183,8 +183,8 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
             IModel channel,
             string eventName,
             byte[] body,
-            IBasicProperties properties,
-            Dictionary<string, object> headersArguments = null,
+            IBasicProperties? properties,
+            Dictionary<string, object>? headersArguments = null,
             long? eventId = null)
         {
             EnsureExchangeExists(channel);
@@ -235,7 +235,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
             _exchangeCreated = true;
         }
 
-        private void SetEventMessageHeaders(IBasicProperties properties, Dictionary<string, object> headersArguments)
+        private void SetEventMessageHeaders(IBasicProperties properties, Dictionary<string, object>? headersArguments)
         {
             if (headersArguments == null)
             {

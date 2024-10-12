@@ -5,8 +5,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Filters
 {
     public partial class GenericDataFilterItem : ViewItem
     {
-        private Type _type = default!;
-        private int _index;
+        private Type _type = default!;        
         private string? _name { get; set; } = "";
         private string? _label { get; set; }
         private List<Option<string>>? _operandOptions { get; set; }

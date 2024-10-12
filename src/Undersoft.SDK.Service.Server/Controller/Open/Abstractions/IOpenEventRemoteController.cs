@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Results;
 
 
-namespace Undersoft.SDK.Service.Server.Controller.Open
+namespace Undersoft.SDK.Service.Server.Controller.Open.Abstractions
 {
     public interface IOpenEventRemoteController<TKey, TModel> where TModel : class, IOrigin, IInnerProxy
     {

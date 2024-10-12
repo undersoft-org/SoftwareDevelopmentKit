@@ -11,7 +11,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
         private IJSObjectReference _jsModule = default!;
 
         [Inject]
-        public override IJSRuntime JSRuntime { get; set; } = default!;
+        public override IJSRuntime? JSRuntime { get; set; } = default!;
 
         [Inject]
         private NavigationManager _navigation { get; set; } = default!;
@@ -32,7 +32,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
         {
             if (firstRender)
             {
-                _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                _jsModule = await JSRuntime!.InvokeAsync<IJSObjectReference>(
                     "import",
                     "./_content/Undersoft.SDK.Service.Application.GUI/View/Generic/Nav/GenericNavSet.razor.js"
                 );

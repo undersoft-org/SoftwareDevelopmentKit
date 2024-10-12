@@ -8,7 +8,7 @@ namespace Undersoft.SDK.Service.Server;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Contract;
 using Undersoft.SDK.Service.Data.Store;
-using Undersoft.SDK.Service.Server.Controller.Stream;
+using Undersoft.SDK.Service.Server.Controller.Stream.Abstractions;
 
 public class GrpcDataServerBuilder<TServiceStore>
     : DataServerBuilder,

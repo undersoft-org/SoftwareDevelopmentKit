@@ -5,9 +5,7 @@ using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Search
 {
     public partial class GenericDataSearchItem : ViewItem
-    {
-        private Type _type = default!;
-        private int _index;
+    {        
         private string? _name { get; set; } = "";
         private string? _label { get; set; }
         private GenericDataSearch _parent = default!;

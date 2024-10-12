@@ -12,6 +12,7 @@ using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Query;
 using Undersoft.SDK.Service.Data.Response;
 using Undersoft.SDK.Service.Data.Store;
+using Undersoft.SDK.Service.Server.Controller.Stream.Abstractions;
 
 [StreamData]
 public abstract class StreamDataController<TKey, TEntry, TReport, TEntity, TDto> : ControllerBase, IStreamDataController<TDto>

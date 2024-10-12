@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
 
-namespace Undersoft.SDK.Service.Server.Controller.Open;
+namespace Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
 using Microsoft.AspNetCore.OData.Results;
 using Undersoft.SDK.Proxies;

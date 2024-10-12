@@ -193,7 +193,7 @@ public class ViewData<TModel> : ListingBase<IViewData>, IViewData<TModel>
 
     public string ViewId => "cn" + Model.CodeNo;
 
-    public virtual int Index
+    public override int Index
     {
         get => (Parent != null) ? Parent.IndexOf(this) : Model.Index;
         set => throw new Exception("Cannot set index");

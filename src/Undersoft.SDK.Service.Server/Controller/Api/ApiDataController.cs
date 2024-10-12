@@ -13,6 +13,7 @@ using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Query;
 using Undersoft.SDK.Service.Data.Repository;
 using Undersoft.SDK.Service.Data.Store;
+using Undersoft.SDK.Service.Server.Controller.Api.Abstractions;
 
 [ApiController]
 [ApiData]
@@ -28,28 +29,30 @@ public abstract class ApiDataController<TKey, TStore, TEntity, TDto, TService>
     protected Func<TKey, Func<TDto, object>> _keysetter = k => e => e.SetId(k);
     protected Func<TKey, Expression<Func<TEntity, bool>>> _keymatcher;
     protected Func<TDto, Expression<Func<TEntity, bool>>> _predicate;
+    protected IQueryParameters<TEntity> _parameters;
     protected EventPublishMode _publishMode;
 
-    protected ApiDataController() { }
-
-    protected ApiDataController(IServicer servicer) : base(servicer) { }
+    protected ApiDataController() { }    
 
     protected ApiDataController(
         IServicer servicer,
-        EventPublishMode publishMode = EventPublishMode.PropagateCommand
-    ) : this(servicer, null, k => e => e.SetId(k), null, publishMode) { }
+        EventPublishMode publishMode = EventPublishMode.PropagateCommand,
+        IQueryParameters<TEntity> parameters = null
+    ) : this(servicer, null, k => e => e.SetId(k), null, publishMode, parameters) { }
 
     protected ApiDataController(
         IServicer servicer,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate,
         Func<TKey, Func<TDto, object>> keysetter,
         Func<TKey, Expression<Func<TEntity, bool>>> keymatcher,
-        EventPublishMode publishMode = EventPublishMode.PropagateCommand
+        EventPublishMode publishMode = EventPublishMode.PropagateCommand,
+        IQueryParameters<TEntity> parameters = null
     ) : base(servicer)
     {
         _keymatcher = keymatcher;
         _keysetter = keysetter;
         _publishMode = publishMode;
+        _parameters = parameters;
     }
 
     public virtual Func<IRepository<TEntity>, IQueryable<TEntity>> Transformations { get; set; }
@@ -58,7 +61,7 @@ public abstract class ApiDataController<TKey, TStore, TEntity, TDto, TService>
     public virtual async Task<IActionResult> Get([FromHeader] int page, [FromHeader] int limit)
     {
         return Ok((await _servicer
-                .Report(new Get<TStore, TEntity, TDto>((page - 1) * limit, limit))).Result.Commit()
+                .Report(new Get<TStore, TEntity, TDto>((page - 1) * limit, limit, _parameters))).Result.Commit()
         );
     }
 

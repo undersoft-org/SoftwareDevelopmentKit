@@ -18,7 +18,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
             Connections = new ConcurrentDictionary<string, Lazy<IConnection>>();
         }
 
-        public virtual IConnection Get(string connectionName = null)
+        public virtual IConnection Get(string? connectionName = null)
         {
             connectionName ??= RabbitMqConnections.DefaultConnectionName;
 

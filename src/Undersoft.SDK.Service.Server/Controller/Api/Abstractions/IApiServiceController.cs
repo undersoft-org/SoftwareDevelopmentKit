@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Undersoft.SDK.Service.Server.Controller.Api
+namespace Undersoft.SDK.Service.Server.Controller.Api.Abstractions
 {
     public interface IApiServiceController<TStore, TService, TModel> where TModel : class, IOrigin, IInnerProxy
     where TService : class

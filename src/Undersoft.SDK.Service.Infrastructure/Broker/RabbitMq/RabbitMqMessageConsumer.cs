@@ -17,15 +17,15 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
 
         protected System.Timers.Timer Timer { get; }
 
-        protected ExchangeDeclareConfiguration Exchange { get; private set; }
+        protected ExchangeDeclareConfiguration? Exchange { get; private set; }
 
-        protected QueueDeclareConfiguration Queue { get; private set; }
+        protected QueueDeclareConfiguration? Queue { get; private set; }
 
-        protected string ConnectionName { get; private set; }
+        protected string? ConnectionName { get; private set; }
 
-        protected ConcurrentBag<Func<IModel, BasicDeliverEventArgs, Task>> Callbacks { get; }
+        protected ConcurrentBag<Func<IModel?, BasicDeliverEventArgs, Task>> Callbacks { get; }
 
-        protected IModel Channel { get; private set; }
+        protected IModel? Channel { get; private set; }
 
         protected ConcurrentQueue<QueueBindCommand> QueueBindCommands { get; }
 
@@ -37,7 +37,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
             ConnectionPool = connectionPool;
             Logger = NullLogger<RabbitMqMessageConsumer>.Instance;
             QueueBindCommands = new ConcurrentQueue<QueueBindCommand>();
-            Callbacks = new ConcurrentBag<Func<IModel, BasicDeliverEventArgs, Task>>();
+            Callbacks = new ConcurrentBag<Func<IModel?, BasicDeliverEventArgs, Task>>();
             Timer = new System.Timers.Timer();
             Timer.Interval = 5000; //5 sec.
             Timer.Elapsed += Timer_Elapsed;
@@ -46,7 +46,7 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
         public void Initialize(
             [DisallowNull] ExchangeDeclareConfiguration exchange,
             [DisallowNull] QueueDeclareConfiguration queue,
-            string connectionName = null)
+            string? connectionName = null)
         {
             Exchange = exchange;
             Queue = queue;
@@ -87,15 +87,15 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
                                 {
                                     case QueueBindType.Bind:
                                         Channel.QueueBind(
-                                            queue: Queue.QueueName,
-                                            exchange: Exchange.ExchangeName,
+                                            queue: Queue?.QueueName,
+                                            exchange: Exchange?.ExchangeName,
                                             routingKey: command.RoutingKey
                                         );
                                         break;
                                     case QueueBindType.Unbind:
                                         Channel.QueueUnbind(
-                                            queue: Queue.QueueName,
-                                            exchange: Exchange.ExchangeName,
+                                            queue: Queue?.QueueName,
+                                            exchange: Exchange?.ExchangeName,
                                             routingKey: command.RoutingKey
                                         );
                                         break;
@@ -117,12 +117,12 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
              );
         }
 
-        public virtual void OnMessageReceived(Func<IModel, BasicDeliverEventArgs, Task> callback)
+        public virtual void OnMessageReceived(Func<IModel?, BasicDeliverEventArgs, Task> callback)
         {
             Callbacks.Add(callback);
         }
 
-        protected virtual void Timer_Elapsed(object sender, ElapsedEventArgs args)
+        protected virtual void Timer_Elapsed(object? sender, ElapsedEventArgs args)
         {
             if (Channel == null || Channel.IsOpen == false)
             {
@@ -139,8 +139,11 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
 
                 try
                 {
+                    if (Exchange == null || ConnectionName == null || Queue == null || Channel == null)
+                        throw new Exception("Exchange, ConnectionName, Queue, Channel cannot be null");
+
                     Channel = ConnectionPool
-                        .Get(ConnectionName)
+                        .Get(ConnectionName!)
                         .CreateModel();
 
                     Channel.ExchangeDeclare(
@@ -190,13 +193,13 @@ namespace Undersoft.SDK.Service.Data.Event.Provider.RabbitMq
                     await callback(Channel, basicDeliverEventArgs);
                 }
 
-                Channel.BasicAck(basicDeliverEventArgs.DeliveryTag, multiple: false);
+                Channel?.BasicAck(basicDeliverEventArgs.DeliveryTag, multiple: false);
             }
             catch (Exception ex)
             {
                 try
                 {
-                    Channel.BasicNack(
+                    Channel?.BasicNack(
                         basicDeliverEventArgs.DeliveryTag,
                         multiple: false,
                         requeue: true
