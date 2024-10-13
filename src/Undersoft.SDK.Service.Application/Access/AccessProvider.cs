@@ -26,6 +26,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
     private TAccount? _account;
     private AccessState? _accessState;
     private DateTime? _expiration;
+    private bool _refreshing = false;
 
     private AuthenticationState Anonymous =>
         new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
@@ -54,17 +55,19 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
         {
             return Anonymous;
         }
-               
+       
         var expirationTimeString = await js.GetFromLocalStorage(EXPIRATIONTOKENKEY);
+
         if (expirationTimeString != null)
         {
             DateTimeOffset expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expirationTimeString));
 
             if (IsExpired(expirationTime.LocalDateTime))
             {
-                await CleanUp();
+                await CleanUp().ConfigureAwait(false);
                 return Anonymous;
             }
+
             if (IsExpired(expirationTime.LocalDateTime.AddMinutes(-5)))
             {
                 var auth = await SignedIn(
@@ -72,26 +75,35 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
                     {
                         Credentials = new Credentials() { Email = email, SessionToken = token }
                     }
-                );
+                ).ConfigureAwait(false);
 
                 if (auth != null)
                 {
                     _authorization.Credentials = auth.Credentials;
-                    token = auth.Credentials.SessionToken;
+                    if (auth.Credentials.SessionToken == null)
+                        return Anonymous;
+                    else
+                        return GetAccessState(auth.Credentials.SessionToken);
                 }
-
-                if (token == null)
-                    return Anonymous;
+                else
+                    return Anonymous;                
             }
         }
 
         _authorization.Credentials.Email = email;
-        return await GetAccessStateAsync(token);
+        return await GetAccessStateAsync(token).ConfigureAwait(false);
     }
 
     public async Task<ClaimsPrincipal?> RefreshAsync()
     {
-        return (await GetAuthenticationStateAsync()).User;
+        ClaimsPrincipal? user = null; 
+        if (!_refreshing)
+        {
+            _refreshing = true;
+            user = (await GetAuthenticationStateAsync()).User;
+            _refreshing = false;
+        }
+        return user;
     }
 
     public AccessState GetAccessState(string token)

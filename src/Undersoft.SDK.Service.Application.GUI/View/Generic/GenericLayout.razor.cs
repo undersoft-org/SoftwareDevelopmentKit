@@ -160,18 +160,25 @@ public partial class GenericLayout : LayoutComponentBase
                 if (DateTime.Now.AddMinutes(5) > Access.Expiration)
                 {
                     if (DateTime.Now.AddSeconds(30) > Access.Expiration)
+                    {
                         NavigationManager.NavigateTo("", true);
-                    else                    
-                        _ = Access.RefreshAsync();                    
-                }
+                    }
+                    else
+                    {
+                        _ = Access.RefreshAsync();
+                    }
 
-                _prevUri = e.Location;
-                if (_mobile && _menuChecked == true)
-                {
-                    _menuChecked = false;
-                    StateHasChanged();
                 }
             }
+
+            _prevUri = e.Location;
+            if (_mobile && _menuChecked == true)
+            {
+                _menuChecked = false;
+                StateHasChanged();
+            }
+
+
         }
     }
 }

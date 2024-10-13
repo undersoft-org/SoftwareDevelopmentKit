@@ -1,6 +1,7 @@
 ﻿using IdentityModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Server.Accounts.Identity;
 using Undersoft.SDK.Service.Server.Accounts.Tokens;
@@ -69,7 +70,7 @@ public class AccountManager : Registry<IAccount>, IAccountManager
         if (validation.IsValid)
         {
             var emailClaim = validation
-                .ClaimsIdentity.Claims.Where(c => c.Type == JwtClaimTypes.Email)
+                .ClaimsIdentity.Claims.Where(c => c.Type == ClaimTypes.Email)
                 .FirstOrDefault();
             if (emailClaim != null)
                 _token = await GetToken(

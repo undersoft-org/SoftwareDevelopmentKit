@@ -104,30 +104,23 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
         manager.AddKeyedObject(_tenant.Id, _tenant);
 
         AddSourceProviderConfiguration();
-
         AddRepositorySources();
-
         AddDataStoreImplementations();
 
         base.ConfigureServices(null);
 
         AddValidators(null);
-
         AddMediator(null);
 
         registry.Configure<DataProtectionTokenProviderOptions>(o =>
-            o.TokenLifespan = TimeSpan.FromHours(1)
+            o.TokenLifespan = TimeSpan.FromMinutes(30)
         );
         registry.AddTransient<IAccountManager, AccountManager>();
 
         AddServerSetupCqrsImplementations();
-
         AddServerSetupInvocationImplementations();
-
         AddServerSetupRemoteCqrsImplementations();
-
         AddServerSetupRemoteInvocationImplementations();
-
         Services.AddOpenDataRemoteImplementations();
 
         Services.MergeServices(true);
@@ -324,8 +317,7 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
 
         registry.AddTransient<AccountEmailConfirmationTokenProvider<AccountUser>>();
         registry.AddTransient<AccountPasswordResetTokenProvider<AccountUser>>();
-        registry.AddTransient<AccountChangeEmailTokenProvider<AccountUser>>();
-        registry.AddTransient<AccountRegistrationProcessTokenProvider<AccountUser>>();
+        registry.AddTransient<AccountChangeEmailTokenProvider<AccountUser>>();        
 
         registry.AddTransient<IAccountManager, AccountManager>();
         registry.AddTransient<AccountService<TAccount>>();
@@ -340,7 +332,7 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
         var jwtOptions = new AccountTokenOptions();
         var jwtFactory = new AccountTokenGenerator(30, jwtOptions);
         registry.Configure<DataProtectionTokenProviderOptions>(o =>
-            o.TokenLifespan = TimeSpan.FromHours(1)
+            o.TokenLifespan = TimeSpan.FromMinutes(30)
         );
 
         registry.AddObject(jwtFactory);
@@ -454,10 +446,10 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
         {
             string connectionString = config.SourceConnectionString(source);
             
-            if (_tenant != null)
+            if (_tenant != null && connectionString.Contains("db"))
                 connectionString = connectionString.Replace(
-                    "-db;",
-                    $"-{_tenant.Id.ToString()}-db;"
+                    "db",
+                    $"{_tenant.Id.ToString()}-db"
                 );
 
             SourceProvider provider = config.SourceProvider(source);
@@ -566,9 +558,7 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
         Assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
         AddJsonOptions();
-
         AddSourceProviderConfiguration();
-
         Services.AddHttpContextAccessor();
 
         if (sourceTypes != null)
@@ -581,15 +571,10 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
         base.ConfigureServices(clientTypes);
 
         AddValidators(Assemblies);
-
         AddMediator(Assemblies);
-
         AddServerSetupCqrsImplementations();
-
-        AddServerSetupInvocationImplementations();
-
-        AddServerSetupRemoteCqrsImplementations();
-
+        AddServerSetupInvocationImplementations();        
+        AddServerSetupRemoteCqrsImplementations();        
         AddServerSetupRemoteInvocationImplementations();
 
         if (includeSwagger)
