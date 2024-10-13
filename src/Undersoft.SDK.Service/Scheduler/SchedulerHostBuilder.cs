@@ -35,7 +35,7 @@ namespace Undersoft.SDK.Service.Hosting
         public IHost Build<TStartup>(Type[] serviceClients = null)
             where TStartup : class, IHostedService
         {
-            _hostBuilder.ConfigureServices(async
+            _hostBuilder.ConfigureServices(
                 (hostContext, services) =>
                 {
                     var setup = services
@@ -45,16 +45,14 @@ namespace Undersoft.SDK.Service.Hosting
                     setup.Manager.Registry.AddHostedService<TStartup>()
                          .AddSingleton<SchedulerServiceHost>((SchedulerServiceHost)_serviceHost);
                     setup.Manager.Registry.MergeServices(services, true);
-                    setup.Manager.Registry.ReplaceServices(services);
                     manager = setup.Manager;
-                    await manager.UseServiceClients();
+                    manager.UseServiceClients().Wait();
+                    manager.Registry.MergeServices(services, true);
                 }
             );
 
             _serviceHost.Host = _hostBuilder.Build();
-
             manager.ReplaceProvider(_serviceHost.Services);
-
             return _serviceHost.Host;
         }
 

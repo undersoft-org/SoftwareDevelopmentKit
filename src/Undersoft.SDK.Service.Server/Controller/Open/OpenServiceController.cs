@@ -92,7 +92,7 @@ public abstract class OpenServiceController<TStore, TService, TModel>
     {
         return args.ForEach(async a =>
             {
-                var preresult = await _servicer.Perform(invocation(a));
+                var preresult = await _servicer.Send(invocation(a));
 
                 if (preresult.GetType().IsArray)
                     return new Arguments(

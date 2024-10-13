@@ -365,12 +365,13 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
             options.DefaultPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
-
-            ao.Scopes.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim("scope", s)));
-
-            ao.Roles.ForEach(s => options.AddPolicy(s, policy => policy.RequireRole(s)));
-
-            ao.Claims.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim(s)));
+            
+            if(ao.Scopes != null)
+                ao.Scopes.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim("scope", s)));
+            if (ao.Roles != null)
+                ao.Roles.ForEach(s => options.AddPolicy(s, policy => policy.RequireRole(s)));
+            if (ao.Claims != null)
+                ao.Claims.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim(s)));
         });
 
         return this;

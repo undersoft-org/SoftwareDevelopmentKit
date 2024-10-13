@@ -46,7 +46,7 @@ namespace Undersoft.SDK.Service.Hosting
                                     ),
                                     relation.Value
                                 );
-                                //if(relation.Value.Towards == Towards.SetToSet)
+                                //if (relation.Value.Towards == Towards.SetToSet)
                                 //{
                                 //    service.AddObject(
                                 //    typeof(IRemoteRelation<,>).MakeGenericType(

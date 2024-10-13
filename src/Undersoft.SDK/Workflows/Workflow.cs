@@ -1,4 +1,5 @@
-﻿using Undersoft.SDK.Uniques;
+﻿using Microsoft.Extensions.ObjectPool;
+using Undersoft.SDK.Uniques;
 
 namespace Undersoft.SDK.Workflows
 {
@@ -16,14 +17,24 @@ namespace Undersoft.SDK.Workflows
         public Workflow() : this(Unique.NewId.ToString()) { }
 
         public Workflow(string name) : base(new WorkAspects(name))
+        {          
+        }
+
+        public void Configure()
+        {
+            ConfigureWork();
+            ConfigureFlow();
+        }
+
+        public virtual void ConfigureWork()
         {
         }
 
-        public virtual void ConfigureWork(Workflow workflow)
+        public virtual void ConfigureFlow()
         {
         }
-
-        public virtual void ConfigureFlow(Workflow workflow)
+         
+        public virtual void Execute(params object[] args)
         {
         }
 

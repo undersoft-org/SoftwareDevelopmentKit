@@ -40,7 +40,7 @@ public abstract class ApiServiceController<TStore, TService, TModel>
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _servicer.Perform(
+        var result = await _servicer.Send(
             new Access<TStore, TService, TModel>(method, arguments)
         );
 
@@ -56,7 +56,7 @@ public abstract class ApiServiceController<TStore, TService, TModel>
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _servicer.Perform(
+        var result = await _servicer.Send(
             new Action<TStore, TService, TModel>(method, arguments)
         );
 
@@ -72,7 +72,7 @@ public abstract class ApiServiceController<TStore, TService, TModel>
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _servicer.Perform(
+        var result = await _servicer.Send(
             new Setup<TStore, TService, TModel>(method, arguments)
         );
 

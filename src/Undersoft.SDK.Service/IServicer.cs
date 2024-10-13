@@ -14,8 +14,7 @@ namespace Undersoft.SDK.Service
         Lazy<R> LazyServe<T, R>(Func<T, R> function)
             where T : class
             where R : class;
-        Task Publish(object notification, CancellationToken cancellationToken = default);
-        Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification;
+       
         Task<R> Run<T, R>(Func<T, Task<R>> function) where T : class;
         Task<R> Run<T, R>(string methodname, params object[] parameters) where T : class where R : class;
         Task Run<T>(Func<T, Task> function) where T : class;
@@ -28,12 +27,12 @@ namespace Undersoft.SDK.Service
         Task<int> SaveStore(IRepositorySource endpoint, bool asTransaction = false);
         Task<int> SaveStores(bool asTransaction = false);
         Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
+        Task<object> Send(object request, CancellationToken cancellationToken = default);
+        Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest;
+        Task Publish(object notification, CancellationToken cancellationToken = default);
+        Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification;
         Task<object> Report(object request, CancellationToken cancellationToken = default);
-        Task<TResponse> Report<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
-        Task<object> Entry(object request, CancellationToken cancellationToken = default);
-        Task<TResponse> Entry<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
-        Task<object> Perform(object request, CancellationToken cancellationToken = default);
-        Task<TResponse> Perform<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
+        Task<TResponse> Report<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);       
         Task<R> Serve<T, R>(Func<T, Task<R>> function) where T : class;
         Task<R> Serve<T, R>(string methodname, params object[] parameters) where T : class where R : class;
         Task Serve<T>(Func<T, Task> function) where T : class;

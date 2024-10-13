@@ -23,8 +23,8 @@ namespace Undersoft.SDK.Service
 
         public IServiceProvider RootProvider => GetRootProvider();
 
-        public IServiceProvider Provider => provider ??= GetProvider();
-        public IServiceScope Session => session ??= GetSession();
+        public IServiceProvider Provider => GetProvider();
+        public IServiceScope Session => GetSession();
 
         static ServiceManager()
         {
@@ -219,7 +219,7 @@ namespace Undersoft.SDK.Service
 
         public IServiceProvider GetProvider()
         {
-            return provider ??= registry.GetProvider() ?? BuildInternalProvider();
+            return (provider ??= registry.GetProvider()) ?? BuildInternalProvider();
         }
 
         public IServiceProviderFactory<IServiceCollection> GetProviderFactory()
@@ -306,12 +306,14 @@ namespace Undersoft.SDK.Service
 
         public IServiceScope GetSession()
         {
-            return CreateSession();
+            return session ?? CreateSession();
         }
 
         public IServiceScope CreateSession()
         {
-            return session ??= CreateScope();
+            var s = CreateScope();
+            session = s;
+            return s;
         }
 
         public static IServiceScope CreateRootSession()

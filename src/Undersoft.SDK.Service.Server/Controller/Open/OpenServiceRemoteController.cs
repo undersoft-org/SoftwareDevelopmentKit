@@ -93,7 +93,7 @@ public abstract class OpenServiceRemoteController<TStore, TService, TDto>
     {
         return args.ForEach(async a =>
             {
-                var preresult = await _servicer.Perform(invocation(a));
+                var preresult = await _servicer.Send(invocation(a));
                 return (Arguments)preresult.Output;
             })
             .Commit();

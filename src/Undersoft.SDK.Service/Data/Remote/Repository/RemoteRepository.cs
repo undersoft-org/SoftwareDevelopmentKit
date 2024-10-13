@@ -328,7 +328,7 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         ISeries<TEntity> deck = null;
         if (predicate != null)
         {
-            deck = entities.SelectMany(e => Query.Where(predicate(e))).ToListing();
+            deck = entities.SelectMany(e => Query.Where(predicate(e))).ToRegistry();
         }
         else
         {
