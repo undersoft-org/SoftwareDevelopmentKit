@@ -8,14 +8,14 @@ namespace Undersoft.SDK.Service.Data.Blob.Container
             [DisallowNull] this BlobContainerConfiguration containerConfiguration,
             [DisallowNull] string name)
         {
-            return (T)containerConfiguration.GetConfiguration(name);
+            return (T)GetConfiguration(containerConfiguration, name);
         }
 
         public static object GetConfiguration(
             [DisallowNull] this BlobContainerConfiguration containerConfiguration,
             [DisallowNull] string name)
         {
-            var value = containerConfiguration.GetConfigurationOrNull(name);
+            var value = containerConfiguration.GetConfiguration(name);
             if (value == null)
             {
                 throw new Exception($"Could not find the configuration value for '{name}'!");

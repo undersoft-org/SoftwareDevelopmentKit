@@ -162,32 +162,32 @@ public class Servicer : ServiceManager, IServicer, IMediator
             {
                 return await function.Invoke(scope.ServiceProvider.GetService<T>());
             }
-        });
+        }).ConfigureAwait(false); ;
     }
 
     public async Task Serve<T>(Func<T, Task> function) where T : class
     {
-        await Task.Run(async () =>
+        await Task.Factory.StartNew(async () =>
         {
             using (var scope = CreateScope())
             {
-                await function.Invoke(scope.ServiceProvider.GetService<T>());
+                await function.Invoke(scope.ServiceProvider.GetService<T>()).ConfigureAwait(false);
             }
-        });
+        }, TaskCreationOptions.AttachedToParent).ConfigureAwait(false);
     }
 
     public async Task Serve<T>(string methodname, params object[] parameters) where T : class
     {
-        await Task.Run(async () =>
+        await Task.Factory.StartNew(async () =>
         {
             using (var scope = CreateScope())
             {
                 return await new Invoker(
                     scope.ServiceProvider.GetService<T>(),
                     methodname
-                ).InvokeAsync(parameters);
+                ).InvokeAsync(parameters).ConfigureAwait(false); ;
             }
-        });
+        }, TaskCreationOptions.AttachedToParent).ConfigureAwait(false); ;
     }
 
     public async Task<R> Serve<T, R>(string methodname, params object[] parameters) where T : class where R : class
@@ -199,14 +199,14 @@ public class Servicer : ServiceManager, IServicer, IMediator
                 return await new Invoker(
                     scope.ServiceProvider.GetService<T>(),
                     methodname
-                ).InvokeAsync<R>(parameters);
+                ).InvokeAsync<R>(parameters).ConfigureAwait(false); ;
             }
-        });
+        }).ConfigureAwait(false); ;
     }
 
     public async Task Serve<T>(string methodname, Arguments arguments) where T : class
     {
-        await Task.Run(async () =>
+        await Task.Factory.StartNew(async () =>        
         {
             using (var scope = CreateScope())
             {
@@ -214,9 +214,9 @@ public class Servicer : ServiceManager, IServicer, IMediator
                     scope.ServiceProvider.GetService<T>(),
                     methodname,
                     arguments.TypeArray
-                ).InvokeAsync(arguments);
+                ).InvokeAsync(arguments).ConfigureAwait(false); ;
             }
-        });
+        }, TaskCreationOptions.AttachedToParent).ConfigureAwait(false); ;
     }
 
     public async Task<R> Serve<T, R>(string methodname, Arguments arguments) where T : class where R : class
@@ -229,9 +229,9 @@ public class Servicer : ServiceManager, IServicer, IMediator
                     scope.ServiceProvider.GetService<T>(),
                     methodname,
                     arguments.TypeArray
-                ).InvokeAsync<R>(arguments);
+                ).InvokeAsync<R>(arguments).ConfigureAwait(false); ;
             }
-        });
+        }).ConfigureAwait(false); ;
     }
 
     public Lazy<R> LazyServe<T, R>(Func<T, R> function)

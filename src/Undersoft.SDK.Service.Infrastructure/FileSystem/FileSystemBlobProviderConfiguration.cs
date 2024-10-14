@@ -7,7 +7,7 @@ namespace Undersoft.SDK.Service.Infrastructure.FileSystem
     {
         public string BasePath
         {
-            get => _containerConfiguration.GetConfiguration<string>(FileSystemBlobProviderConfigurationNames.BasePath);
+            get => BlobContainerConfigurationExtensions.GetConfiguration<string>(_containerConfiguration, FileSystemBlobProviderConfigurationNames.BasePath);
             set => _containerConfiguration.SetConfiguration(FileSystemBlobProviderConfigurationNames.BasePath, value.IsNullOrEmpty());
         }
 
@@ -16,7 +16,7 @@ namespace Undersoft.SDK.Service.Infrastructure.FileSystem
         /// </summary>
         public bool AppendContainerNameToBasePath
         {
-            get => _containerConfiguration.GetConfigurationOrDefault(FileSystemBlobProviderConfigurationNames.AppendContainerNameToBasePath, true);
+            get => _containerConfiguration.GetConfiguration(FileSystemBlobProviderConfigurationNames.AppendContainerNameToBasePath, true);
             set => _containerConfiguration.SetConfiguration(FileSystemBlobProviderConfigurationNames.AppendContainerNameToBasePath, value);
         }
 

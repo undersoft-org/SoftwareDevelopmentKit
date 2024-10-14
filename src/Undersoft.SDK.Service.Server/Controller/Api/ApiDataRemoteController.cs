@@ -14,6 +14,7 @@ using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Server.Controller.Api.Abstractions;
 
+[Authorize]
 [ApiDataRemote]
 [ApiController]
 [Route($"api/data/[controller]")]

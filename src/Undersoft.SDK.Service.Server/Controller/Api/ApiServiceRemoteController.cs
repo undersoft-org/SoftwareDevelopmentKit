@@ -2,6 +2,7 @@
 
 namespace Undersoft.SDK.Service.Server.Controller.Api;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Undersoft.SDK;
 using Undersoft.SDK.Service;
@@ -9,6 +10,7 @@ using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Server.Controller.Api.Abstractions;
 
+[Authorize]
 [ApiController]
 [ApiServiceRemote]
 public abstract class ApiServiceRemoteController<TStore, TService, TModel>

@@ -13,6 +13,7 @@ using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Store;
 
 [OpenData]
+[RemoteResult]
 public abstract class OpenCqrsController<TKey, TEntry, TReport, TEntity, TDto, TService>
     : OpenDataController<TKey, TEntry, TEntity, TDto, TService>
     where TDto : class, IOrigin, IInnerProxy, new()

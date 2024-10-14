@@ -22,15 +22,15 @@ namespace Undersoft.SDK.Service.Data.Blob.Container
             _properties = new Registry<object>();
         }
 
-        public T GetConfigurationOrDefault<T>(string name, T defaultValue = default)
+        public T GetConfiguration<T>(string name, T defaultValue = default)
         {
-            return (T)GetConfigurationOrNull(name, defaultValue);
+            return (T)GetConfiguration(name, (object)defaultValue);
         }
 
-        public object GetConfigurationOrNull(string name, object defaultValue = null)
+        public object GetConfiguration(string name, object defaultValue = null)
         {
             return _properties.Get(name) ??
-                   _fallbackConfiguration?.GetConfigurationOrNull(name, defaultValue) ??
+                   _fallbackConfiguration?.GetConfiguration(name, defaultValue) ??
                    defaultValue;
         }
 

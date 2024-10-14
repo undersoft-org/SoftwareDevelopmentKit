@@ -6,6 +6,7 @@ namespace Undersoft.SDK.Service.Server.Controller.Api;
 
 using Data.Query;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Operation.Remote.Command;
 using Operation.Remote.Query;
 using Undersoft.SDK.Proxies;
@@ -14,7 +15,7 @@ using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Server.Controller.Api.Abstractions;
 
-[RemoteResult]
+[Authorize]
 [ApiDataRemote]
 [ApiController]
 [Route($"api/Events")]

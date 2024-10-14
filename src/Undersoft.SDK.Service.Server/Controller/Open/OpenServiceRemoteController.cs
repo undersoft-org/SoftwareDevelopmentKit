@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 namespace Undersoft.SDK.Service.Server.Controller.Open;
 
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Undersoft.SDK.Service;
 using Undersoft.SDK.Service.Data.Client.Attributes;
@@ -11,6 +12,7 @@ using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Operation.Invocation;
 using Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
+[Authorize]
 [OpenServiceRemote]
 public abstract class OpenServiceRemoteController<TStore, TService, TDto>
     : ODataController,

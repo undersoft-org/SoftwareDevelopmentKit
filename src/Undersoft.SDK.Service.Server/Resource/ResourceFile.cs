@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using System.IO;
 using Undersoft.SDK.Service.Server.Resource.Container;
 
 namespace Undersoft.SDK.Service.Server.Resource
@@ -10,25 +11,26 @@ namespace Undersoft.SDK.Service.Server.Resource
 
         public ResourceFile(ResourceFileContainer container, string filename) : base(container.ContainerName)
         {
-            var task = GetOrNullAsync(filename);
-            task.Wait();
-            _stream = task.Result;
-            _formFile = new FormFile(_stream, 0, _stream.Length, filename.Split('.')[0], filename);
+            Initialize(filename);
         }
         public ResourceFile(string containerName, string filename) : base(containerName)
         {
-            var task = GetOrNullAsync(filename);
-            task.Wait();
-            _stream = task.Result;
-            _formFile = new FormFile(_stream, 0, _stream.Length, filename.Split('.')[0], filename);
+            Initialize(filename);
         }
         public ResourceFile(string path) : base(Path.GetDirectoryName(path))
         {
-            var filename = Path.GetFileName(path);
+            Initialize(Path.GetFileName(path));            
+        }
+
+        private void Initialize(string filename)
+        {
             var task = GetOrNullAsync(filename);
-            task.Wait();
-            _stream = task.Result;
-            _formFile = new FormFile(_stream, 0, _stream.Length, filename.Split('.')[0], filename);
+            Task.WhenAll(task).ContinueWith(t =>
+            {
+                _stream = t.Result.FirstOrDefault();
+                if (_stream != null)
+                    _formFile = new FormFile(_stream, 0, _stream.Length, filename.Split('.')[0], filename);
+            });
         }
 
         public virtual string ContentType => _formFile.ContentType;

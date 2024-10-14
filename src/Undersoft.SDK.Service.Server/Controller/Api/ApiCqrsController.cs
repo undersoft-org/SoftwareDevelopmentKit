@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace Undersoft.SDK.Service.Server.Controller.Api;
 
+using Microsoft.AspNetCore.Authorization;
 using Operation.Command;
 using Operation.Query;
 using Undersoft.SDK.Proxies;
@@ -12,8 +13,9 @@ using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Query;
 using Undersoft.SDK.Service.Data.Store;
 
-[ApiController]
 [ApiData]
+[RemoteResult]
+[ApiController]
 [Route($"api/data/[controller]")]
 public abstract class ApiCqrsController<TKey, TEntry, TReport, TEntity, TDto, TService>
     : ApiDataController<TKey, TEntry, TEntity, TDto, TService>
