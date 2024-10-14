@@ -7,8 +7,6 @@ using System.Linq.Expressions;
 namespace Undersoft.SDK.Service.Server.Controller.Open;
 
 using Data.Event;
-using Documentation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OData.Results;
 using Operation.Remote.Command;
 using Operation.Remote.Query;
@@ -17,7 +15,6 @@ using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
-[Authorize]
 [OpenDataRemote]
 [ODataRouteComponent("open")]
 public abstract class OpenEventRemoteController<TKey, TStore, TDto, TModel> : ODataController, IOpenEventRemoteController<TKey, TModel> where TModel : class, IOrigin, IInnerProxy

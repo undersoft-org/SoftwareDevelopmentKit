@@ -28,16 +28,12 @@ public abstract class Repository : IRepository
     protected Repository(object context)
     {
         InnerContext = context;
-        //PatchingInvoker = new Invoker(this.TracePatching);
-        //AddingInvoker = new Invoker(this.TraceAdding);
     }
 
     protected Repository(IRepositoryContext context)
     {
         Site = context.Site;
         context.Lease(this);
-        //PatchingInvoker = new Invoker(this.TracePatching);
-        //AddingInvoker = new Invoker(this.TraceAdding);
     }
 
     public Type ElementType { get; set; }
@@ -203,9 +199,9 @@ public abstract class Repository : IRepository
         return false;
     }
 
-    public virtual Task<bool> ReleaseAsync(CancellationToken token = default)
+    public virtual async Task<bool> ReleaseAsync(CancellationToken token = default)
     {
-        return ContextLease.ReleaseAsync();
+        return await ContextLease.ReleaseAsync();
     }
 
     public virtual void Lease(IRepositoryContext rentContext)

@@ -288,25 +288,19 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
 
     public virtual Task<bool> ReleaseAsync(CancellationToken token = default)
     {
-        return Task.Run(
-            () =>
-            {
-                if (Leased)
-                {
-                    IRepositoryContext destContext = ContextLease;
-                    destContext.ContextLease = null;
-                    destContext.InnerContext = null;
-                    destContext = null;
-                    ContextLease = null;
+        if (Leased)
+        {
+            IRepositoryContext destContext = ContextLease;
+            destContext.ContextLease = null;
+            destContext.InnerContext = null;
+            destContext = null;
+            ContextLease = null;
 
-                    _ = ReturnAsync();
+            _ = ReturnAsync();
 
-                    return true;
-                }
-                return false;
-            },
-            token
-        );
+            return Task.FromResult(true);
+        }
+        return Task.FromResult(false);
     }
 
     public virtual IRepositoryContext Rent()
@@ -326,18 +320,10 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
         ((IResettableService)((DbContext)Context).ChangeTracker).ResetState();
     }
 
-    public virtual Task ResetStateAsync(CancellationToken token = default)
+    public virtual async Task ResetStateAsync(CancellationToken token = default)
     {
-        return Task.Run(
-            async () =>
-            {
-                await ((IDbContextDependencies)Context).StateManager.ResetStateAsync(token);
-                await (
-                    (IResettableService)((DbContext)Context).ChangeTracker
-                ).ResetStateAsync(token);
-            },
-            token
-        );
+        await ((IDbContextDependencies)Context).StateManager.ResetStateAsync(token).ConfigureAwait(false);
+        await ((IResettableService)((DbContext)Context).ChangeTracker).ResetStateAsync(token).ConfigureAwait(false);
     }
 
     public virtual void Return()
@@ -346,16 +332,10 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
         ContextPool.Add((IRepositoryContext)this);
     }
 
-    public virtual Task ReturnAsync(CancellationToken token = default)
+    public virtual async Task ReturnAsync(CancellationToken token = default)
     {
-        return Task.Run(
-            () =>
-            {
-                ResetStateAsync();
-                ContextPool.Add((IRepositoryContext)this);
-            },
-            token
-        );
+        await ResetStateAsync().ConfigureAwait(false);
+        ContextPool.Add((IRepositoryContext)this);
     }
 
     public virtual Task<int> Save(

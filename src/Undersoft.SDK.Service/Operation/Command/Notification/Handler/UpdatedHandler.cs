@@ -1,6 +1,7 @@
 ﻿using MediatR;
 
 namespace Undersoft.SDK.Service.Operation.Command.Notification.Handler;
+
 using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Store;
@@ -18,6 +19,11 @@ public class UpdatedHandler<TStore, TEntity, TDto>
 
     public UpdatedHandler() { }
 
+    public UpdatedHandler(IStoreRepository<IEventStore, Event> eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
     public UpdatedHandler(
         IStoreRepository<IReportStore, TEntity> repository,
         IStoreRepository<IEventStore, Event> eventStore
@@ -27,45 +33,34 @@ public class UpdatedHandler<TStore, TEntity, TDto>
         _eventStore = eventStore;
     }
 
-    public virtual Task Handle(
+    public virtual async Task Handle(
         Updated<TStore, TEntity, TDto> request,
         CancellationToken cancellationToken
     )
     {
-        return Task.Run(
-            async () =>
-            {
-                if (_eventStore.Add(request) == null)
-                    throw new Exception(
-                        $"{$"{GetType().Name} or entity "}{$"{typeof(TEntity).Name} unable add event"}"
-                    );
+        if (_eventStore != null)
+            _eventStore.Add(request);
 
-                if (request.Command.PublishMode == EventPublishMode.PropagateCommand)
-                {
-                    TEntity result;
-                    if (request.Predicate == null)
-                        result = await _repository.SetBy(request.Command.Contract);
-                    else if (request.Conditions == null)
-                        result = await _repository.SetBy(
-                            request.Command.Contract,
-                            request.Predicate
-                        );
-                    else
-                        result = await _repository.SetBy(
-                            request.Command.Contract,
-                            request.Predicate,
-                            request.Conditions
-                        );
+        if (_repository == null || request.Command.PublishMode != EventPublishMode.PropagateCommand)
+            return;
 
-                    if (result == null)
-                        throw new Exception(
-                            $"{$"{GetType().Name} for entity "}{$"{typeof(TEntity).Name} unable update report"}"
-                        );
+        TEntity result;
+        if (request.Predicate == null)
+            result = await _repository.SetBy(request.Command.Contract);
+        else if (request.Conditions == null)
+            result = await _repository.SetBy(request.Command.Contract, request.Predicate);
+        else
+            result = await _repository.SetBy(
+                request.Command.Contract,
+                request.Predicate,
+                request.Conditions
+            );
 
-                    request.PublishStatus = EventPublishStatus.Complete;
-                }
-            },
-            cancellationToken
-        );
+        if (result == null)
+            throw new Exception(
+                $"{$"{GetType().Name} for entity "}{$"{typeof(TEntity).Name} unable update report"}"
+            );
+
+        request.PublishStatus = EventPublishStatus.Complete;
     }
 }

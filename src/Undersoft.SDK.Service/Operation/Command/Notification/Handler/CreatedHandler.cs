@@ -18,6 +18,11 @@ public class CreatedHandler<TStore, TEntity, TDto>
 
     public CreatedHandler() { }
 
+    public CreatedHandler(IStoreRepository<IEventStore, Event> eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
     public CreatedHandler(
         IStoreRepository<IReportStore, TEntity> repository,
         IStoreRepository<IEventStore, Event> eventStore
@@ -32,25 +37,19 @@ public class CreatedHandler<TStore, TEntity, TDto>
         CancellationToken cancellationToken
     )
     {
-        return Task.Run(
-            () =>
-            {
-                if (_eventStore.Add(request) == null)
-                    throw new Exception(
-                        $"{$"{GetType().Name} "}{$"for entity {typeof(TEntity).Name} unable add event"}"
-                    );
+        if (_eventStore != null)
+            _eventStore.Add(request);
 
-                if (request.Command.PublishMode == EventPublishMode.PropagateCommand)
-                {
-                    if (_repository.Add((TEntity)request.Command.Result, request.Predicate) == null)
-                        throw new Exception(
-                            $"{$"{GetType().Name} "}{$"for entity {typeof(TEntity).Name} unable create report"}"
-                        );
+        if (_repository == null || request.Command.PublishMode != EventPublishMode.PropagateCommand)
+            return Task.CompletedTask;
 
-                    request.PublishStatus = EventPublishStatus.Complete;
-                }
-            },
-            cancellationToken
-        );
+        if (_repository.Add((TEntity)request.Command.Result, request.Predicate) == null)
+            throw new Exception(
+                $"{$"{GetType().Name} "}{$"for entity {typeof(TEntity).Name} unable create report"}"
+            );
+
+        request.PublishStatus = EventPublishStatus.Complete;
+
+        return Task.CompletedTask;
     }
 }

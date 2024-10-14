@@ -164,16 +164,10 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
         ContextPool.Add((IRepositoryContext)this);
     }
 
-    public virtual Task ReturnAsync(CancellationToken token = default)
+    public virtual async Task ReturnAsync(CancellationToken token = default)
     {
-        return Task.Run(
-            () =>
-            {
-                ResetStateAsync(token);
-                ContextPool.Add((IRepositoryContext)this);
-            },
-            token
-        );
+        await ResetStateAsync(token).ConfigureAwait(false);
+        ContextPool.Add((IRepositoryContext)this);
     }
 
     public virtual void CreatePool()
@@ -233,25 +227,19 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
 
     public virtual Task<bool> ReleaseAsync(CancellationToken token = default)
     {
-        return Task.Run(
-            () =>
-            {
-                if (Leased)
-                {
-                    var destContext = ContextLease;
-                    destContext.ContextLease = null;
-                    destContext.InnerContext = null;
-                    destContext = null;
-                    ContextLease = null;
+        if (Leased)
+        {
+            var destContext = ContextLease;
+            destContext.ContextLease = null;
+            destContext.InnerContext = null;
+            destContext = null;
+            ContextLease = null;
 
-                    _ = ReturnAsync(token);
+            _ = ReturnAsync(token);
 
-                    return true;
-                }
-                return false;
-            },
-            token
-        );
+            return Task.FromResult(true);
+        }
+        return Task.FromResult(false);
     }
 
     public virtual void Lease(IRepositoryContext destContext)

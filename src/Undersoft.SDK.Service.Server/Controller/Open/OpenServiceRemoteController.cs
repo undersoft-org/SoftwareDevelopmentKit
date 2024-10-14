@@ -12,7 +12,6 @@ using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Operation.Invocation;
 using Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
-[Authorize]
 [OpenServiceRemote]
 public abstract class OpenServiceRemoteController<TStore, TService, TDto>
     : ODataController,

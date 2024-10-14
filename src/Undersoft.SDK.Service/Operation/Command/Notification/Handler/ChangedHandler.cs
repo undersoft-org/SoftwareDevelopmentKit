@@ -18,6 +18,11 @@ public class ChangedHandler<TStore, TEntity, TCommand>
 
     public ChangedHandler() { }
 
+    public ChangedHandler(IStoreRepository<IEventStore, Event> eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
     public ChangedHandler(
         IStoreRepository<IReportStore, TEntity> repository,
         IStoreRepository<IEventStore, Event> eventStore
@@ -32,25 +37,23 @@ public class ChangedHandler<TStore, TEntity, TCommand>
         CancellationToken cancellationToken
     )
     {
-        if (_eventStore.Add(request) == null)
+        if (_eventStore != null)
+            _eventStore.Add(request);
+
+        if (_repository == null || request.Command.PublishMode != EventPublishMode.PropagateCommand)
+            return;
+
+        TEntity entity;
+        if (request.Command.Keys != null)
+            entity = await _repository.PatchBy(request.Command.Contract, request.Command.Keys);
+        else
+            entity = await _repository.PatchBy(request.Command.Contract, request.Predicate);
+
+        if (entity == null)
             throw new Exception(
-                $"{$"{GetType().Name} for entity "}{$"{typeof(TEntity).Name} unable add event"}"
+                $"{$"{GetType().Name} for entity "}{$"{typeof(TEntity).Name} unable change report"}"
             );
 
-        if (request.Command.PublishMode == EventPublishMode.PropagateCommand)
-        {
-            TEntity entity;
-            if (request.Command.Keys != null)
-                entity = await _repository.PatchBy(request.Command.Contract, request.Command.Keys);
-            else
-                entity = await _repository.PatchBy(request.Command.Contract, request.Predicate);
-
-            if (entity == null)
-                throw new Exception(
-                    $"{$"{GetType().Name} for entity "}{$"{typeof(TEntity).Name} unable change report"}"
-                );
-
-            request.PublishStatus = EventPublishStatus.Complete;
-        }
+        request.PublishStatus = EventPublishStatus.Complete;
     }
 }

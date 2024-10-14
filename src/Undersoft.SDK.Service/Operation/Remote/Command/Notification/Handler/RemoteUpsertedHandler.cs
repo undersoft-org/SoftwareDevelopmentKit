@@ -34,28 +34,9 @@ public class RemoteUpsertedHandler<TStore, TDto, TModel>
         CancellationToken cancellationToken
     )
     {
-        return Task.Run(
-            () =>
-            {
-                try
-                {
-                    if (_eventStore.Add(request) == null)
-                        throw new Exception(
-                            $"{GetType().Name} "
-                                + $"for entity {typeof(TDto).Name} unable add event"
-                        );
+        if (_eventStore != null)
+            _eventStore.Add(request);
 
-                }
-                catch (Exception ex)
-                {
-                    request.Command.ValidationResult.Errors.Add(
-                        new ValidationFailure(string.Empty, ex.Message)
-                    );
-                    this.Failure<Domainlog>(ex.Message, request.Command.ErrorMessages, ex);
-                    request.PublishStatus = EventPublishStatus.Error;
-                }
-            },
-            cancellationToken
-        );
+        return Task.CompletedTask;
     }
 }

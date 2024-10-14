@@ -18,6 +18,11 @@ public class DeletedHandler<TStore, TEntity, TDto>
 
     public DeletedHandler() { }
 
+    public DeletedHandler(IStoreRepository<IEventStore, Event> eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
     public DeletedHandler(
         IStoreRepository<IReportStore, TEntity> repository,
         IStoreRepository<IEventStore, Event> eventStore
@@ -27,42 +32,34 @@ public class DeletedHandler<TStore, TEntity, TDto>
         _eventStore = eventStore;
     }
 
-    public virtual Task Handle(
+    public virtual async Task Handle(
         Deleted<TStore, TEntity, TDto> request,
         CancellationToken cancellationToken
     )
     {
-        return Task.Run(
-            async () =>
-            {
-                if (_eventStore.Add(request) == null)
-                    throw new Exception(
-                        $"{GetType().Name} " + $"for entity {typeof(TEntity).Name} unable add event"
-                    );
+        if (_eventStore != null)
+            _eventStore.Add(request);
 
-                if (request.Command.PublishMode == EventPublishMode.PropagateCommand)
-                {
-                    TEntity result = null;
-                    if (request.Command.Keys != null)
-                        result = await _repository.Delete(request.Command.Keys);
-                    else if (request.Data == null && request.Predicate != null)
-                        result = await _repository.Delete(request.Predicate);
-                    else
-                        result = await _repository.DeleteBy(
-                            request.Command.Contract,
-                            request.Predicate
-                        );
+        if (_repository == null || request.Command.PublishMode != EventPublishMode.PropagateCommand)
+            return;
 
-                    if (result == null)
-                        throw new Exception(
-                            $"{GetType().Name} "
-                                + $"for entity {typeof(TEntity).Name} unable delete report"
-                        );
+        TEntity result = null;
+        if (request.Command.Keys != null)
+            result = await _repository.Delete(request.Command.Keys);
+        else if (request.Data == null && request.Predicate != null)
+            result = await _repository.Delete(request.Predicate);
+        else
+            result = await _repository.DeleteBy(
+                request.Command.Contract,
+                request.Predicate
+            );
 
-                    request.PublishStatus = EventPublishStatus.Complete;
-                }
-            },
-            cancellationToken
-        );
+        if (result == null)
+            throw new Exception(
+                $"{GetType().Name} "
+                    + $"for entity {typeof(TEntity).Name} unable delete report"
+            );
+
+        request.PublishStatus = EventPublishStatus.Complete;    
     }
 }

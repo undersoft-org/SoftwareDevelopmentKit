@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 
 namespace Undersoft.SDK.Service.Data.Store.Repository;
 
-
 using Undersoft.SDK;
 using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Service.Data.Entity;
@@ -15,6 +14,39 @@ using Undersoft.SDK.Service.Data.Repository.Source;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Updating;
 using Undersoft.SDK.Utilities;
+
+public class StoreRepository<TStore, TEntity>
+    : StoreRepository<TEntity>,
+        IStoreRepository<TStore, TEntity>
+    where TEntity : class, IOrigin, IInnerProxy
+    where TStore : IDataStore
+{
+    public StoreRepository(
+        IRepositoryContextPool<DataStoreContext<TStore>> pool,
+        IEntityCache<TStore, TEntity> cache,
+        IEnumerable<IRemoteProperty<IDataStore, TEntity>> remoteProps,
+        IRemoteSynchronizer synchronizer
+    ) : base(pool.ContextPool)
+    {
+        this.cache = cache;
+        synchronizer.AddRepository(this);
+        RemoteProperties = remoteProps.DoEach(
+            (o) =>
+            {
+                o.Host = this;
+                return o;
+            }
+        );
+    }
+
+    public override Task<int> Save(
+        bool asTransaction,
+        CancellationToken token = default
+    )
+    {
+        return ContextLease.Save(asTransaction, token);
+    }
+}
 
 public partial class StoreRepository<TEntity> : Repository<TEntity>, IStoreRepository<TEntity>
     where TEntity : class, IOrigin, IInnerProxy
@@ -349,35 +381,4 @@ public partial class StoreRepository<TEntity> : Repository<TEntity>, IStoreRepos
     }
 }
 
-public class StoreRepository<TStore, TEntity>
-    : StoreRepository<TEntity>,
-        IStoreRepository<TStore, TEntity>
-    where TEntity : class, IOrigin, IInnerProxy
-    where TStore : IDataStore
-{
-    public StoreRepository(
-        IRepositoryContextPool<DataStoreContext<TStore>> pool,
-        IEntityCache<TStore, TEntity> cache,
-        IEnumerable<IRemoteProperty<IDataStore, TEntity>> remoteProps,
-        IRemoteSynchronizer synchronizer
-    ) : base(pool.ContextPool)
-    {
-        this.cache = cache;
-        synchronizer.AddRepository(this);
-        RemoteProperties = remoteProps.DoEach(
-            (o) =>
-            {
-                o.Host = this;
-                return o;
-            }
-        );
-    }
 
-    public override Task<int> Save(
-        bool asTransaction,
-        CancellationToken token = default
-    )
-    {
-        return ContextLease.Save(asTransaction, token);
-    }
-}

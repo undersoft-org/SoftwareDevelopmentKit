@@ -28,15 +28,9 @@ public class ActionInvokedHandler<TStore, TType, TDto>
         CancellationToken cancellationToken
     )
     {
-        return Task.Run(
-            () =>
-            {
-                if (_eventStore.Add(request) == null)
-                    throw new Exception(
-                        $"{$"{GetType().Name} "}{$"for invoke {typeof(TType).Name} unable add event"}"
-                    );
-            },
-            cancellationToken
-        );
+        if (_eventStore != null)
+            _eventStore.Add(request);
+
+        return Task.CompletedTask;
     }
 }

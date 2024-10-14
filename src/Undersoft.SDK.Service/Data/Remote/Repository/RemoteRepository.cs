@@ -48,6 +48,24 @@ public class RemoteRepository<TStore, TEntity>
         this.cache = cache;
     }
 
+    public RemoteRepository(
+        IRepositoryContextPool<DataClient<TStore>> pool,
+        IEntityCache<TStore, TEntity> cache,
+        IServiceManager manager,
+        IEnumerable<IRemoteProperty<IDataStore, TEntity>> remoteProps,
+        IRemoteSynchronizer synchronizer
+    ) : this(pool, cache, manager)
+    {
+        synchronizer.AddRepository(this);
+        RemoteProperties = remoteProps.DoEach(
+            (o) =>
+            {
+                o.Host = this;
+                return o;
+            }
+        );
+    }
+
     public override Task<int> Save(bool asTransaction, CancellationToken token = default)
     {
         return ContextLease.Save(asTransaction, token);

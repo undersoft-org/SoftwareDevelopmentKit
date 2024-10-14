@@ -32,4 +32,9 @@ public abstract class RemoteNotification<TCommand> : Event, INotification where 
 
         Data = JsonSerializer.SerializeToUtf8Bytes((RemoteCommandBase)command);
     }
+
+    public Event GetEvent()
+    {
+        return this;
+    }
 }

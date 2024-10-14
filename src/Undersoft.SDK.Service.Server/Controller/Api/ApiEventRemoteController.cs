@@ -15,10 +15,9 @@ using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Server.Controller.Api.Abstractions;
 
-[Authorize]
 [ApiDataRemote]
 [ApiController]
-[Route($"api/Events")]
+[Route($"api/Event")]
 public abstract class ApiEventRemoteController<TKey, TStore, TDto, TModel>
     : ControllerBase,
         IApiEventRemoteController<TKey, TDto, TModel>

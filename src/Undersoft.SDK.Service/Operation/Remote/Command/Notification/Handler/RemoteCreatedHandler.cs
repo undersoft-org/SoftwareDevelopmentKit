@@ -27,26 +27,9 @@ public class RemoteCreatedHandler<TStore, TDto, TModel>
         CancellationToken cancellationToken
     )
     {
-        return Task.Run(
-            () =>
-            {
-                try
-                {
-                    if (_eventStore.Add(request) == null)
-                        throw new Exception(
-                            $"{$"{GetType().Name} "}{$"for contract {typeof(TModel).Name} unable add event"}"
-                        );
-                }
-                catch (Exception ex)
-                {
-                    request.Command.ValidationResult.Errors.Add(
-                        new ValidationFailure(string.Empty, ex.Message)
-                    );
-                    this.Failure<Domainlog>(ex.Message, request.Command.ErrorMessages, ex);
-                    request.PublishStatus = EventPublishStatus.Error;
-                }
-            },
-            cancellationToken
-        );
+        if (_eventStore != null)
+            _eventStore.Add(request);
+
+        return Task.CompletedTask;
     }
 }

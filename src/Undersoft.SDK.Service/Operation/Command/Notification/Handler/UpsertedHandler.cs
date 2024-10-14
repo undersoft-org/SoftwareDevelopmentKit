@@ -18,6 +18,11 @@ public class UpsertedHandler<TStore, TEntity, TDto>
 
     public UpsertedHandler() { }
 
+    public UpsertedHandler(IStoreRepository<IEventStore, Event> eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
     public UpsertedHandler(
         IStoreRepository<IReportStore, TEntity> repository,
         IStoreRepository<IEventStore, Event> eventStore
@@ -27,45 +32,37 @@ public class UpsertedHandler<TStore, TEntity, TDto>
         _eventStore = eventStore;
     }
 
-    public virtual Task Handle(
+    public virtual async Task Handle(
         Upserted<TStore, TEntity, TDto> request,
         CancellationToken cancellationToken
     )
     {
-        return Task.Run(
-            async () =>
-            {
-                if (_eventStore.Add(request) == null)
-                    throw new Exception(
-                        $"{GetType().Name} "
-                            + $"for entity {typeof(TEntity).Name} unable add event"
-                    );
+        if (_eventStore != null)
+            _eventStore.Add(request);
 
-                if (request.Command.PublishMode == EventPublishMode.PropagateCommand)
-                {
-                    TEntity result = null;
-                    if (request.Conditions != null)
-                        result = await _repository.PutBy(
-                            request.Command.Contract,
-                            request.Predicate,
-                            request.Conditions
-                        );
-                    else
-                        result = await _repository.PutBy(
-                            request.Command.Contract,
-                            request.Predicate
-                        );
+        if (_repository == null || request.Command.PublishMode != EventPublishMode.PropagateCommand)
+            return;
 
-                    if (result == null)
-                        throw new Exception(
-                            $"{GetType().Name} "
-                                + $"for entity {typeof(TEntity).Name} unable renew report"
-                        );
+        TEntity result = null;
+        if (request.Conditions != null)
+            result = await _repository.PutBy(
+                request.Command.Contract,
+                request.Predicate,
+                request.Conditions
+            );
+        else
+            result = await _repository.PutBy(
+                request.Command.Contract,
+                request.Predicate
+            );
 
-                    request.PublishStatus = EventPublishStatus.Complete;
-                }
-            },
-            cancellationToken
-        );
+        if (result == null)
+            throw new Exception(
+                $"{GetType().Name} "
+                    + $"for entity {typeof(TEntity).Name} unable renew report"
+            );
+
+        request.PublishStatus = EventPublishStatus.Complete;
+
     }
 }

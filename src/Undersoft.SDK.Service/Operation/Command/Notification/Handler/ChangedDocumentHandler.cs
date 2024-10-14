@@ -18,6 +18,11 @@ public class ChangedDocumentHandler<TStore, TEntity, TCommand>
 
     public ChangedDocumentHandler() { }
 
+    public ChangedDocumentHandler(IStoreRepository<IEventStore, Event> eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
     public ChangedDocumentHandler(
         IStoreRepository<IReportStore, TEntity> repository,
         IStoreRepository<IEventStore, Event> eventStore
@@ -32,25 +37,24 @@ public class ChangedDocumentHandler<TStore, TEntity, TCommand>
         CancellationToken cancellationToken
     )
     {
-        if (_eventStore.Add(request) == null)
+        if (_eventStore != null)
+            _eventStore.Add(request);          
+
+        if (_repository == null || request.Command.PublishMode != EventPublishMode.PropagateCommand)
+            return;
+
+        TEntity entity;
+        if (request.Command.Keys != null)
+            entity = await _repository.PatchBy(request.Command.Contract, request.Command.Keys);
+        else
+            entity = await _repository.PatchBy(request.Command.Contract, request.Predicate);
+
+        if (entity == null)
             throw new Exception(
-                $"{$"{GetType().Name} for entity "}{$"{typeof(TEntity).Name} unable add event"}"
+                $"{$"{GetType().Name} for entity "}{$"{typeof(TEntity).Name} unable change report"}"
             );
 
-        if (request.Command.PublishMode == EventPublishMode.PropagateCommand)
-        {
-            TEntity entity;
-            if (request.Command.Keys != null)
-                entity = await _repository.PatchBy(request.Command.Contract, request.Command.Keys);
-            else
-                entity = await _repository.PatchBy(request.Command.Contract, request.Predicate);
+        request.PublishStatus = EventPublishStatus.Complete;
 
-            if (entity == null)
-                throw new Exception(
-                    $"{$"{GetType().Name} for entity "}{$"{typeof(TEntity).Name} unable change report"}"
-                );
-
-            request.PublishStatus = EventPublishStatus.Complete;
-        }
     }
 }

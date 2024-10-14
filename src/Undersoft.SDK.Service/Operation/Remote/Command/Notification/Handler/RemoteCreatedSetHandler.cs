@@ -26,32 +26,17 @@ public class RemoteCreatedSetHandler<TStore, TDto, TModel>
         CancellationToken cancellationToken
     )
     {
-        return Task.Run(
-            () =>
-            {
-                try
-                {
-                    request.ForOnly(
-                        d => !d.Command.IsValid,
-                        d =>
-                        {
-                            request.Remove(d);
-                        }
-                    );
+        request.ForOnly(
+           d => !d.Command.IsValid,
+           d =>
+           {
+               request.Remove(d);
+           }
+       );
 
-                    _eventStore.AddAsync(request).ConfigureAwait(true);
-                }
-                catch (Exception ex)
-                {
-                    this.Failure<Domainlog>(
-                        ex.Message,
-                        request.Select(r => r.Command.ErrorMessages).ToArray(),
-                        ex
-                    );
-                    request.ForEach((r) => r.PublishStatus = EventPublishStatus.Error);
-                }
-            },
-            cancellationToken
-        );
+        if (_eventStore != null)
+            _eventStore.Add(request.ForEach(r => r.GetEvent())).Commit();
+
+        return Task.CompletedTask;
     }
 }

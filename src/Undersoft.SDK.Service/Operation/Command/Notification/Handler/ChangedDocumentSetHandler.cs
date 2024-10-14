@@ -19,6 +19,11 @@ public class ChangedDocumentSetHandler<TStore, TEntity, TDto>
 
     public ChangedDocumentSetHandler() { }
 
+    public ChangedDocumentSetHandler(IStoreRepository<IEventStore, Event> eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
     public ChangedDocumentSetHandler(
         IStoreRepository<IReportStore, TEntity> repository,
         IStoreRepository<IEventStore, Event> eventStore
@@ -28,50 +33,46 @@ public class ChangedDocumentSetHandler<TStore, TEntity, TDto>
         _eventStore = eventStore;
     }
 
-    public virtual async Task Handle(
+    public virtual Task Handle(
         ChangedDocumentSet<TStore, TEntity, TDto> request,
         CancellationToken cancellationToken
     )
     {
-        await Task.Run(
-            () =>
+        request.ForOnly(
+            d => !d.Command.IsValid,
+            d =>
             {
-                request.ForOnly(
-                    d => !d.Command.IsValid,
-                    d =>
-                    {
-                        request.Remove(d);
-                    }
-                );
-
-                _eventStore.AddAsync(request).ConfigureAwait(true);
-
-                if (request.PublishMode == EventPublishMode.PropagateCommand)
-                {
-                    ISeries<TEntity> entities;
-                    if (request.Predicate == null)
-                        entities = _repository
-                            .PatchDocument(request.Select(d => d.Command.Contract))
-                            .ToListing();
-                    else
-                        entities = _repository
-                            .PatchDocument(
-                                request.Select(d => d.Command.Contract),
-                                request.Predicate
-                            )
-                            .ToListing();
-
-                    request.ForEach(
-                        (r) =>
-                        {
-                            _ = entities.ContainsKey(r.EntityId)
-                                ? r.PublishStatus = EventPublishStatus.Complete
-                                : r.PublishStatus = EventPublishStatus.Uncomplete;
-                        }
-                    );
-                }
-            },
-            cancellationToken
+                request.Remove(d);
+            }
         );
+
+        if (_eventStore != null)
+            _eventStore.Add(request.ForEach(r => r.GetEvent())).Commit();
+
+        if (_repository == null || request.PublishMode != EventPublishMode.PropagateCommand)
+            return Task.CompletedTask;
+
+        ISeries<TEntity> entities;
+        if (request.Predicate == null)
+            entities = _repository
+                .PatchDocument(request.Select(d => d.Command.Contract))
+                .ToListing();
+        else
+            entities = _repository
+                .PatchDocument(
+                    request.Select(d => d.Command.Contract),
+                    request.Predicate
+                )
+                .ToListing();
+
+        request.ForEach(
+            (r) =>
+            {
+                _ = entities.ContainsKey(r.EntityId)
+                    ? r.PublishStatus = EventPublishStatus.Complete
+                    : r.PublishStatus = EventPublishStatus.Uncomplete;
+            }
+        );
+        return Task.CompletedTask;
     }
 }

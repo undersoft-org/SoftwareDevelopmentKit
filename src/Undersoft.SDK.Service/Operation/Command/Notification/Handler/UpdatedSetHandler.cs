@@ -19,6 +19,11 @@ public class UpdatedSetHandler<TStore, TEntity, TDto>
 
     public UpdatedSetHandler() { }
 
+    public UpdatedSetHandler(IStoreRepository<IEventStore, Event> eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
     public UpdatedSetHandler(
         IStoreRepository<IReportStore, TEntity> repository,
         IStoreRepository<IEventStore, Event> eventStore
@@ -33,50 +38,46 @@ public class UpdatedSetHandler<TStore, TEntity, TDto>
         CancellationToken cancellationToken
     )
     {
-        return Task.Run(
-            () =>
+        request.ForOnly(
+            d => !d.Command.IsValid,
+            d =>
             {
-                request.ForOnly(
-                    d => !d.Command.IsValid,
-                    d =>
-                    {
-                        request.Remove(d);
-                    }
-                );
-
-                _eventStore.AddAsync(request).ConfigureAwait(true);
-
-                if (request.PublishMode == EventPublishMode.PropagateCommand)
-                {
-                    ISeries<TEntity> entities;
-                    if (request.Predicate == null)
-                        entities = _repository
-                            .SetBy(request.Select(d => d.Command.Contract))
-                            .ToCatalog();
-                    else if (request.Conditions == null)
-                        entities = _repository
-                            .SetBy(request.Select(d => d.Command.Contract), request.Predicate)
-                            .ToCatalog();
-                    else
-                        entities = _repository
-                            .SetBy(
-                                request.Select(d => d.Command.Contract),
-                                request.Predicate,
-                                request.Conditions
-                            )
-                            .ToCatalog();
-
-                    request.ForEach(
-                        (r) =>
-                        {
-                            _ = entities.ContainsKey(r.EntityId)
-                                ? (r.PublishStatus = EventPublishStatus.Complete)
-                                : (r.PublishStatus = EventPublishStatus.Uncomplete);
-                        }
-                    );
-                }
-            },
-            cancellationToken
+                request.Remove(d);
+            }
         );
+
+        if (_eventStore != null)
+            _eventStore.Add(request.ForEach(r => r.GetEvent())).Commit();
+
+        if (_repository == null || request.PublishMode != EventPublishMode.PropagateCommand)
+            return Task.CompletedTask;
+
+        ISeries<TEntity> entities;
+        if (request.Predicate == null)
+            entities = _repository
+                .SetBy(request.Select(d => d.Command.Contract))
+                .ToCatalog();
+        else if (request.Conditions == null)
+            entities = _repository
+                .SetBy(request.Select(d => d.Command.Contract), request.Predicate)
+                .ToCatalog();
+        else
+            entities = _repository
+                .SetBy(
+                    request.Select(d => d.Command.Contract),
+                    request.Predicate,
+                    request.Conditions
+                )
+                .ToCatalog();
+
+        request.ForEach(
+            (r) =>
+            {
+                _ = entities.ContainsKey(r.EntityId)
+                    ? (r.PublishStatus = EventPublishStatus.Complete)
+                    : (r.PublishStatus = EventPublishStatus.Uncomplete);
+            }
+        );
+        return Task.CompletedTask;
     }
 }
