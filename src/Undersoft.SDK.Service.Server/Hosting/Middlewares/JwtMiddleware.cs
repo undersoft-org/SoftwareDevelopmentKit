@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Undersoft.SDK.Service.Access;
-using Undersoft.SDK.Service.Server.Accounts.Tokens;
 
 namespace Undersoft.SDK.Service.Server.Hosting.Middlewares;
 
@@ -20,8 +20,8 @@ public class JwtMiddleware
         if (context.Request.Headers.ContainsKey("Authorization"))
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault();
-            var servicer = _servicer.GetTenantServicer(context.User);        
-            var auth = servicer.GetManager().GetService<IAuthorization>();
+            var session = _servicer.GetServicer(context.User).Session;        
+            var auth = session.GetService<IAuthorization>();
             auth.Credentials.SessionToken = token.Split(" ").LastOrDefault();
         }
         await _next(context);

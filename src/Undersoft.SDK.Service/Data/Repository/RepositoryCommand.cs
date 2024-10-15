@@ -2,6 +2,7 @@
 
 namespace Undersoft.SDK.Service.Data.Repository;
 
+using Quartz.Plugin.History;
 using Series;
 using Undersoft.SDK;
 using Undersoft.SDK.Proxies;
@@ -224,7 +225,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         {
             TEntity _entity = null;
             if (predicate != null)
-                _entity = Query.Where(predicate.Invoke(entity)).FirstOrDefault();
+                _entity = this[false, predicate(entity)];
             if (_entity == null)
                 _entity = await Find(entity.Id);
 
@@ -232,9 +233,18 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
                 return null;
 
             if (conditions != null)
+            {
+                Expression<Func<TEntity, bool>> _condition = null;
+                bool first = true;
                 foreach (var condition in conditions)
-                    if (!Query.Any(condition.Invoke(entity)))
-                        return null;
+                {
+                    _condition = first ? condition(entity) : _condition.And(condition(entity));
+                    first = false;
+                }
+
+                if (_condition != null && this[false, _condition] == null)
+                    return null;
+            }
 
             return InnerSet(entity, _entity);
         });
@@ -248,10 +258,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
     {
         ISeries<TEntity> deck = null;
         if (predicate != null)
-            deck = entities
-                .Select(e => Query.FirstOrDefault(predicate.Invoke(e)))
-                .Where(e => e != null)
-                .ToCatalog();
+            deck = entities.Select(e => this[false, predicate(e)]).Where(e => e != null).ToListing();
         if (deck == null)
         {
             deck = lookup<TModel>(entities).ToCatalog();
@@ -263,12 +270,18 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         {
             if (conditions != null)
             {
+                Expression<Func<TEntity, bool>> _condition = null;
+                bool first = true;
                 foreach (var condition in conditions)
                 {
-                    if (!Query.Any(condition.Invoke(entity)))
-                        yield return null;
+                    _condition = first ? condition(entity) : _condition.And(condition(entity));
+                    first = false;
                 }
+
+                if (_condition != null && this[false, _condition] == null)
+                    yield return null;
             }
+
             yield return InnerSet(entity, deck.Get(entity)
             );
         }
@@ -282,10 +295,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
     {
         ISeries<TEntity> deck = null;
         if (predicate != null)
-            deck = entities
-                .Select(e => Query.FirstOrDefault(predicate.Invoke(e)))
-                .Where(e => e != null)
-                .ToCatalog();
+            deck = entities.Select(e => this[false, predicate(e)]).Where(e => e != null).ToListing();
         if (deck == null)
         {
             deck = lookup<TModel>(entities);
@@ -297,11 +307,16 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         {
             if (conditions != null)
             {
+                Expression<Func<TEntity, bool>> _condition = null;
+                bool first = true;
                 foreach (var condition in conditions)
                 {
-                    if (!Query.Any(condition.Invoke(entity)))
-                        yield return null;
+                    _condition = first ? condition(entity) : _condition.And(condition(entity));
+                    first = false;
                 }
+
+                if (_condition != null && this[false, _condition] == null)
+                    yield return null;
             }
             yield return await Task.Run(
                 () =>
@@ -364,9 +379,12 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         where TModel : class, IOrigin
     {
         var listing = entities.ToListing();
+        
         var items = listing.ForEach(e => cache.Lookup<TEntity>(e.Id)).Where(e => e != null).ToListing();
+        
         if (items.Any())
             items.ForEach(item => ((IDataStoreContext)InnerContext).Attach(item)).Commit();
+      
         if (items.Count < listing.Count)
             items.Add(
                 this[
@@ -456,9 +474,9 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         ISeries<TEntity> deck = null;
         if (predicate != null)
             if (expanders.Any())
-                deck = entities.Select(e => this[false, predicate(e), expanders]).ToListing();
+                deck = entities.Select(e => this[false, predicate(e), expanders]).Where(e => e != null).ToListing();
             else
-                deck = entities.Select(e => this[false, predicate(e)]).ToListing();
+                deck = entities.Select(e => this[false, predicate(e)]).Where(e => e != null).ToListing();
         else if (expanders.Any())
             deck = this[
                 Query.WhereIn(q => q.Id, entities.Select(i => i.Id)),
@@ -514,9 +532,9 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         ISeries<TEntity> deck = null;
         if (predicate != null)
             if (expanders.Any())
-                deck = entities.Select(e => this[false, predicate(e), expanders]).ToListing();
+                deck = entities.Select(e => this[false, predicate(e), expanders]).Where(e => e != null).ToListing();
             else
-                deck = entities.Select(e => this[false, predicate(e)]).ToListing();
+                deck = entities.Select(e => this[false, predicate(e)]).Where(e => e != null).ToListing();
         else if (expanders.Any())
             deck = this[
                 Query.WhereIn(q => q.Id, entities.Select(i => i.Id)),
@@ -548,14 +566,24 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         {
             TEntity _entity = null;
             if (predicate != null)
-                _entity = Query.Where(predicate(entity)).FirstOrDefault();
+                _entity = this[false, predicate(entity)];
 
             if (_entity == null)
                 _entity = await Find(entity.Id);
 
-            foreach (var condition in conditions)
-                if (!Query.Any(condition(entity)))
+            if (conditions != null)
+            {
+                Expression<Func<TEntity, bool>> _condition = null;
+                bool first = true;
+                foreach (var condition in conditions)
+                {
+                    _condition = first ? condition(entity) : _condition.And(condition(entity));
+                    first = false;
+                }
+
+                if (_condition != null && this[false, _condition] == null)
                     return null;
+            }
 
             if (_entity == null)
                 return Add(entity);
@@ -572,10 +600,8 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
     {
         ISeries<TEntity> deck = null;
         if (predicate != null)
-        {
-            var query = Query;
-            deck = entities.SelectMany(e => query.Where(predicate(e))).AsQueryable().ToListing();
-        }
+                deck = entities.Select(e => this[false, predicate(e)]).Where(e => e != null).ToListing();
+
         if (deck == null)
         {
             deck = lookup<TEntity>(entities);
@@ -583,9 +609,19 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
 
         foreach (var entity in entities)
         {
-            foreach (var condition in conditions)
-                if (!Query.Any(condition(entity)))
+            if (conditions != null)
+            {
+                Expression<Func<TEntity, bool>> _condition = null;
+                bool first = true;
+                foreach (var condition in conditions)
+                {
+                    _condition = first ? condition(entity) : _condition.And(condition(entity));
+                    first = false;
+                }
+
+                if (_condition != null && this[false, _condition] == null)
                     yield return null;
+            }
 
             if (deck.TryGet(entity.Id, out TEntity settin))
             {
@@ -605,8 +641,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         ISeries<TEntity> deck = null;
         if (predicate != null)
         {
-            var query = Query;
-            deck = entities.SelectMany(e => query.Where(predicate(e))).AsQueryable().ToListing();
+            deck = entities.Select(e => this[false, predicate(e)]).Where(e => e != null).ToListing();
         }
         if (deck == null)
         {
@@ -615,9 +650,19 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
 
         foreach (var entity in entities)
         {
-            foreach (var condition in conditions)
-                if (!Query.Any(condition(entity)))
+            if (conditions != null)
+            {
+                Expression<Func<TEntity, bool>> _condition = null;
+                bool first = true;
+                foreach (var condition in conditions)
+                {
+                    _condition = first ? condition(entity) : _condition.And(condition(entity));
+                    first = false;
+                }
+
+                if (_condition != null && this[false, _condition] == null)
                     yield return null;
+            }
 
             if (deck.TryGet(entity.Id, out TEntity settin))
             {

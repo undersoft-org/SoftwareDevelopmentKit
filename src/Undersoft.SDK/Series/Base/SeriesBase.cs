@@ -1270,24 +1270,29 @@ namespace Undersoft.SDK.Series.Base
         public void Dispose()
         {
             Dispose(true);
+
             GC.SuppressFinalize(this);
         }
 
-        public virtual async ValueTask DisposeAsyncCore()
+        public virtual ValueTask DisposeAsyncCore()
         {
-            await new ValueTask(Task.Run(() =>
+            if (!disposedValue)
             {
                 InnerRenew(minsize);
 
-            }));
+                disposedValue = true;
+            }
+            return new ValueTask();
         }
-        public async ValueTask DisposeAsync()
+        public virtual ValueTask DisposeAsync()
         {
-            await DisposeAsyncCore();
+            var vt = DisposeAsyncCore();
 
             Dispose(false);
 
             GC.SuppressFinalize(this);
+
+            return vt;
         }
 
         public byte[] GetBytes()

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Undersoft.SDK.Service
 {
     using Configuration;
+    using System.Security.Claims;
     using Undersoft.SDK.Service.Data.Repository;
     using Undersoft.SDK.Service.Hosting;
     using Undersoft.SDK.Utilities;
@@ -18,14 +19,14 @@ namespace Undersoft.SDK.Service
         private IServiceRegistry registry;
         private IServiceConfiguration configuration;
 
-        protected IServiceScope session;
+        protected IServiceScope scope;
         protected IServiceProvider provider;
 
         public IServiceProvider RootProvider => GetRootProvider();
-
         public IServiceProvider Provider => GetProvider();
-        public IServiceScope Session => GetSession();
-
+         
+        public IServiceProvider Session => GetSession(); 
+         
         static ServiceManager()
         {
             var sm = new ServiceManager(new ServiceCollection());
@@ -47,10 +48,7 @@ namespace Undersoft.SDK.Service
 
         public ServiceManager(IServiceManager serviceManager) : base()
         {
-            Manager = serviceManager;
-            registry = serviceManager.Registry;
-            provider = serviceManager.Provider;
-            configuration = serviceManager.Configuration;
+            SetManager(serviceManager);
         }
 
         internal ServiceManager(IServiceCollection services) : this()
@@ -304,16 +302,59 @@ namespace Undersoft.SDK.Service
             return rootRegistry.AddObject(typeof(T).New<T>()).Value;
         }
 
-        public IServiceScope GetSession()
+        public IServiceProvider GetSession()
         {
-            return session ?? CreateSession();
+            return (scope ?? CreateScope()).ServiceProvider;
         }
 
-        public IServiceScope CreateSession()
+        public IServicer GetServicer(ClaimsPrincipal tenantUser)
         {
-            var s = CreateScope();
-            session = s;
-            return s;
+            if (
+              tenantUser.Identity.IsAuthenticated
+                && long.TryParse(
+                    tenantUser.Claims.FirstOrDefault(c => c.Type == "tenant_id")?.Value,
+                    out var tenantId
+                )
+            )
+            {
+                var manager = this.GetKeyedObject<IServiceManager>(tenantId);
+                if (manager != null)
+                    return manager.GetService<IServicer>();                                
+            }
+
+            return GetService<IServicer>();
+        }
+
+        public IServicer CreateServicer()
+        {
+            var _scope = CreateScope();
+            var _servicer = _scope.ServiceProvider.GetService<IServicer>();
+            _servicer.SetScope(_scope);            
+            return _servicer;
+        }
+
+        public IServiceProvider CreateSession()
+        {         
+            return CreateServicer().Session;
+        }
+
+        public IServiceScope GetScope()
+        {
+            return scope ??= CreateScope();
+        }
+
+        public IServiceScope SetScope(IServiceScope scope)
+        {
+            return this.scope = scope;       
+        }
+
+        public IServiceManager SetManager(IServiceManager serviceManager)
+        {
+            Manager = serviceManager;
+            registry = serviceManager.Registry;
+            provider = serviceManager.Provider;
+            configuration = serviceManager.Configuration;          
+            return this;
         }
 
         public static IServiceScope CreateRootSession()
@@ -367,21 +408,18 @@ namespace Undersoft.SDK.Service
             {
                 if (disposing)
                 {
-                    if (session != null)
-                        session.Dispose();
+                    if (scope != null)
+                        scope.Dispose();
                 }
                 disposedValue = true;
             }
         }
 
-        public override async ValueTask DisposeAsyncCore()
+        public override ValueTask DisposeAsyncCore()
         {
-            await new ValueTask(Task.Run(() =>
-            {
-                if (session != null)
-                    session.Dispose();
-
-            }));
+            if (scope != null)
+                scope.Dispose();
+            return new ValueTask();
         }
 
         public async Task LoadDataServiceModels()

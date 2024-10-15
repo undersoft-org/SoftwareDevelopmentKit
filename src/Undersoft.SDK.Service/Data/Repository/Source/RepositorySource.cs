@@ -7,6 +7,7 @@ using Undersoft.SDK.Service.Configuration;
 
 namespace Undersoft.SDK.Service.Data.Repository.Source;
 
+using System;
 using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Data.Object;
 using Undersoft.SDK.Service.Data.Repository;
@@ -191,12 +192,7 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
             IRepositoryContext repo = repotype.New<IRepositoryContext>(this);
             Add(repo);
         }
-    }
-
-    public new ValueTask DisposeAsync()
-    {
-        return new ValueTask(Task.Run(() => Dispose(true)));
-    }
+    }   
 
     public TContext GetContext<TContext>() where TContext : IDataStoreContext
     {
@@ -258,9 +254,9 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
         disposedValue = false;
     }
 
-    public virtual Task LeaseAsync(IRepositoryContext lease, CancellationToken token = default)
+    public virtual async Task LeaseAsync(IRepositoryContext lease, CancellationToken token = default)
     {
-        return Task.Run(() => Lease(lease), token);
+        await Task.Factory.StartNew(() => Lease(lease), token).ConfigureAwait(false);
     }
 
     public virtual bool Release()
@@ -286,7 +282,7 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
         _access.Set();
     }
 
-    public virtual Task<bool> ReleaseAsync(CancellationToken token = default)
+    public virtual async Task<bool> ReleaseAsync(CancellationToken token = default)
     {
         if (Leased)
         {
@@ -296,11 +292,11 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
             destContext = null;
             ContextLease = null;
 
-            _ = ReturnAsync();
+            await ReturnAsync().ConfigureAwait(false);
 
-            return Task.FromResult(true);
+            return true;
         }
-        return Task.FromResult(false);
+        return false;
     }
 
     public virtual IRepositoryContext Rent()
@@ -373,19 +369,20 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
     {
         if (!disposedValue)
         {
-            if (disposing)
-            {
-                await Save(true);
+            if(disposing) 
+                base.Dispose(true);
 
-                await ReleaseAsync();
+            await Save(true).ConfigureAwait(false);
 
-                InnerContext = null;
-                contextType = null;
-                Options = null;
-                servicecode.Dispose();
-            }
+            InnerContext = null;
+            contextType = null;
+            Options = null;
+
+            servicecode.Dispose();
+
+            await ReleaseAsync().ConfigureAwait(false);
 
             disposedValue = true;
         }
-    }
+    }  
 }

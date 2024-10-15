@@ -21,7 +21,7 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
     private IRepositoryClients _clients;
     protected IRepositoryClients Clients => _clients ??= Manager.Registry.GetObject<IRepositoryClients>();
 
-    protected IServiceManager Manager { get; init; }
+    protected IServiceManager Manager { get; set; }
 
     static RepositoryManager()
     {
@@ -188,6 +188,14 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
     public bool TryGetSource(Type contextType, out IRepositorySource source)
     {
         return Sources.TryGet(contextType, out source);
+    }
+
+    public void Refresh()
+    {
+        _clients = null;
+        _sources = null;
+        _ = Sources;
+        _ = Clients;
     }
 
     public IEnumerable<IRepositorySource> GetSources()

@@ -251,7 +251,7 @@ public partial class StoreRepository<TEntity> : Repository<TEntity>, IStoreRepos
 
     public virtual async Task CommitTransaction(Task<IDbContextTransaction> transaction)
     {
-        await (await transaction).CommitAsync(Cancellation);
+        await (await transaction).CommitAsync(Cancellation).ConfigureAwait(false);
     }
 
     public virtual void CommitTransaction(IDbContextTransaction transaction)
@@ -324,12 +324,12 @@ public partial class StoreRepository<TEntity> : Repository<TEntity>, IStoreRepos
     )
     {
         await using (
-            IDbContextTransaction tr = await StoreContext.Database.BeginTransactionAsync(token)
+            IDbContextTransaction tr = await StoreContext.Database.BeginTransactionAsync(token).ConfigureAwait(false)
         )
         {
             try
             {
-                int changes = await StoreContext.Save(true, token);
+                int changes = await StoreContext.Save(true, token).ConfigureAwait(false);
 
                 await tr.CommitAsync(token);
 
@@ -362,7 +362,7 @@ public partial class StoreRepository<TEntity> : Repository<TEntity>, IStoreRepos
     {
         try
         {
-            return await StoreContext.SaveChangesAsync(token);
+            return await StoreContext.SaveChangesAsync(token).ConfigureAwait(false);
         }
         catch (DbUpdateException e)
         {

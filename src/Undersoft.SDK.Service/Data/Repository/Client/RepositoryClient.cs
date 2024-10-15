@@ -11,7 +11,7 @@ using Undersoft.SDK.Service.Data.Repository;
 using Undersoft.SDK.Utilities;
 using Uniques;
 
-public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
+public class RepositoryClient : Registry<IRepositoryContext>, IRepositoryClient
 {
     protected Uri uri;
     protected Uscn servicecode;
@@ -94,7 +94,7 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
 
     public async Task<IEdmModel> BuildMetadata()
     {
-        var edmModel = await Context.CreateServiceModel();
+        var edmModel = await Context.CreateServiceModel().ConfigureAwait(false);
         Context.GetEdmEntityTypes();
         return edmModel;
     }
@@ -127,24 +127,20 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
         if (!disposedValue)
         {
             if (disposing)
-            {
-                await Save(true);
+                base.Dispose(true);
 
-                await ReleaseAsync();
+            await Save(true).ConfigureAwait(false);
 
-                InnerContext = null;
-                contextType = null;
-                uri = null;
-                servicecode.Dispose();
-            }
+            InnerContext = null;
+            contextType = null;
+            uri = null;
+
+            servicecode.Dispose();
+
+            await ReleaseAsync().ConfigureAwait(false);
 
             disposedValue = true;
         }
-    }
-
-    public new ValueTask DisposeAsync()
-    {
-        return new ValueTask(Task.Run(() => Dispose(true)));
     }
 
     public virtual IRepositoryContext Rent()
@@ -198,9 +194,9 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
         Context.Entities.ForEach((e) => Context.Detach(e.Entity));
     }
 
-    public virtual Task ResetStateAsync(CancellationToken token = default)
+    public virtual async Task ResetStateAsync(CancellationToken token = default)
     {
-        return Task.Run(() => ResetState(), token);
+        await Task.Factory.StartNew(() => ResetState(), token).ConfigureAwait(false);
     }
 
     public virtual Task<int> Save(bool asTransaction, CancellationToken token = default)
@@ -225,7 +221,7 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
         return false;
     }
 
-    public virtual Task<bool> ReleaseAsync(CancellationToken token = default)
+    public virtual async Task<bool> ReleaseAsync(CancellationToken token = default)
     {
         if (Leased)
         {
@@ -235,11 +231,11 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
             destContext = null;
             ContextLease = null;
 
-            _ = ReturnAsync(token);
+            await ReturnAsync(token).ConfigureAwait(false);
 
-            return Task.FromResult(true);
+            return true;
         }
-        return Task.FromResult(false);
+        return false;
     }
 
     public virtual void Lease(IRepositoryContext destContext)
@@ -261,20 +257,20 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
         disposedValue = false;
     }
 
-    public virtual Task LeaseAsync(
+    public virtual async Task LeaseAsync(
         IRepositoryContext destContext,
         CancellationToken token = default
     )
     {
-        return Task.Run(() => Lease(destContext), token);
+        await Task.Factory.StartNew(() => Lease(destContext), token).ConfigureAwait(false);
     }
 
     private async Task<int> saveClient(bool asTransaction, CancellationToken token = default)
     {
         if (asTransaction)
-            return await saveAsTransaction(Context, token);
+            return await saveAsTransaction(Context, token).ConfigureAwait(false);
         else
-            return await saveChanges(Context, token);
+            return await saveChanges(Context, token).ConfigureAwait(false);
     }
 
     private async Task<int> saveAsTransaction(
@@ -284,7 +280,7 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
     {
         try
         {
-            return (await context.CommitChanges(true)).Length;
+            return (await context.CommitChanges(true).ConfigureAwait(false)).Length;
         }
         catch (Exception e)
         {
@@ -302,7 +298,7 @@ public class RepositoryClient : Catalog<IRepositoryContext>, IRepositoryClient
     {
         try
         {
-            return (await context.CommitChanges()).Length;
+            return (await context.CommitChanges().ConfigureAwait(false)).Length;
         }
         catch (Exception e)
         {

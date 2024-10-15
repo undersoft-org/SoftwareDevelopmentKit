@@ -28,7 +28,9 @@ public class UpsertSetHandler<TStore, TEntity, TDto>
     )
     {
         IEnumerable<TEntity> entities;
-        if (request.Conditions == null)
+        if (request.Predicate == null)
+            entities = _repository.PutBy(request.ForOnly(d => d.IsValid, d => d.Contract), null);
+        else if (request.Conditions == null)
             entities = _repository.PutBy(
                 request.ForOnly(d => d.IsValid, d => d.Contract),
                 request.Predicate

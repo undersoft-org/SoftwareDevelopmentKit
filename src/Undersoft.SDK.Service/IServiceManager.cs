@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Security.Claims;
 using Undersoft.SDK.Service.Configuration;
 using Undersoft.SDK.Service.Data.Repository;
 
@@ -10,7 +11,10 @@ namespace Undersoft.SDK.Service
         IServiceProvider Provider { get; }
         IServiceRegistry Registry { get; }
         IServiceProvider RootProvider { get; }
-        IServiceScope Session { get; }
+        IServiceProvider Session { get; }
+
+        IServicer CreateServicer();
+        IServicer GetServicer(ClaimsPrincipal tenantUser);
 
         T AddObject<T>() where T : class;
         T AddKeyedObject<T>(object key) where T : class;
@@ -42,7 +46,11 @@ namespace Undersoft.SDK.Service
         IEnumerable<object> GetServices(Type type);
         IEnumerable<T> GetServices<T>() where T : class;
         Lazy<IEnumerable<T>> GetServicesLazy<T>() where T : class;
-        IServiceScope GetSession();
+        IServiceProvider GetSession();
+        IServiceProvider CreateSession();
+        IServiceScope GetScope();
+        IServiceScope SetScope(IServiceScope scope);
+        IServiceManager SetManager(IServiceManager manager);
         IServiceScope CreateScope();
         IServiceManager GetManager();
         object GetSingleton(Type type);
@@ -50,7 +58,6 @@ namespace Undersoft.SDK.Service
         ObjectFactory CreateFactory(Type instanceType, Type[] constrTypes);
         ObjectFactory CreateFactory<T>(Type[] constrTypes);
         T InitializeRootService<T>(params object[] parameters) where T : class;
-        IServiceScope CreateSession();
         T Initialize<T>(params object[] besidesInjectedArguments);
         object Initialize(Type type, params object[] besidesInjectedArguments);
         T EnsureGetService<T>();

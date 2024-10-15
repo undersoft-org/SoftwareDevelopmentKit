@@ -29,7 +29,9 @@ public class RemoteUpsertSetHandler<TStore, TDto, TModel>
     )
     {
         IEnumerable<TDto> entities;
-        if (request.Conditions == null)
+        if (request.Predicate == null)
+            entities = _repository.PutBy(request.ForOnly(d => d.IsValid, d => d.Model), null);
+        else if (request.Conditions == null)
             entities = _repository.PutBy(
                 request.ForOnly(d => d.IsValid, d => d.Model),
                 request.Predicate

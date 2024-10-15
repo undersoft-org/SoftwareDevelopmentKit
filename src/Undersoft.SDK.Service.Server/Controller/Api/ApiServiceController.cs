@@ -23,11 +23,11 @@ public abstract class ApiServiceController<TStore, TService, TModel>
     protected ApiServiceController() { }
 
     protected ApiServiceController(IServicer servicer)
-    {
+    {        
         var accessor = servicer.GetService<IHttpContextAccessor>();
         _servicer =
             (accessor != null)
-                ? servicer.GetTenantServicer(accessor.HttpContext.User)
+                ? servicer.GetServicer(accessor.HttpContext.User)
                 : servicer;
     }
 

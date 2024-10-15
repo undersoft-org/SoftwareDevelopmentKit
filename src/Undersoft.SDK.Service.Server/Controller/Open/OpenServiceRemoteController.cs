@@ -25,11 +25,11 @@ public abstract class OpenServiceRemoteController<TStore, TService, TDto>
     protected OpenServiceRemoteController() { }
 
     public OpenServiceRemoteController(IServicer servicer)
-    {
+    {        
         var accessor = servicer.GetService<IHttpContextAccessor>();
         _servicer =
             (accessor != null)
-                ? servicer.GetTenantServicer(accessor.HttpContext.User)
+                ? servicer.GetServicer(accessor.HttpContext.User)
                 : servicer;
     }
 

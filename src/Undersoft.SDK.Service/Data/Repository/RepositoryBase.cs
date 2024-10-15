@@ -117,16 +117,16 @@ public abstract class Repository : IRepository
         {
             if (disposing)
             {
-                await Save(true);
-
-                _ = ReleaseAsync().ConfigureAwait(false);
+                await Save(true).ConfigureAwait(false);
 
                 ElementType = null;
                 Expression = null;
                 Provider = null;
-                serialcode.Dispose();
-            }
 
+                serialcode.Dispose();
+
+                await ReleaseAsync().ConfigureAwait(false);               
+            }
             disposedValue = true;
         }
     }
@@ -134,33 +134,37 @@ public abstract class Repository : IRepository
     public void Dispose()
     {
         Dispose(disposing: true);
+
         GC.SuppressFinalize(this);
     }
 
     public virtual async ValueTask DisposeAsyncCore()
     {
-        await new ValueTask(
-            Task.Run(async () =>
-            {
-                await Save(true).ConfigureAwait(false);
+        if (!disposedValue)
+        {
+            await Save(true).ConfigureAwait(false);          
 
-                await ReleaseAsync().ConfigureAwait(false);
+            ElementType = null;
+            Expression = null;
+            Provider = null;
 
-                ElementType = null;
-                Expression = null;
-                Provider = null;
-                serialcode.Dispose();
-            })
-        ).ConfigureAwait(false);
+            serialcode.Dispose();
+
+            await ReleaseAsync().ConfigureAwait(false);
+
+            disposedValue = true;
+        }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        await DisposeAsyncCore().ConfigureAwait(false);
+        var vt = DisposeAsyncCore();
 
         Dispose(false);
 
         GC.SuppressFinalize(this);
+
+        return vt;
     }
 
     public virtual void ResetState()
