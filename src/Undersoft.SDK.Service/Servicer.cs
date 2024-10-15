@@ -118,13 +118,19 @@ public class Servicer : ServiceManager, IServicer, IMediator
 
     public async Task<TResponse> Report<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
-        return await Mediator.Send(request, cancellationToken);
+        using (var servicer = CreateServicer())
+        {
+            return await servicer.Mediator.Send(request, cancellationToken);
+        }
     }
 
     public async Task<object> Report(object request, CancellationToken cancellationToken = default)
     {
-        return await Mediator.Send(request, cancellationToken).ConfigureAwait(false);
-    }   
+        using (var servicer = CreateServicer())
+        {
+            return await servicer.Mediator.Send(request, cancellationToken).ConfigureAwait(false);
+        }
+    }
 
     public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
