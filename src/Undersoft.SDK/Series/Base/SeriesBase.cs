@@ -1262,7 +1262,8 @@ namespace Undersoft.SDK.Series.Base
         {
             if (!disposedValue)
             {
-                InnerRenew(minsize);
+                if(disposing)
+                    InnerRenew(minsize);
 
                 disposedValue = true;
             }
@@ -1274,25 +1275,25 @@ namespace Undersoft.SDK.Series.Base
             GC.SuppressFinalize(this);
         }
 
-        public virtual ValueTask DisposeAsyncCore()
+        public virtual async ValueTask DisposeAsyncCore()
         {
-            if (!disposedValue)
+            await Task.Factory.StartNew(() =>
             {
-                InnerRenew(minsize);
+                if (!disposedValue)
+                {
+                    InnerRenew(minsize);
 
-                disposedValue = true;
-            }
-            return new ValueTask();
+                    disposedValue = true;
+                }
+            }).ConfigureAwait(false);
         }
-        public virtual ValueTask DisposeAsync()
+        public virtual async ValueTask DisposeAsync()
         {
-            var vt = DisposeAsyncCore();
+            await DisposeAsyncCore().ConfigureAwait(false);
 
             Dispose(false);
 
             GC.SuppressFinalize(this);
-
-            return vt;
         }
 
         public byte[] GetBytes()

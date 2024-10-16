@@ -39,10 +39,10 @@ public class RemoteRepository<TStore, TEntity>
     public RemoteRepository(
         IRepositoryContextPool<DataClient<TStore>> pool,
         IEntityCache<TStore, TEntity> cache,
-        IServiceManager manager
+        IServicer servicer
     ) : base(pool.ContextPool)
     {
-        var authorization = manager.GetService<IAuthorization>();
+        var authorization = servicer.GetService<IAuthorization>();
         if(authorization.Credentials.SessionToken != null)
             SetAuthorization(authorization.Credentials.SessionToken);
         this.cache = cache;
@@ -51,10 +51,10 @@ public class RemoteRepository<TStore, TEntity>
     public RemoteRepository(
         IRepositoryContextPool<DataClient<TStore>> pool,
         IEntityCache<TStore, TEntity> cache,
-        IServiceManager manager,
+        IServicer servicer,
         IEnumerable<IRemoteProperty<IDataStore, TEntity>> remoteProps,
         IRemoteSynchronizer synchronizer
-    ) : this(pool, cache, manager)
+    ) : this(pool, cache, servicer)
     {
         synchronizer.AddRepository(this);
         RemoteProperties = remoteProps.DoEach(

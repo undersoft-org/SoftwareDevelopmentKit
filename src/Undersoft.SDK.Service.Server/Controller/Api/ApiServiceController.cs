@@ -9,6 +9,7 @@ using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Operation.Invocation;
 using Undersoft.SDK.Service.Server.Controller.Api.Abstractions;
+using Undersoft.SDK.Service.Server.Extensions;
 
 [ApiService]
 public abstract class ApiServiceController<TStore, TService, TModel>
@@ -23,12 +24,10 @@ public abstract class ApiServiceController<TStore, TService, TModel>
     protected ApiServiceController() { }
 
     protected ApiServiceController(IServicer servicer)
-    {        
-        var accessor = servicer.GetService<IHttpContextAccessor>();
-        _servicer =
-            (accessor != null)
-                ? servicer.GetServicer(accessor.HttpContext.User)
-                : servicer;
+    {
+        _servicer = servicer.TryGetService<IHttpContextAccessor>(out var accessor)
+            ? accessor.SetServicer(servicer)
+            : servicer.SetServicer(servicer);
     }
 
     [HttpPost("Action/{method}")]
@@ -40,9 +39,7 @@ public abstract class ApiServiceController<TStore, TService, TModel>
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _servicer.Send(
-            new Access<TStore, TService, TModel>(method, arguments)
-        );
+        var result = await _servicer.Send(new Access<TStore, TService, TModel>(method, arguments));
 
         return !result.IsValid ? BadRequest(result.ErrorMessages) : Ok(result.Response);
     }
@@ -56,9 +53,7 @@ public abstract class ApiServiceController<TStore, TService, TModel>
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _servicer.Send(
-            new Action<TStore, TService, TModel>(method, arguments)
-        );
+        var result = await _servicer.Send(new Action<TStore, TService, TModel>(method, arguments));
 
         return !result.IsValid ? BadRequest(result.ErrorMessages) : Ok(result.Response);
     }
@@ -72,9 +67,7 @@ public abstract class ApiServiceController<TStore, TService, TModel>
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _servicer.Send(
-            new Setup<TStore, TService, TModel>(method, arguments)
-        );
+        var result = await _servicer.Send(new Setup<TStore, TService, TModel>(method, arguments));
 
         return !result.IsValid ? BadRequest(result.ErrorMessages) : Ok(result.Response);
     }

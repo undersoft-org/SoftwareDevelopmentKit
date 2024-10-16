@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace Undersoft.SDK.Service.Server.Controller.Open;
 
-using System.Text.Json;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using System.Text.Json;
 using Undersoft.SDK.Service;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Operation.Invocation;
+using Undersoft.SDK.Service.Server.Extensions;
 using Undersoft.SDK.Service.Server.Controller.Open.Abstractions;
 
 [OpenServiceRemote]
@@ -25,12 +25,10 @@ public abstract class OpenServiceRemoteController<TStore, TService, TDto>
     protected OpenServiceRemoteController() { }
 
     public OpenServiceRemoteController(IServicer servicer)
-    {        
-        var accessor = servicer.GetService<IHttpContextAccessor>();
-        _servicer =
-            (accessor != null)
-                ? servicer.GetServicer(accessor.HttpContext.User)
-                : servicer;
+    {
+        _servicer = servicer.TryGetService<IHttpContextAccessor>(out var accessor)
+            ? accessor.SetServicer(servicer)
+            : servicer.SetServicer(servicer);
     }
 
     [HttpPost]

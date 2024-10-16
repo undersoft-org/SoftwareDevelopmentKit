@@ -11,10 +11,12 @@ namespace Undersoft.SDK.Service
         IServiceProvider Provider { get; }
         IServiceRegistry Registry { get; }
         IServiceProvider RootProvider { get; }
-        IServiceProvider Session { get; }
+        IServiceProvider SessionProvider { get; }
 
-        IServicer CreateServicer();
-        IServicer GetServicer(ClaimsPrincipal tenantUser);
+        IServicer SetServicer(IServicer servicer);        
+        void SetInnerProvider(IServiceProvider serviceProvider);        
+        IServicer CreateServicer();        
+        IServicer SetTenantServicer(ClaimsPrincipal tenantUser, IServicer servicer);
 
         T AddObject<T>() where T : class;
         T AddKeyedObject<T>(object key) where T : class;
@@ -41,8 +43,10 @@ namespace Undersoft.SDK.Service
         object GetRootService(Type type);
         T GetRootService<T>() where T : class;
         IEnumerable<T> GetRootServices<T>() where T : class;
+        bool TryGetService<T>(out T service) where T : class;
         T GetService<T>() where T : class;
         Lazy<T> GetServiceLazy<T>() where T : class;
+        bool TryGetService(Type type, out object service);   
         IEnumerable<object> GetServices(Type type);
         IEnumerable<T> GetServices<T>() where T : class;
         Lazy<IEnumerable<T>> GetServicesLazy<T>() where T : class;

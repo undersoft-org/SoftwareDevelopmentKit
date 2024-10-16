@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Undersoft.SDK.Service.Data.Repository;
 
 using Client;
+using Microsoft.Extensions.DependencyInjection;
 using Source;
 using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Service.Data.Client;

@@ -18,7 +18,7 @@ namespace Undersoft.SDK.Service.Data.Blob.Container
             var value = containerConfiguration.GetConfiguration(name);
             if (value == null)
             {
-                throw new Exception($"Could not find the configuration value for '{name}'!");
+                throw new Exception($"Could not find the InnerConfiguration value for '{name}'!");
             }
 
             return value;

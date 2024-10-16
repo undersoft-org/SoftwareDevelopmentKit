@@ -367,7 +367,7 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
                 .Build();
             
             if(ao.Scopes != null)
-                ao.Scopes.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim("scope", s)));
+                ao.Scopes.ForEach(s => options.AddPolicy(s, policy => policy.RequireClaim("SessionScope", s)));
             if (ao.Roles != null)
                 ao.Roles.ForEach(s => options.AddPolicy(s, policy => policy.RequireRole(s)));
             if (ao.Claims != null)

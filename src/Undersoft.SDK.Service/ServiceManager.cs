@@ -14,32 +14,37 @@ namespace Undersoft.SDK.Service
         private new bool disposedValue;
 
         private static IServiceRegistry rootRegistry;
-        private static IServiceConfiguration rootConfiguration;
 
-        private IServiceRegistry registry;
-        private IServiceConfiguration configuration;
-
-        protected IServiceScope scope;
-        protected IServiceProvider provider;
+        private static IServiceConfiguration rootConfiguration;       
 
         public IServiceProvider RootProvider => GetRootProvider();
+
+        protected virtual IServiceProvider InnerProvider { get; set; }
+
         public IServiceProvider Provider => GetProvider();
-         
-        public IServiceProvider Session => GetSession(); 
-         
+
+        protected virtual IServiceScope SessionScope { get; set; }
+
+        public IServiceProvider SessionProvider => GetSession();
+       
+        protected virtual IServiceConfiguration InnerConfiguration { get; set; }
+
+        public IServiceConfiguration Configuration
+        {
+            get => InnerConfiguration;
+            set => InnerConfiguration = value;
+        }
+
+        protected virtual IServiceRegistry InnerRegistry { get; set; }
+
+        public IServiceRegistry Registry => InnerRegistry;
+
         static ServiceManager()
         {
             var sm = new ServiceManager(new ServiceCollection());
             rootRegistry = sm.Registry;
             rootConfiguration = sm.Configuration;
         }
-
-        public IServiceConfiguration Configuration
-        {
-            get => configuration;
-            set => configuration = value;
-        }
-        public IServiceRegistry Registry => registry;
 
         public ServiceManager() : base()
         {
@@ -53,21 +58,21 @@ namespace Undersoft.SDK.Service
 
         internal ServiceManager(IServiceCollection services) : this()
         {
-            if (registry == null)
+            if (InnerRegistry == null)
             {
-                registry = new ServiceRegistry(services, this);
-                registry.MergeServices(true);
+                InnerRegistry = new ServiceRegistry(services, this);
+                InnerRegistry.MergeServices(true);
                 AddObject<IServiceManager>(this);
 
-                BuildServiceProviderFactory(registry);
+                BuildServiceProviderFactory(InnerRegistry);
             }
             else
-                registry.MergeServices(services, true);
+                InnerRegistry.MergeServices(services, true);
 
-            if (configuration == null)
+            if (InnerConfiguration == null)
             {
-                configuration = new ServiceConfiguration(registry);
-                AddObject<IServiceConfiguration>(configuration);
+                InnerConfiguration = new ServiceConfiguration(InnerRegistry);
+                AddObject(InnerConfiguration);
             }
         }
 
@@ -107,10 +112,14 @@ namespace Undersoft.SDK.Service
             return RootProvider.GetService(type);
         }
 
+        public virtual bool TryGetService<T>(out T service) where T : class
+        {
+            return (service = GetService<T>()) == null;
+        }
+
         public virtual T GetService<T>() where T : class
         {
-            var result = Provider.GetService<T>();
-            return result;
+            return Provider.GetService<T>();            
         }
 
         public virtual IEnumerable<T> GetServices<T>() where T : class
@@ -126,6 +135,11 @@ namespace Undersoft.SDK.Service
         public virtual object GetService(Type type)
         {
             return Provider.GetService(type);
+        }
+
+        public virtual bool TryGetService(Type type, out object service)
+        {
+            return (service = GetService(type)) == null;
         }
 
         public virtual IEnumerable<object> GetServices(Type type)
@@ -155,7 +169,7 @@ namespace Undersoft.SDK.Service
 
         public virtual object GetSingleton(Type type)
         {
-            return registry.GetObject(type);
+            return InnerRegistry.GetObject(type);
         }
 
         public virtual object GetRequiredService(Type type)
@@ -182,14 +196,14 @@ namespace Undersoft.SDK.Service
         public IServiceManager ReplaceProvider(IServiceProvider serviceProvider)
         {
             Provider.GetRequiredService<ServiceObject<IServiceProvider>>().Value = serviceProvider;
-            provider = registry.GetProvider();
+            InnerProvider = InnerRegistry.GetProvider();
             return this;
         }
 
         public IServiceProvider BuildInternalProvider(bool withPropertyInjection = false)
         {
             SetProvider(GetRegistry().BuildServiceProviderFromFactory<IServiceCollection>());
-            return provider = registry.GetProvider();
+            return InnerProvider = InnerRegistry.GetProvider();
         }
 
         public static IServiceProvider BuildInternalRootProvider(bool withPropertyInjection = false)
@@ -217,7 +231,7 @@ namespace Undersoft.SDK.Service
 
         public IServiceProvider GetProvider()
         {
-            return (provider ??= registry.GetProvider()) ?? BuildInternalProvider();
+            return (InnerProvider ??= InnerRegistry.GetProvider()) ?? BuildInternalProvider();
         }
 
         public IServiceProviderFactory<IServiceCollection> GetProviderFactory()
@@ -267,25 +281,25 @@ namespace Undersoft.SDK.Service
 
         public T GetObject<T>() where T : class
         {
-            return registry.GetObject<T>();
+            return InnerRegistry.GetObject<T>();
         }
 
         public T AddObject<T>(T obj) where T : class
         {
-            return registry.AddObject(obj).Value;
+            return InnerRegistry.AddObject(obj).Value;
         }
         public T AddObject<T>() where T : class
         {
-            return registry.AddObject(typeof(T).New<T>()).Value;
+            return InnerRegistry.AddObject(typeof(T).New<T>()).Value;
         }
 
         public T AddKeyedObject<T>(object key, T obj) where T : class
         {
-            return registry.AddKeyedObject(key, obj).Value;
+            return InnerRegistry.AddKeyedObject(key, obj).Value;
         }
         public T AddKeyedObject<T>(object key) where T : class
         {
-            return registry.AddKeyedObject(key, typeof(T).New<T>()).Value;
+            return InnerRegistry.AddKeyedObject(key, typeof(T).New<T>()).Value;
         }
 
         public static T GetRootObject<T>() where T : class
@@ -302,13 +316,19 @@ namespace Undersoft.SDK.Service
             return rootRegistry.AddObject(typeof(T).New<T>()).Value;
         }
 
-        public IServiceProvider GetSession()
+        public void SetInnerProvider(IServiceProvider serviceProvider)
         {
-            return (scope ?? CreateScope()).ServiceProvider;
+            InnerProvider = serviceProvider;
         }
 
-        public IServicer GetServicer(ClaimsPrincipal tenantUser)
+        public IServiceProvider GetSession()
         {
+            return (SessionScope ??= CreateScope()).ServiceProvider;
+        }
+
+        public IServicer SetTenantServicer(ClaimsPrincipal tenantUser, IServicer servicer)
+        {
+            IServiceManager manager = null;
             if (
               tenantUser.Identity.IsAuthenticated
                 && long.TryParse(
@@ -317,47 +337,62 @@ namespace Undersoft.SDK.Service
                 )
             )
             {
-                var manager = this.GetKeyedObject<IServiceManager>(tenantId);
+                manager = GetKeyedObject<IServiceManager>(tenantId);
                 if (manager != null)
-                    return manager.GetService<IServicer>();                                
+                {
+                    servicer.SetManager(manager);
+                    return manager.SetServicer(servicer);
+                }
             }
 
-            return GetService<IServicer>();
+            return GetManager().SetServicer(servicer);
         }
 
         public IServicer CreateServicer()
         {
             var _scope = CreateScope();
             var _servicer = _scope.ServiceProvider.GetService<IServicer>();
-            _servicer.SetScope(_scope);            
+            _servicer.SetInnerProvider(_scope.ServiceProvider);             
+            _servicer.SetScope(_scope);
+            _servicer.IsScoped = true;
             return _servicer;
+        }
+
+        public IServicer SetServicer(IServicer servicer)
+        {        
+            var _scope = CreateScope();
+            servicer.SetInnerProvider(_scope.ServiceProvider);
+            servicer.SetScope(_scope);
+            servicer.IsScoped = true;
+            return servicer;
         }
 
         public IServiceProvider CreateSession()
         {         
-            return CreateServicer().Session;
+            return CreateServicer().SessionProvider;
         }
 
         public IServiceScope GetScope()
         {
-            return scope ??= CreateScope();
+            return SessionScope ??= CreateScope();
         }
 
         public IServiceScope SetScope(IServiceScope scope)
         {
-            return this.scope = scope;       
+            return SessionScope = scope;       
         }
 
         public IServiceManager SetManager(IServiceManager serviceManager)
         {
             Manager = serviceManager;
-            registry = serviceManager.Registry;
-            provider = serviceManager.Provider;
-            configuration = serviceManager.Configuration;          
+            InnerRegistry = serviceManager.Registry;
+            InnerProvider = serviceManager.Provider;
+            InnerConfiguration = serviceManager.Configuration;
+            Refresh();
             return this;
         }
 
-        public static IServiceScope CreateRootSession()
+        public static IServiceScope CreateRootScope()
         {
             return GetRootProvider().CreateScope();
         }
@@ -384,12 +419,12 @@ namespace Undersoft.SDK.Service
 
         public IServiceRegistry GetRegistry()
         {
-            return registry;
+            return InnerRegistry;
         }
 
         public IServiceRegistry GetRegistry(IServiceCollection services)
         {
-            return registry ??= new ServiceManager(services).Registry;
+            return InnerRegistry ??= new ServiceManager(services).Registry;
         }
 
         public static IServiceConfiguration GetRootConfiguration()
@@ -399,7 +434,7 @@ namespace Undersoft.SDK.Service
 
         public IServiceConfiguration GetConfiguration()
         {
-            return configuration;
+            return InnerConfiguration;
         }
 
         protected override void Dispose(bool disposing)
@@ -408,18 +443,18 @@ namespace Undersoft.SDK.Service
             {
                 if (disposing)
                 {
-                    if (scope != null)
-                        scope.Dispose();
+                    if (SessionScope != null)
+                        SessionScope.Dispose();
                 }
                 disposedValue = true;
             }
         }
 
-        public override ValueTask DisposeAsyncCore()
+        public override async ValueTask DisposeAsyncCore()
         {
-            if (scope != null)
-                scope.Dispose();
-            return new ValueTask();
+            if (SessionScope != null)
+                await Task.Factory.StartNew(() =>
+                SessionScope.Dispose()).ConfigureAwait(false);
         }
 
         public async Task LoadDataServiceModels()
@@ -441,17 +476,17 @@ namespace Undersoft.SDK.Service
 
         public T GetKeyedObject<T>(object key) where T : class
         {
-            return registry.GetKeyedObject<T>(key);
+            return InnerRegistry.GetKeyedObject<T>(key);
         }
 
         public T GetKeyedService<T>(object key) where T : class
         {
-            return registry.GetKeyedService<T>(key);
+            return InnerRegistry.GetKeyedService<T>(key);
         }
 
         public T GetKeyedSingleton<T>(object key) where T : class
         {
-            return registry.GetKeyedSingleton<ServiceObject<T>>(key)?.Value;
+            return InnerRegistry.GetKeyedSingleton<ServiceObject<T>>(key)?.Value;
         }
     }
 }

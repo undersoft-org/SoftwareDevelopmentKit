@@ -24,12 +24,12 @@ namespace Undersoft.SDK.Service.Data.Blob
 
             if (!BlobProviders.Any())
             {
-                throw new Exception("No BLOB Storage provider was registered! At least one provider must be registered to be able to use the BLOB Storing System.");
+                throw new Exception("No BLOB Storage InnerProvider was registered! At least one InnerProvider must be registered to be able to use the BLOB Storing System.");
             }
 
             if (configuration.ProviderType == null)
             {
-                throw new Exception("No BLOB Storage provider was used! At least one provider must be configured to be able to use the BLOB Storing System.");
+                throw new Exception("No BLOB Storage InnerProvider was used! At least one InnerProvider must be configured to be able to use the BLOB Storing System.");
             }
 
             foreach (var provider in BlobProviders)
@@ -41,7 +41,7 @@ namespace Undersoft.SDK.Service.Data.Blob
             }
 
             throw new Exception(
-                $"Could not find the BLOB Storage provider with the type ({configuration.ProviderType.AssemblyQualifiedName}) configured for the container {containerName} and no default provider was Set."
+                $"Could not find the BLOB Storage InnerProvider with the type ({configuration.ProviderType.AssemblyQualifiedName}) configured for the container {containerName} and no default InnerProvider was Set."
             );
         }
     }

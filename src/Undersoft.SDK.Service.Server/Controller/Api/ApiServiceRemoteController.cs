@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Undersoft.SDK;
 using Undersoft.SDK.Service;
+using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Server.Controller.Api.Abstractions;
+using Undersoft.SDK.Service.Server.Extensions;
 
 [ApiController]
 [ApiServiceRemote]
@@ -24,12 +26,10 @@ public abstract class ApiServiceRemoteController<TStore, TService, TModel>
     protected ApiServiceRemoteController() { }
 
     protected ApiServiceRemoteController(IServicer servicer)
-    {        
-        var accessor = servicer.GetService<IHttpContextAccessor>();
-        _servicer =
-            (accessor != null)
-                ? servicer.GetServicer(accessor.HttpContext.User)
-                : servicer;
+    {
+        _servicer = servicer.TryGetService<IHttpContextAccessor>(out var accessor)
+              ? accessor.SetServicer(servicer)
+              : servicer.SetServicer(servicer);
     }
 
     [HttpPost("Action/{method}")]

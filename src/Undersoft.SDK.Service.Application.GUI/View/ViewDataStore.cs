@@ -113,7 +113,7 @@ public class ViewDataStore<TStore, TDto, TModel> : ViewData<TModel>, IViewDataSt
         if (_servicer != null)
         {
             if (_session != null)
-                throw new Exception("Session already opened");
+                throw new Exception("SessionProvider already opened");
             _session = _servicer.CreateScope();
             _repository = RemoteSet<TDto>();
             SetAuthorization();

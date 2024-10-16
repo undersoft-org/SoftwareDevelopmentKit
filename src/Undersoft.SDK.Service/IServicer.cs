@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Data.Repository;
 using Undersoft.SDK.Service.Data.Repository.Client;
 using Undersoft.SDK.Service.Data.Repository.Source;
@@ -7,7 +8,9 @@ namespace Undersoft.SDK.Service
 {
     public interface IServicer : IServiceManager, IRepositoryManager, IDisposable
     {
+        bool IsScoped { get; set; }
         IMediator Mediator { get; }
+        void SetAuthorization(IAuthorization auth);
         IAsyncEnumerable<object> CreateStream(object request, CancellationToken cancellationToken = default);
         IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default);
         Lazy<R> LazyServe<T, R>(Func<T, R> function)

@@ -856,7 +856,8 @@
         {
             if (!disposedValue)
             {
-                InnerRenew(minsize);
+                if(disposing)
+                    InnerRenew(minsize);
 
                 disposedValue = true;
             }

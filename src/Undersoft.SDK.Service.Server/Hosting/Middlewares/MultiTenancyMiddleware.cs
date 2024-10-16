@@ -28,30 +28,28 @@ public class MultiTenancyMiddleware
             )
         )
         {
-            IServiceManager manager = null;
             if (_servicer.GetKeyedObject<ITenant>(tenantId) == null)
             {
                 await ApplySourceMigrations(
-                        manager = new ServerSetup(new Tenant() { Id = tenantId })
+                        new ServerSetup(new Tenant() { Id = tenantId })
                             .ConfigureTenant(_servicer)
                             .Manager
                     )
                     .ConfigureAwait(false);
             }
-            else if (
-                (manager = _servicer.GetManager().GetKeyedObject<IServiceManager>(tenantId)) == null
-            )
-            {
-                manager = _servicer.GetManager();
-            }
 
-            var token = context.Request.Headers["Authorization"].FirstOrDefault();
+            var token = context.Request.Headers[nameof(Authorization)].FirstOrDefault();
             if (token != null)
-            {
-                manager.GetService<IAuthorization>().Credentials.SessionToken = token
-                    .Split(" ")
-                    .LastOrDefault();
-            }
+                context.Items.Add(
+                    nameof(Authorization),
+                    new Authorization()
+                    {
+                        Credentials = new Credentials()
+                        {
+                            SessionToken = token.Split(" ").LastOrDefault(),
+                        },
+                    }
+                );
         }
         await _next(context);
     }
