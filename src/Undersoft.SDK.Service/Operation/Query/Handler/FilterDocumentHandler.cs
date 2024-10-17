@@ -26,7 +26,7 @@ public class FilterDocumentHandler<TStore, TEntity, TDto>
     )
     {
         request.Result = await _repository
-            .DetalizedFilterQueryAsync<TDto>(
+            .DetalizedFilterNoTrackedQueryAsync<TDto>(
                 request.Offset,
                 request.Limit,
                 request.Parameters.Filter,

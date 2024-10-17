@@ -26,7 +26,7 @@ public class GetDocumentHandler<TStore, TEntity, TDto>
     )
     {
         request.Result = await _repository
-            .DetalizedGetQueryAsync<TDto>(
+            .DetalizedGetNoTrackedQueryAsync<TDto>(
                 request.Offset,
                 request.Limit,
                 request.Parameters.Sort,

@@ -127,7 +127,7 @@
             {
                 yield return action(item);
             }
-        }
+        }       
 
         public static async IAsyncEnumerable<TResult> ForEachAsync<TItem, TResult>(this IEnumerable<TItem> items, Func<TItem, int, TResult> action)
         {

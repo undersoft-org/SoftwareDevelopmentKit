@@ -21,6 +21,22 @@ public partial class Repository<TEntity>
         else
             return Task.FromResult((IQueryable<TDto>)this[skip, take, this[predicate, sortTerms, expanders]]);
     }
+    public virtual Task<IQueryable<TDto>> DetalizedFilterNoTrackedQueryAsync<TDto>(
+      int skip,
+      int take,
+      Expression<Func<TEntity, bool>> predicate,
+      SortExpression<TEntity> sortTerms,
+      params Expression<Func<TEntity, object>>[] expanders
+  ) where TDto : class
+    {
+        if (predicate == null)
+            return DetalizedGetNoTrackedQueryAsync<TDto>(skip, take, sortTerms, expanders);
+
+        if (typeof(TEntity) != typeof(TDto))
+            return DetalizeQueryAsync<TDto>(this[skip, take, this[predicate, sortTerms, expanders]].AsNoTracking());
+        else
+            return Task.FromResult((IQueryable<TDto>)this[skip, take, this[predicate, sortTerms, expanders]].AsNoTracking());
+    }
 
     public virtual Task<IQueryable<TDto>> FilterQueryAsync<TDto>(
         int skip,
@@ -250,6 +266,16 @@ public partial class Repository<TEntity>
             return DetalizeQueryAsync<TDto>(this[skip, take, this[sortTerms, expanders]]);
         else
             return Task.FromResult((IQueryable<TDto>)this[skip, take, this[sortTerms, expanders]]);
+    }
+    public virtual Task<IQueryable<TDto>> DetalizedGetNoTrackedQueryAsync<TDto>(int skip, int take,
+       SortExpression<TEntity> sortTerms,
+       params Expression<Func<TEntity, object>>[] expanders
+   ) where TDto : class
+    {
+        if (typeof(TEntity) != typeof(TDto))
+            return DetalizeQueryAsync<TDto>(this[skip, take, this[sortTerms, expanders]].AsNoTracking());
+        else
+            return Task.FromResult((IQueryable<TDto>)this[skip, take, this[sortTerms, expanders]].AsNoTracking());
     }
 
     public virtual IAsyncEnumerable<TDto> GetStreamAsync<TDto>(

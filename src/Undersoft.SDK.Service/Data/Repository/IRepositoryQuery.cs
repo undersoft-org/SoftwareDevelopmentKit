@@ -54,9 +54,11 @@ namespace Undersoft.SDK.Service.Data.Repository
         IQueryable<TEntity> Sort(IQueryable<TEntity> query, SortExpression<TEntity> sortTerms);
 
         Task<IQueryable<TDto>> DetalizedGetQueryAsync<TDto>(int skip, int take, SortExpression<TEntity> sortTerms, params Expression<Func<TEntity, object>>[] expanders) where TDto : class;
+        Task<IQueryable<TDto>> DetalizedGetNoTrackedQueryAsync<TDto>(int skip, int take, SortExpression<TEntity> sortTerms, params Expression<Func<TEntity, object>>[] expanders) where TDto : class;
 
-        Task<IQueryable<TDto>> DetalizedFilterQueryAsync<TDto>(int skip, int take, Expression<Func<TEntity, bool>> predicate, SortExpression<TEntity> sortTerms, params Expression<Func<TEntity, object>>[] expanders) where TDto : class;
-
+        Task<IQueryable<TDto>> DetalizedFilterQueryAsync<TDto>(int skip, int take, Expression<Func<TEntity, bool>> predicate, SortExpression<TEntity> sortTerms, params Expression<Func<TEntity, object>>[] expanders) where TDto : class;        
+        Task<IQueryable<TDto>> DetalizedFilterNoTrackedQueryAsync<TDto>(int skip, int take, Expression<Func<TEntity, bool>> predicate, SortExpression<TEntity> sortTerms, params Expression<Func<TEntity, object>>[] expanders) where TDto : class;
+        
         Task<IQueryable<TDto>> DetalizedFindQueryAsync<TDto>(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] expanders) where TDto : class, IOrigin;
         Task<IQueryable<TDto>> DetalizedFindQueryAsync<TDto>(object[] keys, params Expression<Func<TEntity, object>>[] expanders) where TDto : class, IOrigin;
     }
