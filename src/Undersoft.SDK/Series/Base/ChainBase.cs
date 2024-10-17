@@ -72,7 +72,7 @@
         {
             long key = value.Id;
 
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
@@ -80,7 +80,7 @@
             {
                 item = createNew(value);
                 table[pos] = item;
-                countIncrement();
+                CountIncrement();
                 return item;
             }
 
@@ -91,7 +91,7 @@
                     if (item.Removed)
                     {
                         item.Removed = false;
-                        removedDecrement();
+                        RemovedDecrement();
                     }
 
                     item.Value = value.Value;
@@ -102,7 +102,7 @@
                 {
                     ISeriesItem<V> newitem = createNew(value);
                     item.Extended = newitem;
-                    conflictIncrement();
+                    ConflictIncrement();
                     return newitem;
                 }
                 item = item.Extended;
@@ -112,7 +112,7 @@
         {
             long key = unique.Key(value);
 
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
@@ -120,7 +120,7 @@
             {
                 item = createNew(key, value);
                 table[pos] = item;
-                countIncrement();
+                CountIncrement();
                 return item;
             }
 
@@ -131,7 +131,7 @@
                     if (item.Removed)
                     {
                         item.Removed = false;
-                        removedDecrement();
+                        RemovedDecrement();
                     }
 
                     item.Value = value;
@@ -142,7 +142,7 @@
                 {
                     ISeriesItem<V> newitem = createNew(key, value);
                     item.Extended = newitem;
-                    conflictIncrement();
+                    ConflictIncrement();
                     return newitem;
                 }
                 item = item.Extended;
@@ -150,7 +150,7 @@
         }
         protected override ISeriesItem<V> InnerPut(long key, V value)
         {
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
@@ -158,7 +158,7 @@
             {
                 item = createNew(key, value);
                 table[pos] = item;
-                countIncrement();
+                CountIncrement();
                 return item;
             }
 
@@ -169,7 +169,7 @@
                     if (item.Removed)
                     {
                         item.Removed = false;
-                        removedDecrement();
+                        RemovedDecrement();
                     }
 
                     item.Value = value;
@@ -180,7 +180,7 @@
                 {
                     ISeriesItem<V> newitem = createNew(key, value);
                     item.Extended = newitem;
-                    conflictIncrement();
+                    ConflictIncrement();
                     return newitem;
                 }
                 item = item.Extended;
@@ -209,14 +209,14 @@
         protected override bool InnerAdd(ISeriesItem<V> value)
         {
             long key = value.Id;
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
             if (item == null)
             {
                 table[pos] = createNew(value);
-                countIncrement();
+                CountIncrement();
                 return true;
             }
 
@@ -228,7 +228,7 @@
                     {
                         item.Removed = false;
                         item.Value = value.Value;
-                        removedDecrement();
+                        RemovedDecrement();
                         return true;
                     }
                     return false;
@@ -237,7 +237,7 @@
                 if (item.Extended == null)
                 {
                     item.Extended = createNew(value);
-                    conflictIncrement();
+                    ConflictIncrement();
                     return true;
                 }
                 item = item.Extended;
@@ -247,14 +247,14 @@
         {
             long key = unique.Key(value);
 
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
             if (item == null)
             {
                 table[pos] = createNew(key, value);
-                countIncrement();
+                CountIncrement();
                 return true;
             }
 
@@ -266,7 +266,7 @@
                     {
                         item.Removed = false;
                         item.Value = value;
-                        removedDecrement();
+                        RemovedDecrement();
                         return true;
                     }
                     return false;
@@ -275,7 +275,7 @@
                 if (item.Extended == null)
                 {
                     item.Extended = createNew(key, value);
-                    conflictIncrement();
+                    ConflictIncrement();
                     return true;
                 }
                 item = item.Extended;
@@ -283,14 +283,14 @@
         }
         protected override bool InnerAdd(long key, V value)
         {
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
             if (item == null)
             {
                 table[pos] = createNew(key, value);
-                countIncrement();
+                CountIncrement();
                 return true;
             }
 
@@ -302,7 +302,7 @@
                     {
                         item.Removed = false;
                         item.Value = value;
-                        removedDecrement();
+                        RemovedDecrement();
                         return true;
                     }
                     return false;
@@ -311,7 +311,7 @@
                 if (item.Extended == null)
                 {
                     item.Extended = createNew(key, value);
-                    conflictIncrement();
+                    ConflictIncrement();
                     return true;
                 }
                 item = item.Extended;

@@ -14,7 +14,7 @@ using Uniques;
 public class RepositoryClient : Registry<IRepositoryContext>, IRepositoryClient
 {
     protected Uri uri;
-    protected Uscn servicecode;
+    //protected Uscn servicecode;
     private new bool disposedValue;
     protected Type contextType;
 
@@ -99,19 +99,19 @@ public class RepositoryClient : Registry<IRepositoryContext>, IRepositoryClient
         return edmModel;
     }
 
-    public override long Id
-    {
-        get => servicecode.Id == 0 ? servicecode.Id = Unique.NewId : servicecode.Id;
-        set => servicecode.Id = value;
-    }
+    //public override long Id
+    //{
+    //    get => servicecode.Id == 0 ? servicecode.Id = Unique.NewId : servicecode.Id;
+    //    set => servicecode.Id = value;
+    //}
 
     public override long TypeId
     {
         get =>
-            servicecode.TypeId == 0
-                ? servicecode.TypeId = ContextType.GetDataTypeId()
-                : servicecode.TypeId;
-        set => servicecode.TypeId = value;
+            base.TypeId == 0 && ContextType != null
+                ? (base.TypeId = ContextType.GetDataTypeId())
+                : base.TypeId;
+        set => base.TypeId = value;
     }
 
     public IRepositoryContext ContextLease { get; set; }
@@ -121,27 +121,6 @@ public class RepositoryClient : Registry<IRepositoryContext>, IRepositoryClient
     public bool Pooled => ContextPool != null;
 
     public bool Leased => ContextLease != null;
-
-    protected override async void Dispose(bool disposing)
-    {
-        if (!disposedValue)
-        {
-            if (disposing)
-                base.Dispose(true);
-
-            await Save(true).ConfigureAwait(false);
-
-            InnerContext = null;
-            contextType = null;
-            uri = null;
-
-            servicecode.Dispose();
-
-            await ReleaseAsync().ConfigureAwait(false);
-
-            disposedValue = true;
-        }
-    }
 
     public virtual IRepositoryContext Rent()
     {
@@ -191,12 +170,12 @@ public class RepositoryClient : Registry<IRepositoryContext>, IRepositoryClient
 
     public virtual void ResetState()
     {
-        Context.Entities.ForEach((e) => Context.Detach(e.Entity));
+        Context.Entities.ForEach((e) => Context.Detach(e.Entity)).Commit();
     }
 
     public virtual async Task ResetStateAsync(CancellationToken token = default)
     {
-        await Task.Factory.StartNew(() => ResetState(), token).ConfigureAwait(false);
+        await Task.Run(() => ResetState(), token).ConfigureAwait(false);
     }
 
     public virtual Task<int> Save(bool asTransaction, CancellationToken token = default)
@@ -221,7 +200,7 @@ public class RepositoryClient : Registry<IRepositoryContext>, IRepositoryClient
         return false;
     }
 
-    public virtual async Task<bool> ReleaseAsync(CancellationToken token = default)
+    public virtual Task<bool> ReleaseAsync(CancellationToken token = default)
     {
         if (Leased)
         {
@@ -231,11 +210,11 @@ public class RepositoryClient : Registry<IRepositoryContext>, IRepositoryClient
             destContext = null;
             ContextLease = null;
 
-            await ReturnAsync(token).ConfigureAwait(false);
+            _ = ReturnAsync(token);
 
-            return true;
+            return Task.FromResult(true);
         }
-        return false;
+        return Task.FromResult(false);
     }
 
     public virtual void Lease(IRepositoryContext destContext)
@@ -262,7 +241,7 @@ public class RepositoryClient : Registry<IRepositoryContext>, IRepositoryClient
         CancellationToken token = default
     )
     {
-        await Task.Factory.StartNew(() => Lease(destContext), token).ConfigureAwait(false);
+        await Task.Run(() => Lease(destContext), token).ConfigureAwait(false);
     }
 
     private async Task<int> saveClient(bool asTransaction, CancellationToken token = default)
@@ -315,5 +294,41 @@ public class RepositoryClient : Registry<IRepositoryContext>, IRepositoryClient
     public void SnapshotConfiguration()
     {
         throw new NotImplementedException();
+    }
+  
+    protected override async void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                await HandleDispose().ConfigureAwait(false);
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        if (!disposedValue)
+        {
+            await HandleDispose().ConfigureAwait(false);
+
+            disposedValue = true;
+        }       
+    }
+
+    protected async Task HandleDispose()
+    {
+        await Save(true).ConfigureAwait(false);
+
+        await ReleaseAsync().ConfigureAwait(false);
+
+        InnerContext = null;
+        contextType = null;
+        uri = null;
+
+        //servicecode.Dispose();
     }
 }

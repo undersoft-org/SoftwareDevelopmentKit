@@ -41,7 +41,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Accounts
                 }
                 else
                 {
-                    var _panel = servicer.Initialize<
+                    var _panel = servicer.Activate<
                         ViewPanel<GenericAccountPanel<TModel, TValidator>, TModel>
                     >(DialogService);
 

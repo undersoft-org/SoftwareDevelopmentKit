@@ -137,7 +137,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Data.Grid.Dialog
                     var dialogType = typeof(GenericDataGridDialog<,>).MakeGenericType(
                         dialogViewType, item.ModelType
                     );
-                    var _dialogObj = vs!.Servicer!.Initialize(dialogType, vs.DialogService);
+                    var _dialogObj = vs!.Servicer!.Activate(dialogType, vs.DialogService);
                     if (_dialogObj != null)
                     {
                         return (IGenericDataGridDialog)_dialogObj;

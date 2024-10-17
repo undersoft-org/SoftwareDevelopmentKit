@@ -7,6 +7,7 @@ using Undersoft.SDK.Service.Configuration;
 
 namespace Undersoft.SDK.Service.Data.Repository.Source;
 
+using Microsoft.AspNetCore.Components.Forms;
 using System;
 using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Data.Object;
@@ -21,7 +22,7 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
     protected Type contextType;
     protected new bool disposedValue;
     protected DbContextOptionsBuilder optionsBuilder;
-    protected Uscn servicecode;
+    //protected Uscn servicecode;
     const int WAIT_PUBLISH_TIMEOUT = 30 * 1000;
     ManualResetEventSlim _access = new ManualResetEventSlim(true, 128);
     SemaphoreSlim _pass = new SemaphoreSlim(1);
@@ -106,22 +107,22 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
 
     public DataSite Site { get; set; }
 
-    public override long Id
-    {
-        get =>
-            servicecode.Id == 0
-                ? (servicecode.Id = Unique.NewId)
-                : servicecode.Id;
-        set => servicecode.Id = value;
-    }
+    //public override long Id
+    //{
+    //    get =>
+    //        servicecode.Id == 0
+    //            ? (servicecode.Id = Unique.NewId)
+    //            : servicecode.Id;
+    //    set => servicecode.Id = value;
+    //}
 
     public override long TypeId
     {
         get =>
-            servicecode.TypeId == 0
-                ? (servicecode.TypeId = ContextType.GetDataTypeId())
-                : servicecode.TypeId;
-        set => servicecode.TypeId = value;
+            base.TypeId == 0 && ContextType != null
+                ? (base.TypeId = ContextType.GetDataTypeId())
+                : base.TypeId;
+        set => base.TypeId = value;
     }
 
     public void AcquireAccess()
@@ -256,7 +257,7 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
 
     public virtual async Task LeaseAsync(IRepositoryContext lease, CancellationToken token = default)
     {
-        await Task.Factory.StartNew(() => Lease(lease), token).ConfigureAwait(false);
+        await Task.Run(() => Lease(lease), token).ConfigureAwait(false);
     }
 
     public virtual bool Release()
@@ -282,7 +283,7 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
         _access.Set();
     }
 
-    public virtual async Task<bool> ReleaseAsync(CancellationToken token = default)
+    public virtual Task<bool> ReleaseAsync(CancellationToken token = default)
     {
         if (Leased)
         {
@@ -292,11 +293,11 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
             destContext = null;
             ContextLease = null;
 
-            await ReturnAsync().ConfigureAwait(false);
+            _ = ReturnAsync();
 
-            return true;
+            return Task.FromResult(true);
         }
-        return false;
+        return Task.FromResult(false);
     }
 
     public virtual IRepositoryContext Rent()
@@ -363,26 +364,41 @@ public class RepositorySource : Registry<IRepositoryContext>, IRepositorySource
             _changeTracker?.CascadeDeleteTiming,
             _changeTracker?.DeleteOrphansTiming
         );
-    }
+    }   
 
     protected override async void Dispose(bool disposing)
     {
         if (!disposedValue)
         {
-            if(disposing) 
-                base.Dispose(true);
-
-            await Save(true).ConfigureAwait(false);
-
-            InnerContext = null;
-            contextType = null;
-            Options = null;
-
-            servicecode.Dispose();
-
-            await ReleaseAsync().ConfigureAwait(false);
+            if (disposing)
+            {
+                await HandleDispose().ConfigureAwait(false);
+            }
 
             disposedValue = true;
         }
-    }  
+    }
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        if (!disposedValue)
+        {
+            await HandleDispose().ConfigureAwait(false);
+
+            disposedValue = true;
+        }
+    }
+
+    protected async Task HandleDispose()
+    {
+        await Save(true).ConfigureAwait(false);
+
+        await ReleaseAsync().ConfigureAwait(false);
+
+        InnerContext = null;
+        contextType = null;
+        Options = null;
+        TypeId = 0;
+        //servicecode.Dispose();
+    }
 }

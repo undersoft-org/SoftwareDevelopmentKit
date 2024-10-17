@@ -41,7 +41,7 @@ else
     protected override void OnInitialized()
     {
         MessageService.OnMessageItemsUpdated += UpdateCount;
-        _panel = _servicer.Initialize<ViewPanel<GenericNotificationPanel<Event>, Event>>(DialogService);
+        _panel = _servicer.Activate<ViewPanel<GenericNotificationPanel<Event>, Event>>(DialogService);
     }
 
     private void UpdateCount()

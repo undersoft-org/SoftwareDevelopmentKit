@@ -34,7 +34,7 @@ public partial class SignUpBase<TLogo, TAccount> : ComponentBase where TAccount 
 
     protected override void OnInitialized()
     {
-        _dialog = _servicer.Initialize<
+        _dialog = _servicer.Activate<
             AccessDialog<TLogo, SignUpDialog<Credentials, AccessValidator>, Credentials>
         >(DialogService);
     }

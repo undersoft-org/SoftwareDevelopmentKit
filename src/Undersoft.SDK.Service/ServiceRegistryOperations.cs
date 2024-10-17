@@ -95,8 +95,22 @@ namespace Undersoft.SDK.Service
 
         public IServiceProvider GetProvider()
         {
-            var a = (ServiceObject<IServiceProvider>)(Get<ServiceObject<IServiceProvider>>()?.ImplementationInstance);
-            return a.Value;
+            return ((ServiceObject<IServiceProvider>)(Get<ServiceObject<IServiceProvider>>()?.ImplementationInstance))?.Value;            
+        }
+
+        public IServiceManager GetManager()
+        {
+            return GetSingleton<IServiceManager>();
+        }
+
+        public IServiceManager GetKeyedManager(object key)
+        {
+            return GetKeyedSingleton<IServiceManager>(key);
+        }
+
+        public bool TryGetKeyedManager(object key, out IServiceManager manager)
+        {
+            return TryGetKeyedSingleton(key, out manager);
         }
 
         public T GetRequiredSingleton<T>() where T : class
@@ -117,9 +131,27 @@ namespace Undersoft.SDK.Service
             return (T)Get<T>()?.ImplementationInstance;
         }
 
+        public bool TryGetSingleton<T>(out T output) where T : class
+        {
+            output = default;
+            if (!TryGet<T>(out var descriptor))
+                return false;
+            output = (T)descriptor.ImplementationInstance;
+            return true;
+        }
+
         public T GetKeyedSingleton<T>(object key) where T : class
         {
-            return (T)Get(key.UniqueKey64(typeof(T).UniqueKey64()))?.KeyedImplementationInstance;
+            return (T)Get<T>(key)?.KeyedImplementationInstance;
+        }
+
+        public bool TryGetKeyedSingleton<T>(object key, out T output) where T : class
+        {
+            output = default;
+            if (!TryGet<T>(key, out var descriptor))
+                return false;
+            output = (T)descriptor.ImplementationInstance;
+            return true;
         }
 
         public object GetSingleton(Type type)
@@ -127,30 +159,35 @@ namespace Undersoft.SDK.Service
             return Get(type)?.ImplementationInstance;
         }
 
-        public bool IsAdded(object key)
+        public bool ContainsKeyedService<T>(object key)
         {
-            return ContainsKey(key);
+            return ContainsKey<T>(key);
         }
 
-        public bool IsAdded<T>() where T : class
+        public bool ContainsKeyedService(object key, Type type)
+        {
+            return ContainsKey(key, type);
+        }
+
+        public bool ContainsService<T>() where T : class
         {
             return ContainsKey<T>();
         }
 
-        public bool IsAdded(Type type)
+        public bool ContainsService(Type type)
         {
             return ContainsKey(type);
         }
 
         public T GetService<T>() where T : class
         {
-            return GetSingleton<IServiceManager>().Provider.GetService<T>();
-        }
+            return GetManager().Provider.GetService<T>();
+        }       
 
         public T GetKeyedService<T>(object key) where T : class
         {
-            return GetSingleton<IServiceManager>().Provider.GetKeyedService<T>(key);
-        }
+            return GetManager().Provider.GetKeyedService<T>(key);
+        }      
 
         public object GetService(Type type)
         {

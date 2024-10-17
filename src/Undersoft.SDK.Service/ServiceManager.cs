@@ -1,13 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Security.Claims;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Configuration;
+using Undersoft.SDK.Service.Data.Repository;
+using Undersoft.SDK.Service.Hosting;
+using Undersoft.SDK.Utilities;
 
 namespace Undersoft.SDK.Service
 {
     using Configuration;
-    using System.Security.Claims;
-    using Undersoft.SDK.Service.Data.Repository;
-    using Undersoft.SDK.Service.Hosting;
-    using Undersoft.SDK.Utilities;
 
     public class ServiceManager : RepositoryManager, IServiceManager, IAsyncDisposable
     {
@@ -15,7 +16,7 @@ namespace Undersoft.SDK.Service
 
         private static IServiceRegistry rootRegistry;
 
-        private static IServiceConfiguration rootConfiguration;       
+        private static IServiceConfiguration rootConfiguration;
 
         public IServiceProvider RootProvider => GetRootProvider();
 
@@ -25,8 +26,8 @@ namespace Undersoft.SDK.Service
 
         protected virtual IServiceScope SessionScope { get; set; }
 
-        public IServiceProvider SessionProvider => GetSession();
-       
+        public IServiceProvider SessionProvider => GetSessionProvider();
+
         protected virtual IServiceConfiguration InnerConfiguration { get; set; }
 
         public IServiceConfiguration Configuration
@@ -41,7 +42,7 @@ namespace Undersoft.SDK.Service
 
         static ServiceManager()
         {
-            var sm = new ServiceManager(new ServiceCollection());
+            var sm = new ServiceManager(null, null);
             rootRegistry = sm.Registry;
             rootConfiguration = sm.Configuration;
         }
@@ -51,36 +52,41 @@ namespace Undersoft.SDK.Service
             Manager = this;
         }
 
-        public ServiceManager(IServiceManager serviceManager) : base()
+        public ServiceManager(IServiceManager serviceManager) : base(serviceManager)
         {
-            SetManager(serviceManager);
+            InnerRegistry = serviceManager.Registry;
+            InnerProvider = serviceManager.Provider;
+            InnerConfiguration = serviceManager.Configuration;
         }
 
-        internal ServiceManager(IServiceCollection services) : this()
+        internal ServiceManager(IServiceCollection services, IConfiguration configuration) : this()
         {
-            if (InnerRegistry == null)
-            {
-                InnerRegistry = new ServiceRegistry(services, this);
-                InnerRegistry.MergeServices(true);
-                AddObject<IServiceManager>(this);
+            Initialize(services, configuration);
+        }
 
-                BuildServiceProviderFactory(InnerRegistry);
-            }
+        public virtual void Initialize() => Initialize(null, null);
+        public virtual void Initialize(IServiceCollection services) => Initialize(services, null);
+        public virtual void Initialize(IServiceCollection services, IConfiguration configuration)
+        {
+            if (services == null)
+                services = new ServiceCollection();
+
+            InnerRegistry = new ServiceRegistry(services, this);
+
+            BuildServiceProviderFactory(InnerRegistry);
+
+            if (configuration != null)
+                InnerConfiguration = new ServiceConfiguration(configuration, InnerRegistry);
             else
-                InnerRegistry.MergeServices(services, true);
-
-            if (InnerConfiguration == null)
-            {
                 InnerConfiguration = new ServiceConfiguration(InnerRegistry);
-                AddObject(InnerConfiguration);
-            }
+
+            AddObject(InnerConfiguration);
         }
 
         public virtual IServiceProviderFactory<IServiceCollection> BuildServiceProviderFactory(IServiceRegistry registry)
         {
             var factory = new ServiceManagerFactory(this);
 
-            AddObject<IServiceRegistry>(registry);
             AddObject<IServiceCollection>(registry);
             AddObject<IServiceProviderFactory<IServiceCollection>>(factory);
 
@@ -114,12 +120,12 @@ namespace Undersoft.SDK.Service
 
         public virtual bool TryGetService<T>(out T service) where T : class
         {
-            return (service = GetService<T>()) == null;
+            return (service = GetService<T>()) != null;
         }
 
         public virtual T GetService<T>() where T : class
         {
-            return Provider.GetService<T>();            
+            return Provider.GetService<T>();
         }
 
         public virtual IEnumerable<T> GetServices<T>() where T : class
@@ -139,7 +145,7 @@ namespace Undersoft.SDK.Service
 
         public virtual bool TryGetService(Type type, out object service)
         {
-            return (service = GetService(type)) == null;
+            return (service = GetService(type)) != null;
         }
 
         public virtual IEnumerable<object> GetServices(Type type)
@@ -164,12 +170,12 @@ namespace Undersoft.SDK.Service
 
         public virtual T GetSingleton<T>() where T : class
         {
-            return GetObject<T>();
+            return InnerRegistry.GetSingleton<T>();
         }
 
         public virtual object GetSingleton(Type type)
         {
-            return InnerRegistry.GetObject(type);
+            return InnerRegistry.GetSingleton(type);
         }
 
         public virtual object GetRequiredService(Type type)
@@ -253,18 +259,16 @@ namespace Undersoft.SDK.Service
         {
             return ActivatorUtilities.CreateFactory(typeof(T), constrTypes);
         }
-
         public ObjectFactory CreateFactory(Type instanceType, Type[] constrTypes)
         {
             return ActivatorUtilities.CreateFactory(instanceType, constrTypes);
         }
 
-        public T Initialize<T>(params object[] besidesInjectedArguments)
+        public T Activate<T>(params object[] besidesInjectedArguments)
         {
             return ActivatorUtilities.CreateInstance<T>(Provider, besidesInjectedArguments);
         }
-
-        public object Initialize(Type type, params object[] besidesInjectedArguments)
+        public object Activate(Type type, params object[] besidesInjectedArguments)
         {
             return ActivatorUtilities.CreateInstance(Provider, type, besidesInjectedArguments);
         }
@@ -273,7 +277,6 @@ namespace Undersoft.SDK.Service
         {
             return ActivatorUtilities.GetServiceOrCreateInstance<T>(Provider);
         }
-
         public object EnsureGetService<T>(Type type)
         {
             return ActivatorUtilities.GetServiceOrCreateInstance(Provider, type);
@@ -282,6 +285,11 @@ namespace Undersoft.SDK.Service
         public T GetObject<T>() where T : class
         {
             return InnerRegistry.GetObject<T>();
+        }
+
+        public bool TryGetObject<T>(out T output) where T : class
+        {
+            return InnerRegistry.TryGetObject(out output);
         }
 
         public T AddObject<T>(T obj) where T : class
@@ -321,14 +329,13 @@ namespace Undersoft.SDK.Service
             InnerProvider = serviceProvider;
         }
 
-        public IServiceProvider GetSession()
+        public IServiceProvider GetSessionProvider()
         {
             return (SessionScope ??= CreateScope()).ServiceProvider;
         }
 
         public IServicer SetTenantServicer(ClaimsPrincipal tenantUser, IServicer servicer)
         {
-            IServiceManager manager = null;
             if (
               tenantUser.Identity.IsAuthenticated
                 && long.TryParse(
@@ -337,12 +344,9 @@ namespace Undersoft.SDK.Service
                 )
             )
             {
-                manager = GetKeyedObject<IServiceManager>(tenantId);
+                var manager = GetKeyedManager(tenantId);
                 if (manager != null)
-                {
-                    servicer.SetManager(manager);
-                    return manager.SetServicer(servicer);
-                }
+                    return servicer.SetManager(manager).SetServicer(servicer);
             }
 
             return GetManager().SetServicer(servicer);
@@ -352,24 +356,19 @@ namespace Undersoft.SDK.Service
         {
             var _scope = CreateScope();
             var _servicer = _scope.ServiceProvider.GetService<IServicer>();
-            _servicer.SetInnerProvider(_scope.ServiceProvider);             
+            _servicer.SetInnerProvider(_scope.ServiceProvider);
             _servicer.SetScope(_scope);
             _servicer.IsScoped = true;
             return _servicer;
         }
 
         public IServicer SetServicer(IServicer servicer)
-        {        
+        {
             var _scope = CreateScope();
             servicer.SetInnerProvider(_scope.ServiceProvider);
             servicer.SetScope(_scope);
             servicer.IsScoped = true;
             return servicer;
-        }
-
-        public IServiceProvider CreateSession()
-        {         
-            return CreateServicer().SessionProvider;
         }
 
         public IServiceScope GetScope()
@@ -379,7 +378,7 @@ namespace Undersoft.SDK.Service
 
         public IServiceScope SetScope(IServiceScope scope)
         {
-            return SessionScope = scope;       
+            return SessionScope = scope;
         }
 
         public IServiceManager SetManager(IServiceManager serviceManager)
@@ -388,7 +387,8 @@ namespace Undersoft.SDK.Service
             InnerRegistry = serviceManager.Registry;
             InnerProvider = serviceManager.Provider;
             InnerConfiguration = serviceManager.Configuration;
-            Refresh();
+            RefreshClients();
+            RefreshSources();
             return this;
         }
 
@@ -409,7 +409,17 @@ namespace Undersoft.SDK.Service
 
         public IServiceManager GetManager()
         {
-            return GetObject<IServiceManager>();
+            return InnerRegistry.GetManager();
+        }
+
+        public IServiceManager GetKeyedManager(object key)
+        {
+            return InnerRegistry.GetKeyedManager(key);
+        }
+
+        public bool TryGetKeyedManager(object key, out IServiceManager manager)
+        {
+            return InnerRegistry.TryGetKeyedManager(key, out manager);
         }
 
         public static IServiceRegistry GetRootRegistry()
@@ -424,7 +434,7 @@ namespace Undersoft.SDK.Service
 
         public IServiceRegistry GetRegistry(IServiceCollection services)
         {
-            return InnerRegistry ??= new ServiceManager(services).Registry;
+            return InnerRegistry ??= new ServiceManager(services, null).Registry;
         }
 
         public static IServiceConfiguration GetRootConfiguration()
@@ -435,26 +445,6 @@ namespace Undersoft.SDK.Service
         public IServiceConfiguration GetConfiguration()
         {
             return InnerConfiguration;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    if (SessionScope != null)
-                        SessionScope.Dispose();
-                }
-                disposedValue = true;
-            }
-        }
-
-        public override async ValueTask DisposeAsyncCore()
-        {
-            if (SessionScope != null)
-                await Task.Factory.StartNew(() =>
-                SessionScope.Dispose()).ConfigureAwait(false);
         }
 
         public async Task LoadDataServiceModels()
@@ -481,12 +471,50 @@ namespace Undersoft.SDK.Service
 
         public T GetKeyedService<T>(object key) where T : class
         {
-            return InnerRegistry.GetKeyedService<T>(key);
+            return Provider.GetKeyedService<T>(key);
         }
 
         public T GetKeyedSingleton<T>(object key) where T : class
         {
-            return InnerRegistry.GetKeyedSingleton<ServiceObject<T>>(key)?.Value;
+            return GetKeyedObject<T>(key);
+        }
+
+        public bool TryGetKeyedObject<T>(object key, out T output) where T : class
+        {
+            return InnerRegistry.TryGetKeyedObject(key, out output);
+        }
+
+        public bool TryGetKeyedService<T>(object key, out T output) where T : class
+        {
+            return (output = Provider.GetKeyedService<T>(key)) != null;
+        }
+
+        public bool TryGetKeyedSingleton<T>(object key, out T output) where T : class
+        {
+            return TryGetKeyedObject(key, out output);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (SessionScope != null)
+                        SessionScope.Dispose();
+                }
+                disposedValue = true;
+            }
+        }
+
+        protected override async ValueTask DisposeAsyncCore()
+        {
+            await new ValueTask(Task.Run(() =>
+            {
+                if (SessionScope != null)
+                    SessionScope.Dispose();
+
+            }));
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 using Undersoft.SDK.Service.Configuration;
 using Undersoft.SDK.Service.Data.Repository;
@@ -13,25 +14,30 @@ namespace Undersoft.SDK.Service
         IServiceProvider RootProvider { get; }
         IServiceProvider SessionProvider { get; }
 
-        IServicer SetServicer(IServicer servicer);        
-        void SetInnerProvider(IServiceProvider serviceProvider);        
-        IServicer CreateServicer();        
-        IServicer SetTenantServicer(ClaimsPrincipal tenantUser, IServicer servicer);
-
-        T AddObject<T>() where T : class;
+        object Activate(Type type, params object[] besidesInjectedArguments);
+        T Activate<T>(params object[] besidesInjectedArguments);
         T AddKeyedObject<T>(object key) where T : class;
-        T AddKeyedObject<T>(object key, T item) where T : class;
+        T AddKeyedObject<T>(object key, T obj) where T : class;
+        T AddObject<T>() where T : class;
         T AddObject<T>(T obj) where T : class;
         IServiceProvider AddPropertyInjection();
         IServiceProvider BuildInternalProvider(bool withPropertyInjection = false);
         IServiceProviderFactory<IServiceCollection> BuildServiceProviderFactory(IServiceRegistry registry);
+        ObjectFactory CreateFactory(Type instanceType, Type[] constrTypes);
+        ObjectFactory CreateFactory<T>(Type[] constrTypes);
+        IServiceProvider CreateProviderFromFacotry();
+        IServiceScope CreateScope();
+        IServicer CreateServicer();
         T EnsureGetRootService<T>() where T : class;
+        T EnsureGetService<T>();
+        object EnsureGetService<T>(Type type);
         IServiceConfiguration GetConfiguration();
-        T GetObject<T>() where T : class;
+        IServiceManager GetKeyedManager(object key);
         T GetKeyedObject<T>(object key) where T : class;
         T GetKeyedService<T>(object key) where T : class;
         T GetKeyedSingleton<T>(object key) where T : class;
-        IServiceManager ReplaceProvider(IServiceProvider serviceProvider);
+        IServiceManager GetManager();
+        T GetObject<T>() where T : class;
         IServiceProvider GetProvider();
         IServiceProviderFactory<IServiceCollection> GetProviderFactory();
         IServiceRegistry GetRegistry();
@@ -43,30 +49,34 @@ namespace Undersoft.SDK.Service
         object GetRootService(Type type);
         T GetRootService<T>() where T : class;
         IEnumerable<T> GetRootServices<T>() where T : class;
-        bool TryGetService<T>(out T service) where T : class;
+        IServiceScope GetScope();
+        object GetService(Type type);
         T GetService<T>() where T : class;
         Lazy<T> GetServiceLazy<T>() where T : class;
-        bool TryGetService(Type type, out object service);   
         IEnumerable<object> GetServices(Type type);
         IEnumerable<T> GetServices<T>() where T : class;
         Lazy<IEnumerable<T>> GetServicesLazy<T>() where T : class;
-        IServiceProvider GetSession();
-        IServiceProvider CreateSession();
-        IServiceScope GetScope();
-        IServiceScope SetScope(IServiceScope scope);
-        IServiceManager SetManager(IServiceManager manager);
-        IServiceScope CreateScope();
-        IServiceManager GetManager();
+        IServiceProvider GetSessionProvider();
         object GetSingleton(Type type);
         T GetSingleton<T>() where T : class;
-        ObjectFactory CreateFactory(Type instanceType, Type[] constrTypes);
-        ObjectFactory CreateFactory<T>(Type[] constrTypes);
+        void Initialize();
+        void Initialize(IServiceCollection services);
+        void Initialize(IServiceCollection services, IConfiguration configuration);
         T InitializeRootService<T>(params object[] parameters) where T : class;
-        T Initialize<T>(params object[] besidesInjectedArguments);
-        object Initialize(Type type, params object[] besidesInjectedArguments);
-        T EnsureGetService<T>();
-        object EnsureGetService<T>(Type type);
         Task LoadDataServiceModels();
+        IServiceManager ReplaceProvider(IServiceProvider serviceProvider);
+        void SetInnerProvider(IServiceProvider serviceProvider);
+        IServiceManager SetManager(IServiceManager serviceManager);
+        IServiceScope SetScope(IServiceScope scope);
+        IServicer SetServicer(IServicer servicer);
+        IServicer SetTenantServicer(ClaimsPrincipal tenantUser, IServicer servicer);
+        bool TryGetKeyedManager(object key, out IServiceManager manager);
+        bool TryGetKeyedObject<T>(object key, out T output) where T : class;
+        bool TryGetKeyedService<T>(object key, out T output) where T : class;
+        bool TryGetKeyedSingleton<T>(object key, out T output) where T : class;
+        bool TryGetObject<T>(out T output) where T : class;
+        bool TryGetService(Type type, out object service);
+        bool TryGetService<T>(out T service) where T : class;
         Task<ServiceManager> UseServiceClients(bool buildProvider = false);
 
     }

@@ -1,17 +1,12 @@
 ﻿using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
-namespace Undersoft.SDK.Service;
-
-using Configuration;
-using Data.Cache;
-using MediatR;
-using Microsoft.IdentityModel.Tokens;
 using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Behaviour;
 using Undersoft.SDK.Service.Data.Client;
@@ -20,8 +15,12 @@ using Undersoft.SDK.Service.Data.Entity;
 using Undersoft.SDK.Service.Data.Repository;
 using Undersoft.SDK.Service.Data.Repository.Client;
 using Undersoft.SDK.Service.Data.Repository.Source;
-using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Utilities;
+
+namespace Undersoft.SDK.Service;
+
+using Configuration;
+using Data.Cache;
 
 public partial class ServiceSetup : IServiceSetup
 {
@@ -33,16 +32,15 @@ public partial class ServiceSetup : IServiceSetup
     protected IServiceRegistry registry => manager.Registry;
     protected IServiceCollection services => registry.Services;
 
-    public ServiceSetup(IServiceCollection services)
-    {
-        manager = new ServiceManager(services);
-        AddStoreRoutes();
-        registry.MergeServices(true);
+    public ServiceSetup(IServiceCollection services) : this(services, null)
+    {        
     }
 
-    public ServiceSetup(IServiceCollection services, IConfiguration configuration) : this(services)
+    public ServiceSetup(IServiceCollection services, IConfiguration configuration)
     {
-        manager.Configuration = new ServiceConfiguration(configuration, services);
+        manager = new ServiceManager(services, configuration);
+        AddStoreRoutes();
+        registry.MergeServices(true);
     }
 
     public IServiceRegistry Services => registry;
@@ -128,7 +126,6 @@ public partial class ServiceSetup : IServiceSetup
         registry.AddScoped<IServicer, Servicer>();
         registry.AddTransient<IInvoker, Invoker>();
         registry.AddScoped<IAuthorization, Authorization>();
-  
 
         IServiceCollection deck = registry
             .AddTransient<ISeries<IEntity>, Listing<IEntity>>()
@@ -298,14 +295,21 @@ public partial class ServiceSetup : IServiceSetup
     {
         Type idatacache = typeof(IStoreCache<>).MakeGenericType(tstore);
         Type datacache = typeof(StoreCache<>).MakeGenericType(tstore);
+        
+        bool haveIfaceCache = registry.ContainsService(idatacache);
+        bool haveCache = registry.ContainsService(datacache);
 
+        if (haveIfaceCache && haveCache)
+            return this;
 
         object cache = datacache.New(registry.GetObject<IDataCache>());
 
-        if (registry.GetObject(idatacache) == null)
+        if (!haveIfaceCache)
             registry.AddObject(idatacache, cache);
-        if (registry.GetObject(datacache) == null)
+
+        if (!haveCache)
             registry.AddObject(datacache, cache);
+
         return this;
     }
 

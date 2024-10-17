@@ -59,7 +59,7 @@ public partial class ChangePasswordBase<TLogo, TAccount> : ComponentBase where T
     /// </summary>
     protected override void OnInitialized()
     {
-        _dialog = _servicer.Initialize<
+        _dialog = _servicer.Activate<
             AccessDialog<TLogo, GenericFormDialog<Credentials, AccessValidator>, Credentials>
         >(DialogService);
     }

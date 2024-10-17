@@ -56,7 +56,7 @@ namespace Undersoft.SDK
             get => code.Id;
             set
             {
-                if (value != 0 && !code.Equals(value) && IsNew)
+                if (IsNew && value != 0 && !code.Equals(value))
                 {
                     code.SetId(value);
                     IsNew = false;

@@ -9,14 +9,12 @@ namespace Undersoft.SDK.Service.Data.Repository
 {
     public interface IRepositoryManager
     {
-
         IRepositoryClient AddClient(IRepositoryClient client);
         void AddClientPool(Type contextType, int poolSize, int minSize = 1);
         Task AddClientPools();
         Task AddPools();
         IRepositorySource AddSource(IRepositorySource source);
         void AddSourcePool(Type contextType, int poolSize, int minSize = 1);
-        ValueTask DisposeAsyncCore();
         IRepositoryClient GetClient<TStore, TEntity>() where TEntity : class, IOrigin, IInnerProxy;
         IEnumerable<IRepositoryClient> GetClients();
         IRepositorySource GetSource<TStore, TEntity>() where TEntity : class, IOrigin, IInnerProxy;

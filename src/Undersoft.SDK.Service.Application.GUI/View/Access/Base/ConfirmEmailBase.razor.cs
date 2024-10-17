@@ -63,7 +63,7 @@ public partial class ConfirmEmailBase<TLogo, TAccount> : ComponentBase where TAc
     /// </summary>
     protected override void OnInitialized()
     {
-        _dialog = _servicer.Initialize<
+        _dialog = _servicer.Activate<
             AccessDialog<TLogo, ConfirmEmailDialog<Credentials, AccessValidator>, Credentials>
         >(DialogService);
     }

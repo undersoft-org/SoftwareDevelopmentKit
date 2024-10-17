@@ -31,7 +31,7 @@
 
     protected override void OnInitialized()
     {
-        _panel = _servicer.Initialize<ViewPanel<GenericAppearancePanel<AppearanceState>, AppearanceState>>(DialogService);
+        _panel = _servicer.Activate<ViewPanel<GenericAppearancePanel<AppearanceState>, AppearanceState>>(DialogService);
     }
 
     private async Task OpenAppearancePanel()

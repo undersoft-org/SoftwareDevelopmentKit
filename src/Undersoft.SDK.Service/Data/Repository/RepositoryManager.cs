@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Undersoft.SDK.Service.Data.Repository;
 
 using Client;
-using Microsoft.Extensions.DependencyInjection;
 using Source;
 using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Service.Data.Client;
@@ -12,9 +11,9 @@ using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Data.Store.Repository;
 using Undersoft.SDK.Utilities;
 
-public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyncDisposable, IRepositoryManager
+public class RepositoryManager : Origin, IDisposable, IAsyncDisposable, IRepositoryManager
 {
-    private new bool disposedValue;
+    private bool disposedValue;
 
     private IRepositorySources _sources;
     protected IRepositorySources Sources => _sources ??= Manager.Registry.GetObject<IRepositorySources>();
@@ -24,11 +23,13 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
 
     protected IServiceManager Manager { get; set; }
 
-    static RepositoryManager()
-    {
-    }
     public RepositoryManager() : base()
     {
+    }
+
+    public RepositoryManager(IServiceManager manager) : base()
+    {
+        Manager = manager;
     }
 
     public IStoreRepository<TEntity> StoreSet<TEntity>()
@@ -49,7 +50,7 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
     {
         return Manager.GetService<IStoreRepository<TStore, TEntity>>();
     }
-
+     
     public IRemoteRepository<TDto> RemoteSet<TDto>() where TDto : class, IOrigin, IInnerProxy
     {
         return RemoteSet<TDto>(DataClientRegistry.GetContextTypes<TDto>().FirstOrDefault());
@@ -74,7 +75,6 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
         var contextType = DataStoreRegistry.GetContext<TStore, TEntity>();
         return Sources.Get(contextType);
     }
-
     public IRepositoryClient GetClient<TStore, TEntity>()
     where TEntity : class, IOrigin, IInnerProxy
     {
@@ -191,11 +191,14 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
         return Sources.TryGet(contextType, out source);
     }
 
-    public void Refresh()
-    {
-        _clients = null;
+    public void RefreshSources()
+    {        
         _sources = null;
-        _ = Sources;
+        _ = Sources;     
+    }
+    public void RefreshClients()
+    {
+        _clients = null;                
         _ = Clients;
     }
 
@@ -209,20 +212,45 @@ public class RepositoryManager : Registry<IDataStoreContext>, IDisposable, IAsyn
         return Clients;
     }
 
-    protected override void Dispose(bool disposing)
+    protected virtual void Dispose(bool disposing)
     {
         if (!disposedValue)
         {
             if (disposing)
             {
-                base.Dispose(true);
+                _sources = null;
+                _clients = null;
             }
             disposedValue = true;
         }
     }
 
-    public override async ValueTask DisposeAsyncCore()
+    public void Dispose()
     {
-        await base.DisposeAsyncCore().ConfigureAwait(false);
+        Dispose(true);
+
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual ValueTask DisposeAsyncCore()
+    {
+        if (!disposedValue)
+        {
+            _sources = null;
+            _clients = null;
+
+            disposedValue = true;
+        }
+
+        return new ValueTask();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await DisposeAsyncCore().ConfigureAwait(false);
+
+        Dispose(false);
+
+        GC.SuppressFinalize(this);
     }
 }

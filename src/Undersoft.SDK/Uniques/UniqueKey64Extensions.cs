@@ -9,7 +9,7 @@
 
     public unsafe static class UniqueKey64Extensions
     {
-        public static Double ComparableDouble(this Object obj, Type t = null)
+        public static double ComparableDouble(this object obj, Type t = null)
         {
             if (t == null)
                 t = obj.GetType();
@@ -17,15 +17,15 @@
             if (t.IsAssignableTo(typeof(IUnique)))
                 return ((IUnique)obj).Id;
             if (t.IsValueType)
-                return getSequentialValueTypeUniqueKey64((ValueType)obj);
+                return GetSequentialValueTypeUniqueKey64((ValueType)obj);
             if (t == typeof(string))
                 return (((string)obj)).UniqueKey64();
             if (t.IsAssignableTo(typeof(Type)))
                 return UniqueKey64((Type)obj);
             if (t.IsAssignableTo(typeof(IList)))
             {
-                if (t == typeof(Byte[]))
-                    return Hasher64.ComputeKey((Byte[])obj);
+                if (t == typeof(byte[]))
+                    return Hasher64.ComputeKey((byte[])obj);
 
                 IList o = (IList)obj;
                 if (o.Count == 1)
@@ -37,7 +37,7 @@
             return UniqueKey64(obj);
         }
 
-        public static Int64 ComparableInt64(this Object obj, Type type = null)
+        public static long ComparableInt64(this object obj, Type type = null)
         {
             if (type == null)
                 type = obj.GetType();
@@ -68,52 +68,52 @@
             return obj.UniqueKey64();
         }
 
-        public static Int32 GetHashCode(this Byte[] obj, long seed = 0)
+        public static int GetHashCode(this byte[] obj, long seed = 0)
         {
             return obj.UniqueKey32(seed);
         }
 
-        public static Int32 GetHashCode<T>(this IEquatable<T> obj, long seed = 0)
+        public static int GetHashCode<T>(this IEquatable<T> obj, long seed = 0)
         {
             return obj.UniqueKey32(seed);
         }
 
-        public static Int32 GetHashCode(this IList obj, long seed = 0)
+        public static int GetHashCode(this IList obj, long seed = 0)
         {
             return obj.UniqueKey32(seed);
         }
 
-        public static Int32 GetHashCode(this IntPtr ptr, int length, long seed = 0)
+        public static int GetHashCode(this IntPtr ptr, int length, long seed = 0)
         {
             return ptr.UniqueKey32(length, seed);
         }
 
-        public static Int32 GetHashCode(this IOrigin obj)
+        public static int GetHashCode(this IOrigin obj)
         {
             return obj.UniqueBytes32().ToInt32();
         }
 
-        public static Int32 GetHashCode(this IIdentifiable obj)
+        public static int GetHashCode(this IIdentifiable obj)
         {
             return obj.UniqueBytes32().ToInt32();
         }
 
-        public static Int32 GetHashCode(this Object obj, long seed = 0)
+        public static int GetHashCode(this object obj, long seed = 0)
         {
             return obj.UniqueKey32(seed);
         }
 
-        public static Int32 GetHashCode(this string obj, long seed = 0)
+        public static int GetHashCode(this string obj, long seed = 0)
         {
             return obj.UniqueKey32(seed);
         }
 
-        public static Int32 GetHashCode(this Type obj, long seed = 0)
+        public static int GetHashCode(this Type obj, long seed = 0)
         {
             return obj.UniqueKey32(seed);
         }
 
-        public static bool NullOrEquals(this ICollection obj, Object value)
+        public static bool NullOrEquals(this ICollection obj, object value)
         {
             if (obj != null)
             {
@@ -124,7 +124,7 @@
             return (obj == null && value == null);
         }
 
-        public static bool NullOrEquals(this Object obj, Object value)
+        public static bool NullOrEquals(this object obj, object value)
         {
             if (obj != null)
             {
@@ -141,13 +141,13 @@
             return (obj == null && value == null);
         }
 
-        public static Byte[] UniqueBytes64(this Byte[] bytes, long seed = 0)
+        public static byte[] UniqueBytes64(this byte[] bytes, long seed = 0)
         {
             return Hasher64.ComputeBytes(bytes, seed);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Byte[] UniqueBytes64(
+        public static byte[] UniqueBytes64(
             this IList obj,
             int[] sizes,
             int totalsize,
@@ -191,7 +191,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Byte[] UniqueBytes64(this IList obj, long seed = 0)
+        public static byte[] UniqueBytes64(this IList obj, long seed = 0)
         {
             int length = 1024,
                 offset = 0,
@@ -262,22 +262,22 @@
             return Hasher64.ComputeBytes(buffer, offset, seed);
         }
 
-        public static Byte[] UniqueBytes64(this IntPtr bytes, int length, long seed = 0)
+        public static byte[] UniqueBytes64(this IntPtr bytes, int length, long seed = 0)
         {
             return Hasher64.ComputeBytes((byte*)bytes.ToPointer(), length, seed);
         }
 
-        public static Byte[] UniqueBytes64(this IOrigin obj)
+        public static byte[] UniqueBytes64(this IOrigin obj)
         {
             return obj.Id.GetBytes();
         }
 
-        public static Byte[] UniqueBytes64(this IIdentifiable obj)
+        public static byte[] UniqueBytes64(this IIdentifiable obj)
         {
             return obj.Id.GetBytes();
         }
 
-        public static Byte[] UniqueBytes64(this Object obj, long seed = 0)
+        public static byte[] UniqueBytes64(this object obj, long seed = 0)
         {
             if (obj == null)
                 return new byte[0];
@@ -287,15 +287,15 @@
             if (t.IsAssignableTo(typeof(IIdentifiable)))
                 return ((IIdentifiable)obj).Id.GetBytes();
             if (t.IsValueType)
-                return getValueTypeHashBytes64((ValueType)obj, seed);
+                return GetValueTypeUniqueBytes64((ValueType)obj, seed);
             if (t == typeof(string))
                 return (((string)obj)).UniqueBytes64(seed);
             if (t.IsAssignableTo(typeof(Type)))
                 return UniqueBytes64((Type)obj, seed);
             if (t.IsAssignableTo(typeof(IList)))
             {
-                if (t == typeof(Byte[]))
-                    return Hasher64.ComputeBytes((Byte[])obj, seed);
+                if (t == typeof(byte[]))
+                    return Hasher64.ComputeBytes((byte[])obj, seed);
 
                 IList o = (IList)obj;
                 if (o.Count == 1)
@@ -306,8 +306,8 @@
             return Hasher64.ComputeBytes(obj.GetBytes(true), seed);
         }
 
-        public static Byte[] UniqueBytes64(
-            this Object[] obj,
+        public static byte[] UniqueBytes64(
+            this object[] obj,
             int[] sizes,
             int totalsize,
             long seed = 0
@@ -318,20 +318,20 @@
             return UniqueBytes64((IList)obj, sizes, totalsize, seed);
         }
 
-        public static Byte[] UniqueBytes64(this Object[] obj, long seed = 0)
+        public static byte[] UniqueBytes64(this object[] obj, long seed = 0)
         {
             if (obj.Length == 1)
                 return UniqueBytes64(obj[0], seed);
             return UniqueBytes64((IList)obj, seed);
         }
 
-        public static Byte[] UniqueBytes64(this String obj, long seed = 0)
+        public static byte[] UniqueBytes64(this string obj, long seed = 0)
         {
             fixed (char* c = obj)
                 return Hasher64.ComputeBytes((byte*)c, obj.Length * sizeof(char), seed);
         }
 
-        public static Byte[] UniqueBytes64(this Type obj, long seed = 0)
+        public static byte[] UniqueBytes64(this Type obj, long seed = 0)
         {
             fixed (char* b = obj.FullName)
             {
@@ -339,75 +339,75 @@
             }
         }
 
-        public static Int64 UniqueKey(this Byte[] bytes, long seed = 0)
+        public static long UniqueKey(this byte[] bytes, long seed = 0)
         {
             return UniqueKey64(bytes, seed);
         }
 
-        public static Int64 UniqueKey<T>(this IEquatable<T> obj, long seed = 0)
+        public static long UniqueKey<T>(this IEquatable<T> obj, long seed = 0)
         {
             return UniqueKey64(obj, seed);
         }
 
-        public static Int64 UniqueKey(this IList obj, long seed = 0)
+        public static long UniqueKey(this IList obj, long seed = 0)
         {
             return UniqueKey64(obj, seed);
         }
 
-        public static Int64 UniqueKey(this IntPtr ptr, int length, long seed = 0)
+        public static long UniqueKey(this IntPtr ptr, int length, long seed = 0)
         {
             return UniqueKey64(ptr, length, seed);
         }
 
-        public static Int64 UniqueKey(this IOrigin obj)
+        public static long UniqueKey(this IOrigin obj)
         {
             return UniqueKey64(obj);
         }
 
-        public static Int64 UniqueKey(this IOrigin obj, long seed)
+        public static long UniqueKey(this IOrigin obj, long seed)
         {
             return UniqueKey64(obj, seed);
         }
 
-        public static Int64 UniqueKey(this IIdentifiable obj)
+        public static long UniqueKey(this IIdentifiable obj)
         {
             return obj.Id;
         }
 
-        public static Int64 UniqueKey(this IIdentifiable obj, long seed)
+        public static long UniqueKey(this IIdentifiable obj, long seed)
         {
             return (long)Hasher64.ComputeKey(obj.Id.GetBytes(), seed);
         }
 
-        public static Int64 UniqueKey(this Object obj, long seed = 0)
+        public static long UniqueKey(this object obj, long seed = 0)
         {
             return UniqueKey64(obj, seed);
         }
 
-        public static Int64 UniqueKey(this Object[] obj, long seed = 0)
+        public static long UniqueKey(this object[] obj, long seed = 0)
         {
             if (obj.Length == 1)
                 return UniqueKey64(obj[0], seed);
             return UniqueKey64((IList)obj, seed);
         }
 
-        public static Int64 UniqueKey(this String obj, long seed = 0)
+        public static long UniqueKey(this string obj, long seed = 0)
         {
             return UniqueKey64(obj, seed);
         }
 
-        public static Int64 UniqueKey(this Type obj, long seed = 0)
+        public static long UniqueKey(this Type obj, long seed = 0)
         {
             return UniqueKey64(obj, seed);
         }
 
-        public static Int64 UniqueKey64(this Byte[] bytes, long seed = 0)
+        public static long UniqueKey64(this byte[] bytes, long seed = 0)
         {
             return (long)Hasher64.ComputeKey(bytes, seed);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int64 UniqueKey64(this IList obj, int[] sizes, int totalsize, long seed = 0)
+        public static long UniqueKey64(this IList obj, int[] sizes, int totalsize, long seed = 0)
         {
             byte[] bytes = new byte[totalsize];
             fixed (byte* buff = bytes)
@@ -450,7 +450,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int64 UniqueKey64(this IList obj, long seed = 0)
+        public static long UniqueKey64(this IList obj, long seed = 0)
         {
             int length = 1024,
                 offset = 0,
@@ -523,36 +523,36 @@
             return (long)Hasher64.ComputeKey(buffer, offset, seed);
         }
 
-        public static Int64 UniqueKey64(this IntPtr ptr, int length, long seed = 0)
+        public static long UniqueKey64(this IntPtr ptr, int length, long seed = 0)
         {
             return (long)Hasher64.ComputeKey((byte*)ptr.ToPointer(), length, seed);
         }
 
-        public static Int64 UniqueKey64(this IIdentifiable obj)
+        public static long UniqueKey64(this IIdentifiable obj)
         {
             return obj.Id;
         }
 
-        public static Int64 UniqueKey64(this IIdentifiable obj, long seed)
+        public static long UniqueKey64(this IIdentifiable obj, long seed)
         {
             return (long)Hasher64.ComputeKey(obj.Id.GetBytes(), seed);
         }
 
-        public static Int64 UniqueKey64(this Object obj, long seed = 0)
+        public static long UniqueKey64(this object obj, long seed = 0)
         {
             if (obj == null)
                 return 0;
 
             var t = obj.GetType();
 
-            if (t == typeof(Int64) && seed == 0)
+            if (t == typeof(long) && seed == 0)
                 return (long)obj;
 
             if (t.IsAssignableTo(typeof(IIdentifiable)) && seed == 0)
                 return (long)((IIdentifiable)obj).Id;
 
             if (t.IsValueType)
-                return getValueTypeUniqueKey64((ValueType)obj, seed);
+                return GetValueTypeUniqueKey64((ValueType)obj, seed);
 
             if (t == typeof(string))
                 return (((string)obj)).UniqueKey64(seed);
@@ -562,8 +562,8 @@
 
             if (t.IsAssignableTo(typeof(IList)))
             {
-                if (t == typeof(Byte[]))
-                    return (long)Hasher64.ComputeKey((Byte[])obj, seed);
+                if (t == typeof(byte[]))
+                    return (long)Hasher64.ComputeKey((byte[])obj, seed);
 
                 IList o = (IList)obj;
                 if (o.Count == 1)
@@ -575,8 +575,8 @@
             return (long)Hasher64.ComputeKey(obj.GetBytes(true), seed);
         }
 
-        public static Int64 UniqueKey64(
-            this Object[] obj,
+        public static long UniqueKey64(
+            this object[] obj,
             int[] sizes,
             int totalsize,
             long seed = 0
@@ -587,7 +587,7 @@
             return UniqueKey64((IList)obj, sizes, totalsize, seed);
         }
 
-        public static Int64 UniqueKey64(this Object[] obj, long seed = 0)
+        public static long UniqueKey64(this object[] obj, long seed = 0)
         {
             if (obj.Length == 1)
                 return UniqueKey64(obj[0], seed);
@@ -595,7 +595,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int64 UniqueKey64(this String obj, long seed = 0)
+        public static long UniqueKey64(this string obj, long seed = 0)
         {
             fixed (char* c = obj)
             {
@@ -604,7 +604,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Int64 UniqueKey64(this Type obj, long seed = 0)
+        public static long UniqueKey64(this Type obj, long seed = 0)
         {
             var name = obj.FullName;
             if (name == null)
@@ -617,7 +617,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Byte[] getSequentialValueTypeHashBytes64(ValueType obj, long seed = 0)
+        private static byte[] GetSequentialValueTypeHashBytes64(ValueType obj, long seed = 0)
         {
             int size = obj.GetSize();
             byte[] s = new byte[size];
@@ -629,7 +629,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Int64 getSequentialValueTypeUniqueKey64(ValueType obj, long seed = 0)
+        private static long GetSequentialValueTypeUniqueKey64(ValueType obj, long seed = 0)
         {
             int size = obj.GetSize();
             byte* ps = stackalloc byte[size];
@@ -638,7 +638,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Byte[] getValueTypeHashBytes64(ValueType obj, long seed = 0)
+        private static byte[] GetValueTypeUniqueBytes64(ValueType obj, long seed = 0)
         {
             byte[] s = new byte[8];
             fixed (byte* ps = s)
@@ -653,7 +653,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Int64 getValueTypeUniqueKey64(ValueType obj, long seed = 0)
+        private static long GetValueTypeUniqueKey64(ValueType obj, long seed = 0)
         {
             byte[] s = new byte[8];
             fixed (byte* ps = s)

@@ -1,12 +1,14 @@
 namespace Undersoft.SDK.Service
 {
-    public class ServiceObject<T> : ServiceObject, IServiceObject<T> where T : class
+    public class ServiceObject<T> : ServiceObject, IServiceObject<T>
     {
-        public new T Value { get; set; }
-
-        public ServiceObject()
+        public virtual new T Value
         {
+            get => (T)base.Value;
+            set => base.Value = value;
         }
+
+        public ServiceObject() { }
 
         public ServiceObject(T obj)
         {
@@ -16,11 +18,9 @@ namespace Undersoft.SDK.Service
 
     public class ServiceObject : IServiceObject
     {
-        public object Value { get; set; }
+        public virtual object Value { get; set; }
 
-        public ServiceObject()
-        {
-        }
+        public ServiceObject() { }
 
         public ServiceObject(object obj)
         {

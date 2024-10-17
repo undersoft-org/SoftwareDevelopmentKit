@@ -70,7 +70,7 @@ public partial class RegisterBase<TLogo, TAccount, TValidator> : ComponentBase
     /// </summary>
     protected override void OnInitialized()
     {
-        _dialog = _servicer.Initialize<
+        _dialog = _servicer.Activate<
             AccessDialog<TLogo, RegisterDialog<TAccount, TValidator>, TAccount>
         >(DialogService);
     }

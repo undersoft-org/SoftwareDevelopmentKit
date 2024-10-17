@@ -17,7 +17,6 @@ namespace Undersoft.SDK.Series.Base
         readonly ManualResetEventSlim writingAccess = new ManualResetEventSlim(true, 128);
         readonly SemaphoreSlim writingPass = new SemaphoreSlim(1);
 
-
         public RegistryBase() : this(false, 17, HashBits.bit64)
         {
         }

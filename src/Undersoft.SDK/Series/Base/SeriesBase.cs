@@ -6,7 +6,6 @@ namespace Undersoft.SDK.Series.Base
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
     using Undersoft.SDK;
@@ -29,38 +28,38 @@ namespace Undersoft.SDK.Series.Base
         protected uint maxid;
         protected ulong bitmask;
 
-        private int nextSize()
+        private int NextSize()
         {
             return (((int)(size * RESIZING_VECTOR)) | 3);
         }
-        private int previousSize()
+        private int PreviousSize()
         {
             return (int)(size * (1 - REMOVED_PERCENT_LIMIT)) | 3;
         }
 
-        protected void countIncrement()
+        protected void CountIncrement()
         {
             if ((++count + 3) > size)
-                Rehash(nextSize());
+                Rehash(NextSize());
         }
-        protected void conflictIncrement()
+        protected void ConflictIncrement()
         {
-            countIncrement();
+            CountIncrement();
             if (++conflicts > (size * CONFLICTS_PERCENT_LIMIT))
-                Rehash(nextSize());
+                Rehash(NextSize());
         }
-        protected void removedIncrement()
+        protected void RemovedIncrement()
         {
             --count;
             if (++removed > ((size * REMOVED_PERCENT_LIMIT) - 1))
             {
                 if (size < (size * 0.5))
-                    Rehash(previousSize());
+                    Rehash(PreviousSize());
                 else
                     Rehash(size);
             }
         }
-        protected void removedDecrement()
+        protected void RemovedDecrement()
         {
             ++count;
             --removed;
@@ -153,16 +152,16 @@ namespace Undersoft.SDK.Series.Base
 
         protected virtual V InnerGet(long key)
         {
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> _item = table[GetPosition(key)];
 
-            while (mem != null)
+            while (_item != null)
             {
-                if (mem.Equals(key))
-                    return (!mem.Removed)
-                        ? mem.Value
+                if (_item.Equals(key))
+                    return (!_item.Removed)
+                        ? _item.Value
                         : default(V);
 
-                mem = mem.Extended;
+                _item = _item.Extended;
             }
 
             return default(V);
@@ -183,7 +182,7 @@ namespace Undersoft.SDK.Series.Base
 
         protected virtual bool InnerTryGet(long key, out ISeriesItem<V> output)
         {
-            output = table[getPosition(key)];
+            output = table[GetPosition(key)];
 
             while (output != null)
             {
@@ -210,7 +209,7 @@ namespace Undersoft.SDK.Series.Base
 
         public virtual bool TryGet(object key, out V output)
         {
-            output = default(V);
+            output = default;
             if (InnerTryGet(unique.Key(key), out ISeriesItem<V> item))
             {
                 output = item.Value;
@@ -239,19 +238,19 @@ namespace Undersoft.SDK.Series.Base
 
         protected virtual ISeriesItem<V> InnerGetItem(long key)
         {
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> item = table[GetPosition(key)];
 
-            while (mem != null)
+            while (item != null)
             {
-                if (mem.Equals(key))
-                    return (!mem.Removed)
-                        ? mem
+                if (item.Equals(key))
+                    return (!item.Removed)
+                        ? item
                         : null;
 
-                mem = mem.Extended;
+                item = item.Extended;
             }
 
-            return mem;
+            return item;
         }
 
         public virtual ISeriesItem<V> GetItem(long key)
@@ -508,7 +507,7 @@ namespace Undersoft.SDK.Series.Base
 
             long key = seriesItem.Id;
             V value = seriesItem.Value;
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
@@ -517,7 +516,7 @@ namespace Undersoft.SDK.Series.Base
                 item = NewItem(value);
                 table[pos] = item;
                 InnerInsert(index, item);
-                countIncrement();
+                CountIncrement();
                 return;
             }
 
@@ -532,7 +531,7 @@ namespace Undersoft.SDK.Series.Base
                         var newitem = NewItem(item);
                         item.Extended = newitem;
                         InnerInsert(index, newitem);
-                        conflictIncrement();
+                        ConflictIncrement();
                         return;
                     }
                     throw new Exception("SeriesItem exist");
@@ -544,7 +543,7 @@ namespace Undersoft.SDK.Series.Base
                     var newitem = NewItem(item);
                     item.Extended = newitem;
                     InnerInsert(index, newitem);
-                    conflictIncrement();
+                    ConflictIncrement();
                     return;
                 }
                 item = item.Extended;
@@ -554,7 +553,7 @@ namespace Undersoft.SDK.Series.Base
         {
 
             long key = unique.Key(value);
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
@@ -563,7 +562,7 @@ namespace Undersoft.SDK.Series.Base
                 item = NewItem(value);
                 table[pos] = item;
                 InnerInsert(index, item);
-                countIncrement();
+                CountIncrement();
                 return;
             }
 
@@ -578,7 +577,7 @@ namespace Undersoft.SDK.Series.Base
                         var newitem = NewItem(item);
                         item.Extended = newitem;
                         InnerInsert(index, newitem);
-                        conflictIncrement();
+                        ConflictIncrement();
                         return;
                     }
                     throw new Exception("SeriesItem exist");
@@ -590,7 +589,7 @@ namespace Undersoft.SDK.Series.Base
                     var newitem = NewItem(item);
                     item.Extended = newitem;
                     InnerInsert(index, newitem);
-                    conflictIncrement();
+                    ConflictIncrement();
                     return;
                 }
                 item = item.Extended;
@@ -621,7 +620,7 @@ namespace Undersoft.SDK.Series.Base
             if (item != null)
             {
                 item.Removed = true;
-                removedIncrement();
+                RemovedIncrement();
                 first = item;
                 return item.Value;
             }
@@ -638,7 +637,7 @@ namespace Undersoft.SDK.Series.Base
             if (item != null)
             {
                 item.Removed = true;
-                removedIncrement();
+                RemovedIncrement();
                 first = item;
                 output = item.Value;
                 return true;
@@ -655,7 +654,7 @@ namespace Undersoft.SDK.Series.Base
             if (output != null)
             {
                 output.Removed = true;
-                removedIncrement();
+                RemovedIncrement();
                 first = output;
                 return true;
             }
@@ -719,15 +718,15 @@ namespace Undersoft.SDK.Series.Base
 
         protected bool InnerContainsKey(long key)
         {
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> _item = table[GetPosition(key)];
 
-            while (mem != null)
+            while (_item != null)
             {
-                if (!mem.Removed && mem.Equals(key))
+                if (!_item.Removed && _item.Equals(key))
                 {
                     return true;
                 }
-                mem = mem.Extended;
+                _item = _item.Extended;
             }
 
             return false;
@@ -768,44 +767,44 @@ namespace Undersoft.SDK.Series.Base
 
         protected virtual V InnerRemove(long key)
         {
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> _item = table[GetPosition(key)];
 
-            while (mem != null)
+            while (_item != null)
             {
-                if (mem.Equals(key))
+                if (_item.Equals(key))
                 {
-                    if (mem.Removed)
+                    if (_item.Removed)
                         return default(V);
 
-                    mem.Removed = true;
-                    removedIncrement();
-                    return mem.Value;
+                    _item.Removed = true;
+                    RemovedIncrement();
+                    return _item.Value;
                 }
 
-                mem = mem.Extended;
+                _item = _item.Extended;
             }
             return default(V);
         }
         protected virtual V InnerRemove(long key, V item)
         {
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> _item = table[GetPosition(key)];
 
-            while (mem != null)
+            while (_item != null)
             {
-                if (mem.Equals(key))
+                if (_item.Equals(key))
                 {
-                    if (mem.Removed)
+                    if (_item.Removed)
                         return default(V);
 
-                    if (Equals(mem.Value, item))
+                    if (Equals(_item.Value, item))
                     {
-                        mem.Removed = true;
-                        removedIncrement();
-                        return mem.Value;
+                        _item.Removed = true;
+                        RemovedIncrement();
+                        return _item.Value;
                     }
                     return default(V);
                 }
-                mem = mem.Extended;
+                _item = _item.Extended;
             }
             return default(V);
         }
@@ -994,11 +993,11 @@ namespace Undersoft.SDK.Series.Base
             return new SeriesItemEnumerator<V>(this);
         }
 
-        protected ulong getPosition(long key)
+        protected ulong GetPosition(long key)
         {
             return ((ulong)key % maxid);
         }
-        protected static ulong getPosition(long key, uint tableMaxId)
+        protected static ulong GetPosition(long key, uint tableMaxId)
         {
             return ((ulong)key % tableMaxId);
         }
@@ -1013,11 +1012,11 @@ namespace Undersoft.SDK.Series.Base
             item = item.Next;
             if (removed > 0)
             {
-                rehashAndReindex(item, _table, _maxid);
+                InnerRehashAndReindex(item, _table, _maxid);
             }
             else
             {
-                rehash(item, _table, _maxid);
+                InnerRehash(item, _table, _maxid);
             }
 
             table = _table;
@@ -1025,7 +1024,7 @@ namespace Undersoft.SDK.Series.Base
             size = _size;
         }
 
-        private void rehashAndReindex(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
+        private void InnerRehashAndReindex(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
         {
             int _conflicts = 0;
             uint _maxid = newMaxId;
@@ -1036,11 +1035,11 @@ namespace Undersoft.SDK.Series.Base
             {
                 if (!item.Removed)
                 {
-                    ulong pos = getPosition(item.Id, _maxid);
+                    ulong pos = GetPosition(item.Id, _maxid);
 
-                    ISeriesItem<V> ex_item = _table[pos];
+                    ISeriesItem<V> _item = _table[pos];
 
-                    if (ex_item == null)
+                    if (_item == null)
                     {
                         item.Extended = null;
                         _table[pos] = _last = _last.Next = item;
@@ -1049,15 +1048,15 @@ namespace Undersoft.SDK.Series.Base
                     {
                         for (; ; )
                         {
-                            if (ex_item.Extended == null)
+                            if (_item.Extended == null)
                             {
                                 item.Extended = null; ;
-                                _last = _last.Next = ex_item.Extended = item;
+                                _last = _last.Next = _item.Extended = item;
                                 _conflicts++;
                                 break;
                             }
                             else
-                                ex_item = ex_item.Extended;
+                                _item = _item.Extended;
                         }
                     }
                 }
@@ -1071,7 +1070,7 @@ namespace Undersoft.SDK.Series.Base
             first = _first;
             last = _last;
         }
-        private void rehash(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
+        private void InnerRehash(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
         {
             int _conflicts = 0;
             uint _maxid = newMaxId;
@@ -1080,7 +1079,7 @@ namespace Undersoft.SDK.Series.Base
             {
                 if (!item.Removed)
                 {
-                    ulong pos = getPosition(item.Id, _maxid);
+                    ulong pos = GetPosition(item.Id, _maxid);
 
                     ISeriesItem<V> ex_item = _table[pos];
 
@@ -1112,7 +1111,7 @@ namespace Undersoft.SDK.Series.Base
             conflicts = _conflicts;
         }
 
-        protected ulong mapPosition(long key)
+        protected ulong MapPosition(long key)
         {
             // standard hashmap method to establish position / index in table
 
@@ -1124,7 +1123,7 @@ namespace Undersoft.SDK.Series.Base
 
             return Submix.Map(key, maxid, bitmask, msbid);
         }
-        protected ulong mapPosition(long key, uint newmaxid, ulong newbitmask, int newmsbid)
+        protected ulong MapPosition(long key, uint newmaxid, ulong newbitmask, int newmsbid)
         {
             // standard hashmap method to establish position / index in table 
 
@@ -1147,11 +1146,11 @@ namespace Undersoft.SDK.Series.Base
             item = item.Next;
             if (removed > 0)
             {
-                remapAndReindex(item, _table, _maxid);
+                InnerRemapAndReindex(item, _table, _maxid);
             }
             else
             {
-                remap(item, _table, _maxid);
+                InnerRemap(item, _table, _maxid);
             }
 
             table = _table;
@@ -1159,7 +1158,7 @@ namespace Undersoft.SDK.Series.Base
             size = _size;
         }
 
-        private void remapAndReindex(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
+        private void InnerRemapAndReindex(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
         {
             int _conflicts = 0;
             uint _maxid = newMaxId;
@@ -1173,11 +1172,11 @@ namespace Undersoft.SDK.Series.Base
             {
                 if (!item.Removed)
                 {
-                    ulong pos = mapPosition(item.Id, _maxid, _bitmask, _msbid);
+                    ulong pos = MapPosition(item.Id, _maxid, _bitmask, _msbid);
 
-                    ISeriesItem<V> mem = _table[pos];
+                    ISeriesItem<V> _item = _table[pos];
 
-                    if (mem == null)
+                    if (_item == null)
                     {
                         item.Extended = null;
                         _table[pos] = _last = _last.Next = item;
@@ -1186,15 +1185,15 @@ namespace Undersoft.SDK.Series.Base
                     {
                         for (; ; )
                         {
-                            if (mem.Extended == null)
+                            if (_item.Extended == null)
                             {
                                 item.Extended = null; ;
-                                _last = _last.Next = mem.Extended = item;
+                                _last = _last.Next = _item.Extended = item;
                                 _conflicts++;
                                 break;
                             }
                             else
-                                mem = mem.Extended;
+                                _item = _item.Extended;
                         }
                     }
                 }
@@ -1210,7 +1209,7 @@ namespace Undersoft.SDK.Series.Base
             bitmask = _bitmask;
             msbid = _msbid;
         }
-        private void remap(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
+        private void InnerRemap(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
         {
             int _conflicts = 0;
             uint _maxid = newMaxId;
@@ -1221,11 +1220,11 @@ namespace Undersoft.SDK.Series.Base
             {
                 if (!item.Removed)
                 {
-                    ulong pos = mapPosition(item.Id, _maxid, _bitmask, _msbid);
+                    ulong pos = MapPosition(item.Id, _maxid, _bitmask, _msbid);
 
-                    ISeriesItem<V> mem = newTable[pos];
+                    ISeriesItem<V> _item = newTable[pos];
 
-                    if (mem == null)
+                    if (_item == null)
                     {
                         item.Extended = null;
                         newTable[pos] = item;
@@ -1234,15 +1233,15 @@ namespace Undersoft.SDK.Series.Base
                     {
                         for (; ; )
                         {
-                            if (mem.Extended == null)
+                            if (_item.Extended == null)
                             {
                                 item.Extended = null;
-                                mem.Extended = item;
+                                _item.Extended = item;
                                 _conflicts++;
                                 break;
                             }
                             else
-                                mem = mem.Extended;
+                                _item = _item.Extended;
                         }
                     }
                 }
@@ -1254,46 +1253,6 @@ namespace Undersoft.SDK.Series.Base
             conflicts = _conflicts;
             bitmask = _bitmask;
             msbid = _msbid;
-        }
-
-        protected bool disposedValue = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if(disposing)
-                    InnerRenew(minsize);
-
-                disposedValue = true;
-            }
-        }
-        public void Dispose()
-        {
-            Dispose(true);
-
-            GC.SuppressFinalize(this);
-        }
-
-        public virtual async ValueTask DisposeAsyncCore()
-        {
-            await Task.Factory.StartNew(() =>
-            {
-                if (!disposedValue)
-                {
-                    InnerRenew(minsize);
-
-                    disposedValue = true;
-                }
-            }).ConfigureAwait(false);
-        }
-        public virtual async ValueTask DisposeAsync()
-        {
-            await DisposeAsyncCore().ConfigureAwait(false);
-
-            Dispose(false);
-
-            GC.SuppressFinalize(this);
         }
 
         public byte[] GetBytes()
@@ -1377,6 +1336,48 @@ namespace Undersoft.SDK.Series.Base
         void IList.Remove(object value)
         {
             Remove((V)value);
+        }
+
+        protected bool disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                    InnerRenew(minsize);
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual async ValueTask DisposeAsyncCore()
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                if (!disposedValue)
+                {
+                    InnerRenew(minsize);
+
+                    disposedValue = true;
+                }
+            }).ConfigureAwait(false);
+        }
+
+        public virtual async ValueTask DisposeAsync()
+        {
+            await DisposeAsyncCore().ConfigureAwait(false);
+
+            Dispose(false);
+
+            GC.SuppressFinalize(this);
         }
     }
 }

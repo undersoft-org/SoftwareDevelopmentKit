@@ -1,12 +1,11 @@
 ﻿using MediatR;
 using Undersoft.SDK.Service.Access;
-using Undersoft.SDK.Service.Data.Repository;
 using Undersoft.SDK.Service.Data.Repository.Client;
 using Undersoft.SDK.Service.Data.Repository.Source;
 
 namespace Undersoft.SDK.Service
 {
-    public interface IServicer : IServiceManager, IRepositoryManager, IDisposable
+    public interface IServicer : IServiceManager, IDisposable
     {
         bool IsScoped { get; set; }
         IMediator Mediator { get; }

@@ -31,17 +31,14 @@ public class Servicer : ServiceManager, IServicer, IMediator
     {
         return function.Invoke(GetService<T>());
     }
-
     public Task Run<T>(Func<T, Task> function) where T : class
     {
         return function.Invoke(GetService<T>());
     }
-
     public Task<object> Run<T>(string methodname, params object[] parameters) where T : class
     {        
        return new Invoker(GetService<T>(), methodname).InvokeAsync(parameters);        
     }
-
     public Task<R> Run<T, R>(string methodname, params object[] parameters) where T : class where R : class
     {
         Invoker deputy = new Invoker(
@@ -51,7 +48,6 @@ public class Servicer : ServiceManager, IServicer, IMediator
     );
         return deputy.InvokeAsync<R>(parameters);
     }
-
     public Task<object> Run<T>(Arguments arguments) where T : class
     {
         using (var servicer = CreateServicer())
@@ -60,7 +56,6 @@ public class Servicer : ServiceManager, IServicer, IMediator
             return deputy.InvokeAsync(arguments);
         }
     }
-
     public Task<R> Run<T, R>(Arguments arguments) where T : class where R : class
     {
             Invoker deputy = new Invoker<T>(GetService<T>(), arguments);
@@ -71,12 +66,10 @@ public class Servicer : ServiceManager, IServicer, IMediator
     {
         return await Mediator.Send(request, cancellationToken).ConfigureAwait(false);
     }
-
     public async Task<object> Send(object request, CancellationToken cancellationToken = default)
     {
         return await Mediator.Send(request, cancellationToken).ConfigureAwait(false);
     }
-
     public async Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest
     {
         await Mediator.Send(request, cancellationToken).ConfigureAwait(false);        
@@ -84,19 +77,21 @@ public class Servicer : ServiceManager, IServicer, IMediator
 
     public async Task Publish(object notification, CancellationToken cancellationToken = default)
     {
-        await Mediator.Publish(notification, cancellationToken).ConfigureAwait(false);
-    }
+        using var servicer = CreateServicer();
 
+        await servicer.Mediator.Publish(notification, cancellationToken).ConfigureAwait(false);
+    }
     public async Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
     {
-        await Mediator.Publish(notification, cancellationToken).ConfigureAwait(false);
+        using var servicer = CreateServicer();
+
+        await servicer.Mediator.Publish(notification, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<TResponse> Report<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
             return await Mediator.Send(request, cancellationToken);        
     }
-
     public async Task<object> Report(object request, CancellationToken cancellationToken = default)
     {   
         return await Mediator.Send(request, cancellationToken).ConfigureAwait(false);
@@ -107,7 +102,6 @@ public class Servicer : ServiceManager, IServicer, IMediator
         return Mediator
          .CreateStream(request, cancellationToken);
     }
-
     public IAsyncEnumerable<object> CreateStream(object request, CancellationToken cancellationToken = default)
     {    
             return Mediator
@@ -118,27 +112,22 @@ public class Servicer : ServiceManager, IServicer, IMediator
     {        
             return await function.Invoke(GetService<T>());        
     }
-
     public async Task Serve<T>(Func<T, Task> function) where T : class
     {        
         await function.Invoke(GetService<T>()).ConfigureAwait(false);        
     }
-
     public async Task Serve<T>(string methodname, params object[] parameters) where T : class
     {
         await new Invoker(GetService<T>(), methodname).InvokeAsync(parameters).ConfigureAwait(false);
     }
-
     public async Task<R> Serve<T, R>(string methodname, params object[] parameters) where T : class where R : class
     {
         return await new Invoker(GetService<T>(), methodname).InvokeAsync<R>(parameters).ConfigureAwait(false);
     }
-
     public async Task Serve<T>(string methodname, Arguments arguments) where T : class
     {
         await new Invoker(GetService<T>(), methodname, arguments.TypeArray).InvokeAsync(arguments).ConfigureAwait(false); ;
     }
-
     public async Task<R> Serve<T, R>(string methodname, Arguments arguments) where T : class where R : class
     {
             return await new Invoker(
@@ -174,7 +163,6 @@ public class Servicer : ServiceManager, IServicer, IMediator
     {
         return await client.Save(asTransaction);
     }
-
     public async Task<int> SaveClients(bool asTransaction = false)
     {
         int changes = 0;
@@ -190,7 +178,6 @@ public class Servicer : ServiceManager, IServicer, IMediator
     {
         return await source.Save(asTransaction);
     }
-
     public async Task<int> SaveStores(bool asTransaction = false)
     {
         int changes = 0;
@@ -202,11 +189,11 @@ public class Servicer : ServiceManager, IServicer, IMediator
         return changes;
     }
 
-    public override async ValueTask DisposeAsyncCore()
+    protected override async ValueTask DisposeAsyncCore()
     {
         await base.DisposeAsyncCore().ConfigureAwait(false);
     }
-
+    
     protected override void Dispose(bool disposing)
     {
         if (!disposedValue)
@@ -217,6 +204,4 @@ public class Servicer : ServiceManager, IServicer, IMediator
             disposedValue = true;
         }
     }
-
-
 }

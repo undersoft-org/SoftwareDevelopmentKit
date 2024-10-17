@@ -1,6 +1,6 @@
 namespace Undersoft.SDK.Service
 {
-    public interface IServiceObject<out T> : IServiceObject where T : class
+    public interface IServiceObject<out T> : IServiceObject 
     {
         new T Value { get; }
     }

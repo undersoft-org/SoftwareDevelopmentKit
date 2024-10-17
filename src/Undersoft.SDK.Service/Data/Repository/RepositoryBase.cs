@@ -7,6 +7,7 @@ namespace Undersoft.SDK.Service.Data.Repository;
 
 using Data.Entity;
 using Invoking;
+using System;
 using Undersoft.SDK;
 using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Data.Object;
@@ -109,62 +110,6 @@ public abstract class Repository : IRepository
     public int CompareTo(IUnique other)
     {
         return serialcode.CompareTo(other);
-    }
-
-    protected virtual async void Dispose(bool disposing)
-    {
-        if (!disposedValue)
-        {
-            if (disposing)
-            {
-                await Save(true).ConfigureAwait(false);
-
-                ElementType = null;
-                Expression = null;
-                Provider = null;
-
-                serialcode.Dispose();
-
-                await ReleaseAsync().ConfigureAwait(false);               
-            }
-            disposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-
-        GC.SuppressFinalize(this);
-    }
-
-    public virtual async ValueTask DisposeAsyncCore()
-    {
-        if (!disposedValue)
-        {
-            await Save(true).ConfigureAwait(false);          
-
-            ElementType = null;
-            Expression = null;
-            Provider = null;
-
-            serialcode.Dispose();
-
-            await ReleaseAsync().ConfigureAwait(false);
-
-            disposedValue = true;
-        }
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        var vt = DisposeAsyncCore();
-
-        Dispose(false);
-
-        GC.SuppressFinalize(this);
-
-        return vt;
     }
 
     public virtual void ResetState()
@@ -371,4 +316,55 @@ public abstract class Repository : IRepository
     protected abstract Task<int> SaveAsTransaction(CancellationToken token = default);
 
     protected abstract Task<int> SaveChanges(CancellationToken token = default);
+
+    protected virtual async void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                await HandleDispose().ConfigureAwait(false);
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+
+        GC.SuppressFinalize(this);
+    }
+
+    public virtual async ValueTask DisposeAsyncCore()
+    {
+        if (!disposedValue)
+        {
+            await HandleDispose().ConfigureAwait(false);
+
+            disposedValue = true;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await DisposeAsyncCore().ConfigureAwait(false);
+
+        Dispose(false);
+
+        GC.SuppressFinalize(this);
+    }
+
+    protected async Task HandleDispose()
+    {
+        await Save(true).ConfigureAwait(false);
+
+        await ReleaseAsync().ConfigureAwait(false);
+
+        ElementType = null;
+        Expression = null;
+        Provider = null;
+        serialcode.Dispose();
+    }
 }
