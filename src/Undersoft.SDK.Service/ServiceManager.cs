@@ -12,7 +12,7 @@ namespace Undersoft.SDK.Service
 
     public class ServiceManager : RepositoryManager, IServiceManager, IAsyncDisposable
     {
-        private new bool disposedValue;
+        private bool disposedValue;
 
         private static IServiceRegistry rootRegistry;
 
@@ -39,6 +39,8 @@ namespace Undersoft.SDK.Service
         protected virtual IServiceRegistry InnerRegistry { get; set; }
 
         public IServiceRegistry Registry => InnerRegistry;
+
+        public virtual bool IsScoped { get; set; }
 
         static ServiceManager()
         {
@@ -351,6 +353,13 @@ namespace Undersoft.SDK.Service
 
             return GetManager().SetServicer(servicer);
         }
+        public IServicer SetTenantServicer(long tenantId, IServicer servicer)
+        {
+            var manager = GetKeyedManager(tenantId);
+            if (manager != null)
+                return servicer.SetManager(manager).SetServicer(servicer);
+            return GetManager().SetServicer(servicer);
+        }
 
         public IServicer CreateServicer()
         {
@@ -369,6 +378,17 @@ namespace Undersoft.SDK.Service
             servicer.SetScope(_scope);
             servicer.IsScoped = true;
             return servicer;
+        }
+
+        public IServicer SetServicer()
+        {
+            if (!GetType().IsAssignableTo(typeof(IServicer)))
+                return null;
+            var _scope = CreateScope();
+            SetInnerProvider(_scope.ServiceProvider);
+            SetScope(_scope);
+            IsScoped = true;
+            return (IServicer)this;
         }
 
         public IServiceScope GetScope()

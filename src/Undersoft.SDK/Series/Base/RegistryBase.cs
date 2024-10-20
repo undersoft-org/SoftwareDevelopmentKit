@@ -282,7 +282,17 @@ namespace Undersoft.SDK.Series.Base
         public override void Insert(int index, ISeriesItem<V> item)
         {
             AcquireWriting();
-            InnerInsert(index, item);
+            bool temp = base.InnerAdd(item);
+            base.InnerInsert(index, item);
+            ReleaseWriting();
+        }
+
+        public override void Insert(int index, V item)
+        {
+            AcquireWriting();
+            var newitem = NewItem(item);
+            bool temp = base.InnerAdd(newitem);
+            base.InnerInsert(index, newitem);
             ReleaseWriting();
         }
 

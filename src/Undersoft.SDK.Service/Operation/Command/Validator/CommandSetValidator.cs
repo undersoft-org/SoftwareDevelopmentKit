@@ -13,18 +13,18 @@ public class CommandSetValidator<TDto> : CommandSetValidatorBase<CommandSet<TDto
 {
     public CommandSetValidator(IServicer ultimateService) : base(ultimateService) { }
 
-    protected void ValidationScope<T>(OperationType commandMode, Action validations)
+    protected void ValidationScope<T>(OperationKind commandMode, Action validations)
     {
         ValidationScope(typeof(T), commandMode, validations);
     }
 
-    protected void ValidationScope(Type type, OperationType commandMode, Action validations)
+    protected void ValidationScope(Type type, OperationKind commandMode, Action validations)
     {
         WhenAsync(
             async (cmd, cancel) =>
                 await Task.Run(
                     () =>
-                        ((int)cmd.CommandMode & (int)commandMode) > 0
+                        ((int)cmd.Kind & (int)commandMode) > 0
                         && GetType().UnderlyingSystemType.IsAssignableTo(type),
                     cancel
                 ),
@@ -32,11 +32,11 @@ public class CommandSetValidator<TDto> : CommandSetValidatorBase<CommandSet<TDto
         );
     }
 
-    protected void ValidationScope(OperationType commandMode, Action validations)
+    protected void ValidationScope(OperationKind commandMode, Action validations)
     {
         WhenAsync(
             async (cmd, cancel) =>
-                await Task.Run(() => ((int)cmd.CommandMode & (int)commandMode) > 0, cancel),
+                await Task.Run(() => ((int)cmd.Kind & (int)commandMode) > 0, cancel),
             validations
         );
     }

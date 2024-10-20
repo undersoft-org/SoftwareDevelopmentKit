@@ -2,6 +2,7 @@
 
 using FluentValidation.Results;
 using Undersoft.SDK.Proxies;
+using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Query;
 
 public abstract class QueryBase : IQuery
@@ -10,20 +11,20 @@ public abstract class QueryBase : IQuery
 
     public QueryBase()
     {
-        ValidationResult = new ValidationResult();
+        Validation = new ValidationResult();
     }
 
-    public QueryBase(OperationType type) : this()
+    public QueryBase(OperationKind type) : this()
     {
-        OperationType = type;
+        Kind = type;
     }
 
-    public QueryBase(OperationType type, object[] keys) : this(type)
+    public QueryBase(OperationKind type, object[] keys) : this(type)
     {
         Keys = keys;
     }
 
-    public QueryBase(OperationType type, IQueryParameters parameters) : this(type)
+    public QueryBase(OperationKind type, IQueryParameters parameters) : this(type)
     {
         _parameters = parameters;
     }
@@ -34,11 +35,11 @@ public abstract class QueryBase : IQuery
 
     public virtual int Count { get => Parameters.Count; set => Parameters.Count = value; }
 
-    public virtual ValidationResult ValidationResult { get; set; }
+    public virtual ValidationResult Validation { get; set; }
 
-    public bool IsValid => ValidationResult.IsValid;
+    public bool IsValid => Validation.IsValid;
 
-    public string ErrorMessages => ValidationResult.ToString();
+    public string ErrorMessages => Validation.ToString();
 
     public bool IsSingle => SingleResult != null;
 
@@ -54,7 +55,11 @@ public abstract class QueryBase : IQuery
 
     public virtual object Output => IsValid ? IsSingle ? SingleResult : (object)Result : (object)ErrorMessages;
 
-    public OperationType OperationType { get; set; }
+    public virtual OperationSite Site => OperationSite.Server;
+
+    public OperationKind Kind { get; set; }
+
+    public PublishMode Mode { get; set; }
 
     public virtual object Data { get => Parameters.Data; set => Parameters.Data = value; }
 }

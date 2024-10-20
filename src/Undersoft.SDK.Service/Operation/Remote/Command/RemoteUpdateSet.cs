@@ -15,17 +15,17 @@ public class RemoteUpdateSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     [JsonIgnore]
     public Func<TModel, Expression<Func<TDto, bool>>>[] Conditions { get; }
 
-    public RemoteUpdateSet(EventPublishMode publishPattern, TModel input, object key)
+    public RemoteUpdateSet(PublishMode publishPattern, TModel input, object key)
         : base(
-            OperationType.Change,
+            OperationKind.Change,
             publishPattern,
             new[] { new RemoteUpdate<TStore, TDto, TModel>(publishPattern, input, key) }
         )
     { }
 
-    public RemoteUpdateSet(EventPublishMode publishPattern, TModel[] inputs)
+    public RemoteUpdateSet(PublishMode publishPattern, TModel[] inputs)
         : base(
-            OperationType.Update,
+            OperationKind.Update,
             publishPattern,
             inputs
                 .Select(input => new RemoteUpdate<TStore, TDto, TModel>(publishPattern, input))
@@ -34,12 +34,12 @@ public class RemoteUpdateSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     { }
 
     public RemoteUpdateSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel[] inputs,
         Func<TModel, Expression<Func<TDto, bool>>> predicate
     )
         : base(
-            OperationType.Update,
+            OperationKind.Update,
             publishPattern,
             inputs
                 .Select(
@@ -53,13 +53,13 @@ public class RemoteUpdateSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     }
 
     public RemoteUpdateSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel[] inputs,
         Func<TModel, Expression<Func<TDto, bool>>> predicate,
         params Func<TModel, Expression<Func<TDto, bool>>>[] conditions
     )
         : base(
-            OperationType.Update,
+            OperationKind.Update,
             publishPattern,
             inputs
                 .Select(

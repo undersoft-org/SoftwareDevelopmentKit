@@ -25,9 +25,5 @@
         Task<IQueryable<TDto>> MapQueryAsync<TDto>(IQueryable<TEntity> entity) where TDto : class;
         IQueryable<TEntity> MapQuery<TDto>(IQueryable<TDto> model);
         IQueryable<TDto> MapQuery<TDto>(IQueryable<TEntity> entity) where TDto : class;
-
-        IList<TEntity> GeneralizeToList<TDto>(IEnumerable<TDto> model);
-        Task<IQueryable<TDto>> DetalizeQueryAsync<TDto>(IQueryable<TEntity> entity)
-        where TDto : class;
     }
 }

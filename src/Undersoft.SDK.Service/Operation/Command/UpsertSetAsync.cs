@@ -14,17 +14,17 @@ public class UpsertSetAsync<TStore, TEntity, TDto>
     where TEntity : class, IOrigin, IInnerProxy
     where TStore : IDataServerStore
 {
-    public UpsertSetAsync(EventPublishMode publishPattern, TDto input, object key)
+    public UpsertSetAsync(PublishMode publishPattern, TDto input, object key)
         : base(publishPattern, input, key) { }
 
     public UpsertSetAsync(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TEntity, Expression<Func<TEntity, bool>>> predicate
     ) : base(publishPattern, inputs, predicate) { }
 
     public UpsertSetAsync(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TEntity, Expression<Func<TEntity, bool>>> predicate,
         params Func<TEntity, Expression<Func<TEntity, bool>>>[] conditions

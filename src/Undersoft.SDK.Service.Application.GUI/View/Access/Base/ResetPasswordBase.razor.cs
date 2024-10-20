@@ -83,7 +83,7 @@ public partial class ResetPasswordBase<TLogo, TAccount> : ComponentBase where TA
     /// <returns>A <see cref="Task"/></returns>
     private async Task ResettingPassword(string title, string description = "")
     {
-        var data = new ViewData<Credentials>(new Credentials(), OperationType.Update, title);
+        var data = new ViewData<Credentials>(new Credentials(), OperationKind.Update, title);
         data.SetVisible(nameof(Credentials.Email));
         data.Description = description;
 

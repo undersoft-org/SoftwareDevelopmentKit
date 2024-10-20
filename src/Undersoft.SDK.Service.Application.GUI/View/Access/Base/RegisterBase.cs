@@ -95,7 +95,7 @@ public partial class RegisterBase<TLogo, TAccount, TValidator> : ComponentBase
         account.Credentials = _authorization.Credentials;
         _authorization.Credentials.PatchTo(account.ValueOf("Personal"));
 
-        var data = new ViewData<TAccount>(account, OperationType.Any, title);
+        var data = new ViewData<TAccount>(account, OperationKind.Any, title);
 
         data.Description = description;
 

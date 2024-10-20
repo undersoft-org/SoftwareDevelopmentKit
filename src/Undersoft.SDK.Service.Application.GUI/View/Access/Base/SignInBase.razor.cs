@@ -47,7 +47,7 @@ public partial class SignInBase<TLogo, TAccount> : ComponentBase where TAccount 
 
     private async Task SigningIn(string title, string description = "")
     {
-        var data = new ViewData<Credentials>(new Credentials(), OperationType.Access, title);
+        var data = new ViewData<Credentials>(new Credentials(), OperationKind.Access, title);
         data.SetRequired(nameof(Credentials.Email), nameof(Credentials.Password));
         data.SetVisible(nameof(Credentials.SaveAccountInCookies));
         data.Description = description;

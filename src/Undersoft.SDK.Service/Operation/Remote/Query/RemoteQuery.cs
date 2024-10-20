@@ -12,11 +12,11 @@ public class RemoteQuery<TDto, TModel>
 {
     public RemoteQuery() : base() { }
 
-    public RemoteQuery(OperationType type) : base(type) { }
+    public RemoteQuery(OperationKind type) : base(type) { }
 
-    public RemoteQuery(OperationType type, object[] keys) : base(type, keys) { }
+    public RemoteQuery(OperationKind type, object[] keys) : base(type, keys) { }
 
-    public RemoteQuery(OperationType type, IQueryParameters<TDto> parameters)
+    public RemoteQuery(OperationKind type, IQueryParameters<TDto> parameters)
         : base(type, parameters) { }
 
     public new IQueryParameters<TDto> Parameters

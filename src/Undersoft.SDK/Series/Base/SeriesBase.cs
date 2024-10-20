@@ -513,7 +513,7 @@ namespace Undersoft.SDK.Series.Base
 
             if (item == null)
             {
-                item = NewItem(value);
+                item = NewItem(seriesItem);
                 table[pos] = item;
                 InnerInsert(index, item);
                 CountIncrement();
@@ -528,10 +528,10 @@ namespace Undersoft.SDK.Series.Base
 
                     if (item.Removed)
                     {
-                        var newitem = NewItem(item);
-                        item.Extended = newitem;
-                        InnerInsert(index, newitem);
-                        ConflictIncrement();
+                        item.Value = value;
+                        item.Removed = false;
+                        InnerInsert(index, item);
+                        RemovedDecrement();
                         return;
                     }
                     throw new Exception("SeriesItem exist");
@@ -540,7 +540,7 @@ namespace Undersoft.SDK.Series.Base
 
                 if (item.Extended == null)
                 {
-                    var newitem = NewItem(item);
+                    var newitem = NewItem(seriesItem);
                     item.Extended = newitem;
                     InnerInsert(index, newitem);
                     ConflictIncrement();
@@ -559,7 +559,7 @@ namespace Undersoft.SDK.Series.Base
 
             if (item == null)
             {
-                item = NewItem(value);
+                item = NewItem(key, value);
                 table[pos] = item;
                 InnerInsert(index, item);
                 CountIncrement();
@@ -574,10 +574,10 @@ namespace Undersoft.SDK.Series.Base
 
                     if (item.Removed)
                     {
-                        var newitem = NewItem(item);
-                        item.Extended = newitem;
-                        InnerInsert(index, newitem);
-                        ConflictIncrement();
+                        item.Value = value;
+                        item.Removed = false;
+                        InnerInsert(index, item);
+                        RemovedDecrement();
                         return;
                     }
                     throw new Exception("SeriesItem exist");
@@ -586,7 +586,7 @@ namespace Undersoft.SDK.Series.Base
 
                 if (item.Extended == null)
                 {
-                    var newitem = NewItem(item);
+                    var newitem = NewItem(key, value);
                     item.Extended = newitem;
                     InnerInsert(index, newitem);
                     ConflictIncrement();

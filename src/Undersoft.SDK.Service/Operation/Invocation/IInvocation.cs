@@ -16,7 +16,5 @@ public interface IInvocation : IOperation
 
     object Response { get; set; }
 
-    ValidationResult Result { get; set; }
-
     bool IsValid { get; }
 }

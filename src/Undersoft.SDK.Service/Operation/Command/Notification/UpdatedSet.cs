@@ -14,7 +14,7 @@ public class UpdatedSet<TStore, TEntity, TDto> : NotificationSet<Command<TDto>>
 {
     public UpdatedSet(UpdateSet<TStore, TEntity, TDto> commands)
         : base(
-            commands.PublishMode,
+            commands.Mode,
             commands
                 .ForOnly(
                     c => c.Result != null,

@@ -7,16 +7,18 @@ public class RemoteSetup<TStore, TService, TModel> : Invocation<TModel>
     where TModel : class
     where TStore : IDataServiceStore
 {
+    public override OperationSite Site => OperationSite.Client;
+
     public RemoteSetup() : base() { }
 
-    public RemoteSetup(string method, object argument) : base(OperationType.Setup, typeof(TService), method, argument) { }
+    public RemoteSetup(string method, object argument) : base(OperationKind.Setup, typeof(TService), method, argument) { }
 
     public RemoteSetup(string method, Arguments arguments)
-     : base(OperationType.Setup, typeof(TService), method, arguments) { }
+     : base(OperationKind.Setup, typeof(TService), method, arguments) { }
 
     public RemoteSetup(string method, params object[] arguments)
-    : base(OperationType.Setup, typeof(TService), method, arguments) { }
+    : base(OperationKind.Setup, typeof(TService), method, arguments) { }
 
     public RemoteSetup(string method, params byte[] arguments)
-    : base(OperationType.Setup, typeof(TService), method, arguments) { }
+    : base(OperationKind.Setup, typeof(TService), method, arguments) { }
 }

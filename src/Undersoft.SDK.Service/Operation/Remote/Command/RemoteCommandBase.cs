@@ -9,16 +9,16 @@ public abstract class RemoteCommandBase : IRemoteCommand
 {
     protected RemoteCommandBase()
     {
-        ValidationResult = new ValidationResult();
+        Validation = new ValidationResult();
     }
 
-    protected RemoteCommandBase(OperationType commandMode, EventPublishMode publishMode) : this()
+    protected RemoteCommandBase(OperationKind commandMode, PublishMode publishMode) : this()
     {
-        CommandMode = commandMode;
-        PublishMode = publishMode;
+        Kind = commandMode;
+        Mode = publishMode;
     }
 
-    protected RemoteCommandBase(object entryData, OperationType commandMode, EventPublishMode publishMode)
+    protected RemoteCommandBase(object entryData, OperationKind commandMode, PublishMode publishMode)
         : this(commandMode, publishMode)
     {
         Model = entryData;
@@ -26,8 +26,8 @@ public abstract class RemoteCommandBase : IRemoteCommand
 
     protected RemoteCommandBase(
         object entryData,
-        OperationType commandMode,
-        EventPublishMode publishMode,
+        OperationKind commandMode,
+        PublishMode publishMode,
         params object[] keys
     ) : this(commandMode, publishMode, keys)
     {
@@ -35,13 +35,15 @@ public abstract class RemoteCommandBase : IRemoteCommand
     }
 
     protected RemoteCommandBase(
-        OperationType commandMode,
-        EventPublishMode publishMode,
+        OperationKind commandMode,
+        PublishMode publishMode,
         params object[] keys
     ) : this(commandMode, publishMode)
     {
         Keys = keys;
     }
+
+    public OperationSite Site => OperationSite.Client;
 
     private IOrigin contract;
 
@@ -65,17 +67,17 @@ public abstract class RemoteCommandBase : IRemoteCommand
     public virtual object Model { get; set; }
 
     [JsonIgnore]
-    public ValidationResult ValidationResult { get; set; }
+    public ValidationResult Validation { get; set; }
 
-    public string ErrorMessages => ValidationResult.ToString();
+    public string ErrorMessages => Validation.ToString();
 
-    public OperationType CommandMode { get; set; }
+    public OperationKind Kind { get; set; }
 
-    public EventPublishMode PublishMode { get; set; }
+    public PublishMode Mode { get; set; }
 
     public virtual object Input => Model;
 
     public virtual object Output => IsValid ? Id : ErrorMessages;
 
-    public bool IsValid => ValidationResult.IsValid;
+    public bool IsValid => Validation.IsValid;
 }

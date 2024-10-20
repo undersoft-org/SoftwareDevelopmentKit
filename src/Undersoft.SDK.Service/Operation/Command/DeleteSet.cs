@@ -16,25 +16,25 @@ public class DeleteSet<TStore, TEntity, TDto> : CommandSet<TDto>
     [JsonIgnore]
     public Func<TDto, Expression<Func<TEntity, bool>>> Predicate { get; }
 
-    public DeleteSet(EventPublishMode publishPattern, object key)
+    public DeleteSet(PublishMode publishPattern, object key)
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             new[] { new Delete<TStore, TEntity, TDto>(publishPattern, key) }
         )
     { }
 
-    public DeleteSet(EventPublishMode publishPattern, TDto input, object key)
+    public DeleteSet(PublishMode publishPattern, TDto input, object key)
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             new[] { new Delete<TStore, TEntity, TDto>(publishPattern, input, key) }
         )
     { }
 
-    public DeleteSet(EventPublishMode publishPattern, TDto[] inputs)
+    public DeleteSet(PublishMode publishPattern, TDto[] inputs)
         : base(
-            OperationType.Delete,
+            OperationKind.Delete,
             publishPattern,
             inputs
                 .Select(input => new Delete<TStore, TEntity, TDto>(publishPattern, input))
@@ -43,12 +43,12 @@ public class DeleteSet<TStore, TEntity, TDto> : CommandSet<TDto>
     { }
 
     public DeleteSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate
     )
         : base(
-            OperationType.Delete,
+            OperationKind.Delete,
             publishPattern,
             inputs
                 .Select(

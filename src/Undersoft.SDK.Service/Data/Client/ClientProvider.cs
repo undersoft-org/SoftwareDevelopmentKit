@@ -4,7 +4,6 @@
     {
         None,
         Open,
-        Crud,
-        Stream
+        Grpc
     }
 }

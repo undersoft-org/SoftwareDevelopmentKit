@@ -22,7 +22,7 @@ public class AccountProfessionalValidator<TModel> : ViewValidator<TModel> where 
     public AccountProfessionalValidator(IServicer servicer) : base(servicer)
     {
         ValidationScope(
-            OperationType.Any,
+            OperationKind.Any,
             () =>
             {
                 ValidateEmail(p => p.Model.ProfessionalEmail);

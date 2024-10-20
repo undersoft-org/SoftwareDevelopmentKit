@@ -27,7 +27,7 @@ public class UpdateHandler<TStore, TEntity, TDto>
         CancellationToken cancellationToken
     )
     {
-        if (!request.ValidationResult.IsValid)
+        if (!request.Validation.IsValid)
             return request;
 
         if (request.Keys != null)

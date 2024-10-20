@@ -16,29 +16,29 @@ public class ChangeSet<TStore, TEntity, TDto> : CommandSet<TDto>
     [JsonIgnore]
     public Func<TDto, Expression<Func<TEntity, bool>>> Predicate { get; }
 
-    public ChangeSet(EventPublishMode publishPattern, TDto input, object key)
+    public ChangeSet(PublishMode publishPattern, TDto input, object key)
         : base(
-            OperationType.Change,
+            OperationKind.Change,
             publishPattern,
             new[] { new Change<TStore, TEntity, TDto>(publishPattern, input, key) }
         )
     { }
 
-    public ChangeSet(EventPublishMode publishPattern, TDto[] inputs)
+    public ChangeSet(PublishMode publishPattern, TDto[] inputs)
         : base(
-            OperationType.Change,
+            OperationKind.Change,
             publishPattern,
             inputs.Select(c => new Change<TStore, TEntity, TDto>(publishPattern, c, c.Id)).ToArray()
         )
     { }
 
     public ChangeSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate
     )
         : base(
-            OperationType.Change,
+            OperationKind.Change,
             publishPattern,
             inputs
                 .Select(c => new Change<TStore, TEntity, TDto>(publishPattern, c, predicate))

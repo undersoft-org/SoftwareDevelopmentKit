@@ -24,11 +24,11 @@ namespace Undersoft.SDK.Service.Data.Repository
 
         TEntity NewEntry(params object[] parameters);
 
-        TEntity InnerPut<TModel>(TModel source, TEntity target) where TModel : class;
+        TEntity PutBy<TModel>(TModel source, TEntity target) where TModel : class;
 
-        TEntity InnerSet<TModel>(TModel source, TEntity target) where TModel : class;
+        TEntity SetBy<TModel>(TModel source, TEntity target) where TModel : class;
 
-        TEntity InnerPatch<TModel>(TModel source, TEntity target) where TModel : class;
+        TEntity PatchBy<TModel>(TModel source, TEntity target) where TModel : class;
 
         TEntity Update(TEntity entity);
 

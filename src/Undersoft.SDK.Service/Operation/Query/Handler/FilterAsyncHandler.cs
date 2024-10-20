@@ -26,7 +26,7 @@ public class FilterAsyncHandler<TStore, TParams, TEntity, TDto>
         CancellationToken cancellationToken
     )
     {
-        return _repository.FilterStreamAsync<TDto>(
+        return _repository.FilterNoTrackedStreamAsync<TDto>(
             request.Offset,
             request.Limit,
             request.Parameters.Filter,

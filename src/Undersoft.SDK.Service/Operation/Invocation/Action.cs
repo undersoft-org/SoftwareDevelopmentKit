@@ -8,17 +8,19 @@ public class Action<TStore, TService, TDto> : Invocation<TDto>
     where TService : class
     where TStore : IDataServerStore
 {
+    public override OperationSite Site => OperationSite.Server;
+
     public Action() : base() { }
 
-    public Action(string method, object argument) : base(OperationType.Action, typeof(TService), method, argument) { }
+    public Action(string method, object argument) : base(OperationKind.Action, typeof(TService), method, argument) { }
 
     public Action(string method, Arguments arguments)
-     : base(OperationType.Action, typeof(TService), method, arguments) { }
+     : base(OperationKind.Action, typeof(TService), method, arguments) { }
 
     public Action(string method, params object[] arguments)
-    : base(OperationType.Action, typeof(TService), method, arguments) { }
+    : base(OperationKind.Action, typeof(TService), method, arguments) { }
 
     public Action(string method, params byte[] arguments)
-   : base(OperationType.Action, typeof(TService), method, arguments) { }
+   : base(OperationKind.Action, typeof(TService), method, arguments) { }
 
 }

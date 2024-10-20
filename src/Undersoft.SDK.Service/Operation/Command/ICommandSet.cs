@@ -13,6 +13,4 @@ public interface ICommandSet<TDto> : ICommandSet where TDto : class, IOrigin, II
 public interface ICommandSet : IOperation
 {
     public IEnumerable<ICommand> Commands { get; }
-
-    public ValidationResult ValidationResult { get; set; }
 }

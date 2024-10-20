@@ -89,7 +89,7 @@ public partial class ConfirmEmailBase<TLogo, TAccount> : ComponentBase where TAc
     {
         var data = new ViewData<Credentials>(
             _authorization.Credentials,
-            OperationType.Setup,
+            OperationKind.Setup,
             title
         );
         data.SetVisible(nameof(Credentials.EmailConfirmationToken));

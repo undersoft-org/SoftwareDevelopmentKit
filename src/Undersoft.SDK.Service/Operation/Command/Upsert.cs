@@ -20,20 +20,20 @@ public class Upsert<TStore, TEntity, TDto> : Command<TDto>
     public Func<TEntity, Expression<Func<TEntity, bool>>>[] Conditions { get; }
 
     public Upsert(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto input,
         Func<TEntity, Expression<Func<TEntity, bool>>> predicate
-    ) : base(OperationType.Upsert, publishPattern, input)
+    ) : base(OperationKind.Upsert, publishPattern, input)
     {
         Predicate = predicate;
     }
 
     public Upsert(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto input,
         Func<TEntity, Expression<Func<TEntity, bool>>> predicate,
         params Func<TEntity, Expression<Func<TEntity, bool>>>[] conditions
-    ) : base(OperationType.Upsert, publishPattern, input)
+    ) : base(OperationKind.Upsert, publishPattern, input)
     {
         Predicate = predicate;
         Conditions = conditions;

@@ -30,32 +30,34 @@ public abstract class CommandBase : ICommand
     public virtual object Contract { get; set; }
 
     [JsonIgnore]
-    public ValidationResult ValidationResult { get; set; }
+    public ValidationResult Validation { get; set; }
 
-    public string ErrorMessages => ValidationResult.ToString();
+    public string ErrorMessages => Validation.ToString();
 
-    public OperationType CommandMode { get; set; }
+    public virtual OperationSite Site => OperationSite.Server;
 
-    public EventPublishMode PublishMode { get; set; }
+    public OperationKind Kind { get; set; }
+
+    public PublishMode Mode { get; set; }
 
     public virtual object Input => Contract;
 
     public virtual object Output => IsValid ? Id : ErrorMessages;
 
-    public bool IsValid => ValidationResult.IsValid;
+    public bool IsValid => Validation.IsValid;
 
     protected CommandBase()
     {
-        ValidationResult = new ValidationResult();
+        Validation = new ValidationResult();
     }
 
-    protected CommandBase(OperationType commandMode, EventPublishMode publishMode) : this()
+    protected CommandBase(OperationKind commandMode, PublishMode publishMode) : this()
     {
-        CommandMode = commandMode;
-        PublishMode = publishMode;
+        Kind = commandMode;
+        Mode = publishMode;
     }
 
-    protected CommandBase(object entryData, OperationType commandMode, EventPublishMode publishMode)
+    protected CommandBase(object entryData, OperationKind commandMode, PublishMode publishMode)
         : this(commandMode, publishMode)
     {
         Contract = entryData;
@@ -63,8 +65,8 @@ public abstract class CommandBase : ICommand
 
     protected CommandBase(
         object entryData,
-        OperationType commandMode,
-        EventPublishMode publishMode,
+        OperationKind commandMode,
+        PublishMode publishMode,
         params object[] keys
     ) : this(commandMode, publishMode, keys)
     {
@@ -72,8 +74,8 @@ public abstract class CommandBase : ICommand
     }
 
     protected CommandBase(
-        OperationType commandMode,
-        EventPublishMode publishMode,
+        OperationKind commandMode,
+        PublishMode publishMode,
         params object[] keys
     ) : this(commandMode, publishMode)
     {

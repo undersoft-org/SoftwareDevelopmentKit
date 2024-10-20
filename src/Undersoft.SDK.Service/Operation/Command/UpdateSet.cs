@@ -15,22 +15,22 @@ public class UpdateSet<TStore, TEntity, TDto> : CommandSet<TDto>
     [JsonIgnore]
     public Func<TDto, Expression<Func<TEntity, bool>>>[] Conditions { get; }
 
-    public UpdateSet(EventPublishMode publishPattern) : base(OperationType.Update)
+    public UpdateSet(PublishMode publishPattern) : base(OperationKind.Update)
     {
-        PublishMode = publishPattern;
+        Mode = publishPattern;
     }
 
-    public UpdateSet(EventPublishMode publishPattern, TDto input, object key)
+    public UpdateSet(PublishMode publishPattern, TDto input, object key)
         : base(
-            OperationType.Change,
+            OperationKind.Change,
             publishPattern,
             new[] { new Update<TStore, TEntity, TDto>(publishPattern, input, key) }
         )
     { }
 
-    public UpdateSet(EventPublishMode publishPattern, TDto[] inputs)
+    public UpdateSet(PublishMode publishPattern, TDto[] inputs)
         : base(
-            OperationType.Update,
+            OperationKind.Update,
             publishPattern,
             inputs
                 .Select(input => new Update<TStore, TEntity, TDto>(publishPattern, input))
@@ -39,12 +39,12 @@ public class UpdateSet<TStore, TEntity, TDto> : CommandSet<TDto>
     { }
 
     public UpdateSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate
     )
         : base(
-            OperationType.Update,
+            OperationKind.Update,
             publishPattern,
             inputs
                 .Select(
@@ -57,13 +57,13 @@ public class UpdateSet<TStore, TEntity, TDto> : CommandSet<TDto>
     }
 
     public UpdateSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate,
         params Func<TDto, Expression<Func<TEntity, bool>>>[] conditions
     )
         : base(
-            OperationType.Update,
+            OperationKind.Update,
             publishPattern,
             inputs
                 .Select(

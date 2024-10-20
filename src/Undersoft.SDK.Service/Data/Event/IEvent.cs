@@ -11,5 +11,5 @@ public interface IEventInfo
     long EntityId { get; set; }
     string EntityTypeName { get; set; }
     DateTime PublishTime { get; set; }
-    EventPublishStatus PublishStatus { get; set; }
+    PublishStatus PublishStatus { get; set; }
 }

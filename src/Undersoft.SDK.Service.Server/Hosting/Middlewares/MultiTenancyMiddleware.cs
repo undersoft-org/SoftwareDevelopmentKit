@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Access.MultiTenancy;
+using Undersoft.SDK.Service.Server.Extensions;
 
 namespace Undersoft.SDK.Service.Server.Hosting.Middlewares;
 
@@ -20,6 +20,8 @@ public class MultiTenancyMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        var requestServicer = GetRequestServicer(context);
+
         if (
             context.User.Identity.IsAuthenticated
             && long.TryParse(
@@ -38,32 +40,29 @@ public class MultiTenancyMiddleware
                     .ConfigureAwait(false);
             }
 
-            var token = context.Request.Headers[nameof(Authorization)].FirstOrDefault();
-            if (token != null)
-                context.Items.Add(
-                    nameof(Authorization),
-                    new Authorization()
-                    {
-                        Credentials = new Credentials()
-                        {
-                            SessionToken = token.Split(" ").LastOrDefault(),
-                        },
-                    }
-                );
+            context.SetTenantServicer(requestServicer, tenantId);
         }
+        else
+            requestServicer.SetServicer();
+
         await _next(context);
     }
 
-    private void ReplaceRequestProvider(HttpContext context, long tenantId)
+    private IServicer GetRequestServicer(HttpContext context)
     {
         KeyValuePair<Type, object>? requestServiceProvider = context.Features.FirstOrDefault(kvp =>
             kvp.Key == typeof(IServiceProvidersFeature)
         );
+        
         if (requestServiceProvider != null)
-        {
-            ((IServiceProvidersFeature)requestServiceProvider.Value.Value).RequestServices =
-                _servicer.GetKeyedObject<IServiceManager>(tenantId).CreateScope().ServiceProvider;
-        }
+            return (
+                (IServiceProvidersFeature)requestServiceProvider.Value.Value
+            ).RequestServices.GetService<IServicer>();
+        
+        context.Error<Weblog, Exception>(
+            "Unable to get request service provider from http context"
+        );
+        return null;
     }
 
     private async Task ApplySourceMigrations(IServiceManager manager)
@@ -85,7 +84,7 @@ public class MultiTenancyMiddleware
             catch (Exception ex)
             {
                 this.Error<Applog>(
-                    "Unable to establish connection with data source engine",
+                    $"Model migration to data sources failed: {ex.Message}",
                     null,
                     ex
                 );

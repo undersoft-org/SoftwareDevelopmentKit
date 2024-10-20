@@ -27,5 +27,5 @@ public class EventInfo : DataObject, IEventInfo, IEntity, IContract, IViewModel
     public virtual DateTime PublishTime { get; set; }
 
     [DataMember(Order = 18)]
-    public virtual EventPublishStatus PublishStatus { get; set; }
+    public virtual PublishStatus PublishStatus { get; set; }
 }

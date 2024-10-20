@@ -47,7 +47,7 @@ public partial class SignUpBase<TLogo, TAccount> : ComponentBase where TAccount 
 
     private async Task SigningUp(string title, string description = "")
     {
-        var data = new ViewData<Credentials>(new Credentials(), OperationType.Create, title);
+        var data = new ViewData<Credentials>(new Credentials(), OperationKind.Create, title);
         data.SetVisible(
             nameof(Credentials.FirstName),
             nameof(Credentials.LastName),

@@ -41,7 +41,7 @@ public class UpdatedHandler<TStore, TEntity, TDto>
         if (_eventStore != null)
             _eventStore.Add(request);
 
-        if (_repository == null || request.Command.PublishMode != EventPublishMode.PropagateCommand)
+        if (_repository == null || request.Command.Mode != PublishMode.Propagate)
             return;
 
         TEntity result;
@@ -61,6 +61,6 @@ public class UpdatedHandler<TStore, TEntity, TDto>
                 $"{$"{GetType().Name} for entity "}{$"{typeof(TEntity).Name} unable update report"}"
             );
 
-        request.PublishStatus = EventPublishStatus.Complete;
+        request.PublishStatus = PublishStatus.Complete;
     }
 }

@@ -8,10 +8,10 @@ public class RemoteFind<TStore, TDto, TModel> : RemoteQuery<TDto, TModel>
     where TDto : class, IOrigin, IInnerProxy
 {
     public RemoteFind(params object[] keys)
-        : base(OperationType.Find | OperationType.Query | OperationType.Remote, keys) { }
+        : base(OperationKind.Find | OperationKind.Query | OperationKind.Remote, keys) { }
 
     public RemoteFind(IQueryParameters<TDto> parameters)
-        : base(OperationType.Find | OperationType.Query | OperationType.Remote, parameters) { }
+        : base(OperationKind.Find | OperationKind.Query | OperationKind.Remote, parameters) { }
 
-    public RemoteFind() : base(OperationType.Find | OperationType.Query | OperationType.Remote) { }
+    public RemoteFind() : base(OperationKind.Find | OperationKind.Query | OperationKind.Remote) { }
 }

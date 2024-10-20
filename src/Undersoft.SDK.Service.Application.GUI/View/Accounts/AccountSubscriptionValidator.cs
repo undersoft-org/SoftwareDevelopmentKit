@@ -22,7 +22,7 @@ public class AccountSubscriptionValidator<TModel> : ViewValidator<TModel> where 
     public AccountSubscriptionValidator(IServicer servicer) : base(servicer)
     {
         ValidationScope(
-            OperationType.Any,
+            OperationKind.Any,
             () =>
             {
             }

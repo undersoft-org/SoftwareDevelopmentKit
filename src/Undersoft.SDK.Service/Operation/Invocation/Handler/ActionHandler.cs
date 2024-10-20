@@ -24,7 +24,7 @@ public class ActionHandler<TStore, TService, TDto>
         CancellationToken cancellationToken
     )
     {
-        if (!request.Result.IsValid)
+        if (!request.Validation.IsValid)
             return request;
 
         request.Arguments.ResolveArgumentTypes();

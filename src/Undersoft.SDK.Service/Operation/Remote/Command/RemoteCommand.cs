@@ -12,23 +12,23 @@ public class RemoteCommand<TModel> : RemoteCommandBase, IRequest<RemoteCommand<T
 
     protected RemoteCommand() { }
 
-    protected RemoteCommand(OperationType commandMode, TModel dataObject)
+    protected RemoteCommand(OperationKind commandMode, TModel dataObject)
     {
-        CommandMode = commandMode;
+        Kind = commandMode;
         base.Model = dataObject;
     }
 
-    protected RemoteCommand(OperationType commandMode, EventPublishMode publishMode, TModel dataObject)
+    protected RemoteCommand(OperationKind commandMode, PublishMode publishMode, TModel dataObject)
         : base(dataObject, commandMode, publishMode) { }
 
     protected RemoteCommand(
-        OperationType commandMode,
-        EventPublishMode publishMode,
+        OperationKind commandMode,
+        PublishMode publishMode,
         TModel dataObject,
         params object[] keys
     ) : base(dataObject, commandMode, publishMode, keys) { }
 
-    protected RemoteCommand(OperationType commandMode, EventPublishMode publishMode, params object[] keys)
+    protected RemoteCommand(OperationKind commandMode, PublishMode publishMode, params object[] keys)
         : base(commandMode, publishMode, keys) { }
 
     public override long Id

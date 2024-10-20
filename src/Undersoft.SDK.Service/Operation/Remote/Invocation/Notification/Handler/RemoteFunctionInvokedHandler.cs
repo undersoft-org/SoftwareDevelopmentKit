@@ -39,11 +39,11 @@ public class RemoteSetupInvokedHandler<TStore, TService, TModel>
                 }
                 catch (Exception ex)
                 {
-                    request.Command.Result.Errors.Add(
+                    request.Command.Validation.Errors.Add(
                         new ValidationFailure(string.Empty, ex.Message)
                     );
                     this.Failure<Domainlog>(ex.Message, request.Command.ErrorMessages, ex);
-                    request.PublishStatus = EventPublishStatus.Error;
+                    request.PublishStatus = PublishStatus.Error;
                 }
             },
             cancellationToken

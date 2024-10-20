@@ -30,7 +30,7 @@ public class RemoteSetupHandler<TStore, TService, TModel>
         CancellationToken cancellationToken
     )
     {
-        if (!request.Result.IsValid)
+        if (!request.Validation.IsValid)
             return request;
 
         request.Response = await _repository.Setup(request.Arguments.MethodName, request.Arguments);

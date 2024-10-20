@@ -14,7 +14,7 @@ public class RemoteUpdatedSet<TStore, TDto, TModel> : RemoteNotificationSet<Remo
 {
     public RemoteUpdatedSet(RemoteUpdateSet<TStore, TDto, TModel> commands)
         : base(
-            commands.PublishMode,
+            commands.Mode,
             commands
                 .ForOnly(
                     c => c.Result != null,

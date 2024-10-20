@@ -19,9 +19,9 @@ public class RemoteUpsertSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     [JsonIgnore]
     public Func<TDto, Expression<Func<TDto, bool>>>[] Conditions { get; }
 
-    public RemoteUpsertSet(EventPublishMode publishPattern, TModel input, object key)
+    public RemoteUpsertSet(PublishMode publishPattern, TModel input, object key)
         : base(
-            OperationType.Change,
+            OperationKind.Change,
             publishPattern,
             new[]
             {
@@ -35,12 +35,12 @@ public class RemoteUpsertSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     { }
 
     public RemoteUpsertSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel[] inputs,
         Func<TDto, Expression<Func<TDto, bool>>> predicate
     )
         : base(
-            OperationType.Upsert,
+            OperationKind.Upsert,
             publishPattern,
             inputs
                 .Select(
@@ -53,13 +53,13 @@ public class RemoteUpsertSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     }
 
     public RemoteUpsertSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel[] inputs,
         Func<TDto, Expression<Func<TDto, bool>>> predicate,
         params Func<TDto, Expression<Func<TDto, bool>>>[] conditions
     )
         : base(
-            OperationType.Upsert,
+            OperationKind.Upsert,
             publishPattern,
             inputs
                 .Select(

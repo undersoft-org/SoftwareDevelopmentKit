@@ -2,6 +2,7 @@
 
 using FluentValidation.Results;
 using Undersoft.SDK.Proxies;
+using Undersoft.SDK.Service.Data.Event;
 using Undersoft.SDK.Service.Data.Query;
 
 public abstract class RemoteQueryBase : IRemoteQuery
@@ -10,23 +11,25 @@ public abstract class RemoteQueryBase : IRemoteQuery
 
     public RemoteQueryBase()
     {
-        ValidationResult = new ValidationResult();
+        Validation = new ValidationResult();
     }
 
-    public RemoteQueryBase(OperationType type) : this()
+    public RemoteQueryBase(OperationKind type) : this()
     {
-        OperationType = type;
+        Kind = type;
     }
 
-    public RemoteQueryBase(OperationType type, object[] keys) : this(type)
+    public RemoteQueryBase(OperationKind type, object[] keys) : this(type)
     {
         Keys = keys;
     }
 
-    public RemoteQueryBase(OperationType type, IQueryParameters parameters) : this(type)
+    public RemoteQueryBase(OperationKind type, IQueryParameters parameters) : this(type)
     {
         _parameters = parameters;
     }
+
+    public OperationSite Site => OperationSite.Client;
 
     public virtual int Offset
     {
@@ -46,11 +49,11 @@ public abstract class RemoteQueryBase : IRemoteQuery
         set => Parameters.Count = value;
     }
 
-    public virtual ValidationResult ValidationResult { get; set; }
+    public virtual ValidationResult Validation { get; set; }
 
-    public bool IsValid => ValidationResult.IsValid;
+    public bool IsValid => Validation.IsValid;
 
-    public string ErrorMessages => ValidationResult.ToString();
+    public string ErrorMessages => Validation.ToString();
 
     public bool IsSingle => SingleResult != null;
 
@@ -75,7 +78,9 @@ public abstract class RemoteQueryBase : IRemoteQuery
                 : (object)Result
             : (object)ErrorMessages;
 
-    public OperationType OperationType { get; set; }
+    public OperationKind Kind { get; set; }
+
+    public PublishMode Mode { get; set; }
 
     public virtual object Data
     {

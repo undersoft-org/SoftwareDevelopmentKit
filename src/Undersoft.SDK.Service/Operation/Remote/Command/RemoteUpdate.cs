@@ -15,24 +15,24 @@ public class RemoteUpdate<TStore, TDto, TModel> : RemoteCommand<TModel>
     [JsonIgnore]
     public Func<TDto, Expression<Func<TDto, bool>>>[] Conditions { get; }
 
-    public RemoteUpdate(EventPublishMode publishPattern, TModel input, params object[] keys)
-        : base(OperationType.Update, publishPattern, input, keys) { }
+    public RemoteUpdate(PublishMode publishPattern, TModel input, params object[] keys)
+        : base(OperationKind.Update, publishPattern, input, keys) { }
 
     public RemoteUpdate(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel input,
         Func<TDto, Expression<Func<TDto, bool>>> predicate
-    ) : base(OperationType.Update, publishPattern, input)
+    ) : base(OperationKind.Update, publishPattern, input)
     {
         Predicate = predicate;
     }
 
     public RemoteUpdate(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel input,
         Func<TDto, Expression<Func<TDto, bool>>> predicate,
         params Func<TDto, Expression<Func<TDto, bool>>>[] conditions
-    ) : base(OperationType.Update, publishPattern, input)
+    ) : base(OperationKind.Update, publishPattern, input)
     {
         Predicate = predicate;
         Conditions = conditions;

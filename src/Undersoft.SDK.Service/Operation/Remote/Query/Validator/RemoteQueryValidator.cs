@@ -14,19 +14,19 @@ public class RemoteQueryValidator<TDto, TModel> : RemoteQueryValidatorBase<Remot
 {
     public RemoteQueryValidator(IServicer servicer) : base(servicer) { }
 
-    protected void ValidationScope<T>(OperationType operationType, Action actions)
+    protected void ValidationScope<T>(OperationKind operationType, Action actions)
     {
         ValidationScope(typeof(T), operationType, actions);
     }
 
-    protected void ValidationScope(Type type, OperationType operationType, Action actions)
+    protected void ValidationScope(Type type, OperationKind operationType, Action actions)
     {
         WhenAsync(
             (cmd, cancel) =>
                 Task.Run(
                     () =>
                     {
-                        return ((int)cmd.OperationType & (int)operationType) > 0
+                        return ((int)cmd.Kind & (int)operationType) > 0
                             && GetType().UnderlyingSystemType.IsAssignableTo(type);
                     },
                     cancel
@@ -35,14 +35,14 @@ public class RemoteQueryValidator<TDto, TModel> : RemoteQueryValidatorBase<Remot
         );
     }
 
-    protected void ValidationScope(OperationType operationType, Action actions)
+    protected void ValidationScope(OperationKind operationType, Action actions)
     {
         WhenAsync(
             (cmd, cancel) =>
                 Task.Run(
                     () =>
                     {
-                        return ((int)cmd.OperationType & (int)operationType) > 0;
+                        return ((int)cmd.Kind & (int)operationType) > 0;
                     },
                     cancel
                 ),

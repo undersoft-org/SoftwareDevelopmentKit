@@ -20,20 +20,20 @@ public class RemoteUpsert<TStore, TDto, TModel> : RemoteCommand<TModel>
     public Func<TDto, Expression<Func<TDto, bool>>>[] Conditions { get; }
 
     public RemoteUpsert(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel input,
         Func<TDto, Expression<Func<TDto, bool>>> predicate
-    ) : base(OperationType.Upsert, publishPattern, input)
+    ) : base(OperationKind.Upsert, publishPattern, input)
     {
         Predicate = predicate;
     }
 
     public RemoteUpsert(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel input,
         Func<TDto, Expression<Func<TDto, bool>>> predicate,
         params Func<TDto, Expression<Func<TDto, bool>>>[] conditions
-    ) : base(OperationType.Upsert, publishPattern, input)
+    ) : base(OperationKind.Upsert, publishPattern, input)
     {
         Predicate = predicate;
         Conditions = conditions;

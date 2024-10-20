@@ -8,20 +8,20 @@ public class RemoteFilter<TStore, TDto, TModel> : RemoteQuery<TDto, TModel>
     where TDto : class, IOrigin, IInnerProxy
 {
     public RemoteFilter(int offset, int limit, IQueryParameters<TDto> parameters)
-        : base(OperationType.Filter | OperationType.Query | OperationType.Remote, parameters)
+        : base(OperationKind.Filter | OperationKind.Query | OperationKind.Remote, parameters)
     {
         Offset = offset;
         Limit = limit;
     }
 
     public RemoteFilter(IQueryParameters<TDto> parameters)
-        : base(OperationType.Filter | OperationType.Query | OperationType.Remote, parameters) { }
+        : base(OperationKind.Filter | OperationKind.Query | OperationKind.Remote, parameters) { }
 
-    public RemoteFilter() : base(OperationType.Filter | OperationType.Query | OperationType.Remote)
+    public RemoteFilter() : base(OperationKind.Filter | OperationKind.Query | OperationKind.Remote)
     { }
 
     public RemoteFilter(int offset, int limit)
-        : base(OperationType.Filter | OperationType.Query | OperationType.Remote)
+        : base(OperationKind.Filter | OperationKind.Query | OperationKind.Remote)
     {
         Offset = offset;
         Limit = limit;

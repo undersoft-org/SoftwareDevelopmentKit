@@ -23,7 +23,7 @@
         }
 
         public Arguments(string methodName, object argValue, string targetName = null, Type targetType = null)
-           : this(methodName, new Argument(argValue, methodName, targetName), targetName, targetType) { }
+          : this(methodName, new Argument(argValue, methodName, targetName), targetName, targetType) { }
 
         public Arguments(string methodName, string argName, object argValue, string targetName = null, Type targetType = null)
             : this(methodName, new Argument(argName, argValue, methodName, targetName), targetName, targetType) { }
@@ -60,7 +60,7 @@
             string methodName,
             Dictionary<string, object> dictionary,
             string targetName
-        ) : this(methodName, targetName)
+        ) : this(targetName)
         {
             this.Add(dictionary.ForEach(p => new Argument(p.Key, p.Value, methodName, targetName)));
         }
@@ -84,20 +84,21 @@
         [IgnoreDataMember]
         public Type TargetType { get; set; }
 
-        public string TargetName => this.FirstOrDefault()?.TargetName;
+        public string TargetName => TargetType != null ? TargetType.FullName : this.FirstOrDefault()?.TargetName;
 
         public string MethodName => this.FirstOrDefault()?.MethodName;
 
         public bool IsValid => !this.Any(p => !p.IsValid);
 
-        public Argument New(string name, object value, string method, string target)
+        public Argument New(string name, object value, string method, string target = null)
         {
+            var targetName = target ?? TargetName;
             return this.Put(new Argument(name, value, method, target)).Value;
         }
 
-        public ISeriesItem<Argument> New(object value, string method, string target = null)
-        {
-            return this.Put(new Argument(value.GetType().Name, value, method, target));
+        public Argument New(object value, string method, string target = null)
+        {            
+            return New(value.GetType().Name, value, method, target);
         }
     }
 }

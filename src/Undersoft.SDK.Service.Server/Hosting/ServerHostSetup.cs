@@ -10,8 +10,10 @@ using ProtoBuf.Grpc.Server;
 namespace Undersoft.SDK.Service.Server.Hosting;
 
 using Logging;
-using Series;
+using Microsoft.AspNetCore.Routing;
 using Undersoft.SDK.Service.Data.Store;
+using Undersoft.SDK.Service.Infrastructure.Telemetry;
+using Undersoft.SDK.Service.Server.Builders;
 using Undersoft.SDK.Service.Server.Hosting.Middlewares;
 
 public class ServerHostSetup : IServerHostSetup
@@ -52,26 +54,7 @@ public class ServerHostSetup : IServerHostSetup
     {
         _builder.UseEndpoints(endpoints =>
         {
-            var method = typeof(GrpcEndpointRouteBuilderExtensions)
-                .GetMethods()
-                .Where(m => m.Name.Contains("MapGrpcService"))
-                .FirstOrDefault()
-                .GetGenericMethodDefinition();
-
-            ISeries<Type> serviceContracts = GrpcDataServerRegistry.ServiceContracts;
-
-            if (serviceContracts.Any())
-            {
-                foreach (var serviceContract in serviceContracts)
-                {
-                    method
-                        .MakeGenericMethod(serviceContract)
-                        .Invoke(endpoints, new object[] { endpoints });
-
-                }
-
-                endpoints.MapCodeFirstGrpcReflectionService();
-            }
+            MapStreamControllers(endpoints);         
 
             _manager.Registry.MergeServices();
 
@@ -82,9 +65,63 @@ public class ServerHostSetup : IServerHostSetup
                 endpoints.MapRazorPages();
                 endpoints.MapFallbackToFile("/index.html");
             }
-        });
 
+            if (_manager.Registry.ContainsService<OperationInstrumentation>())
+                endpoints.MapPrometheusScrapingEndpoint();
+        });
+        
         return this;
+    }
+
+    private IEndpointRouteBuilder MapStreamControllers(IEndpointRouteBuilder endpoints)
+    {
+        var method = typeof(GrpcEndpointRouteBuilderExtensions)
+               .GetMethods()
+               .Where(m => m.Name.Contains("MapGrpcService"))
+               .FirstOrDefault()
+               .GetGenericMethodDefinition();
+
+        foreach (var storeControllers in DataServerRegistry.StreamControllers)
+        {           
+            foreach (var controller in storeControllers)
+            {
+                method
+                    .MakeGenericMethod(controller)
+                    .Invoke(endpoints, new object[] { endpoints });
+            }
+        }
+
+        endpoints.MapCodeFirstGrpcReflectionService();
+
+        return endpoints;
+    }
+
+    private IEndpointRouteBuilder MapDataControllers(IEndpointRouteBuilder endpoints)
+    {
+        foreach (var storeControllers in DataServerRegistry.DataControllers.AsItems())
+        {
+            string routePrefix = null;
+            Type storeType = null;
+            var sro = Manager.GetObject<StoreRouteRegistry>();
+            if (sro != null)
+            {
+                if (sro.TryGet(storeControllers.Id, out (Type, string) route))
+                {
+                    routePrefix = route.Item2;
+                    storeType = route.Item1;
+                }
+            }
+
+            foreach (var _controller in storeControllers.Value)
+            {
+                var controllerName = _controller.Name.Replace("Controller", "");
+                var pattern = string.Format("{0}/{1}", routePrefix, controllerName);
+                var patternWithKeyAsSegment = string.Format("{0}/{key}", pattern);
+                var patternWithKeyParanthesis = string.Format("{0}({key})", pattern);               
+            }
+        }
+
+        return endpoints;
     }
 
     public IServerHostSetup MapFallbackToFile(string filePath)

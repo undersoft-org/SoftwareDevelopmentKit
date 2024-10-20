@@ -11,11 +11,11 @@ public class Query<TEntity, TDto> : QueryBase, IRequest<Query<TEntity, TDto>>, I
 {
     public Query() : base() { }
 
-    public Query(OperationType type) : base(type) { }
+    public Query(OperationKind type) : base(type) { }
 
-    public Query(OperationType type, object[] keys) : base(type, keys) { }
+    public Query(OperationKind type, object[] keys) : base(type, keys) { }
 
-    public Query(OperationType type, IQueryParameters<TEntity> parameters) : base(type, parameters) { }
+    public Query(OperationKind type, IQueryParameters<TEntity> parameters) : base(type, parameters) { }
 
     public new IQueryParameters<TEntity> Parameters
     {

@@ -24,7 +24,7 @@ namespace Undersoft.SDK.Service.Behaviour
                               .Select(v => v
                               .ValidateAsync(context, cancellationToken))))
                                  .SelectMany(r => r.Errors)
-                                 .ForEach(f => request.ValidationResult.Errors.Add(f));
+                                 .ForEach(f => request.Validation.Errors.Add(f));
             }
 
             return await next();

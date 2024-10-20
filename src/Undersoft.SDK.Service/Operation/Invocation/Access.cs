@@ -8,17 +8,19 @@ public class Access<TStore, TService, TDto> : Invocation<TDto>
     where TService : class
     where TStore : IDataServerStore
 {
+    public override OperationSite Site => OperationSite.Server;
+
     public Access() : base() { }
 
-    public Access(string method, object argument) : base(OperationType.Access, typeof(TService), method, argument) { }
+    public Access(string method, object argument) : base(OperationKind.Access, typeof(TService), method, argument) { }
 
     public Access(string method, Arguments arguments)
-     : base(OperationType.Access, typeof(TService), method, arguments) { }
+     : base(OperationKind.Access, typeof(TService), method, arguments) { }
 
     public Access(string method, params object[] arguments)
-    : base(OperationType.Access, typeof(TService), method, arguments) { }
+    : base(OperationKind.Access, typeof(TService), method, arguments) { }
 
     public Access(string method, params byte[] arguments)
-   : base(OperationType.Access, typeof(TService), method, arguments) { }
+   : base(OperationKind.Access, typeof(TService), method, arguments) { }
 
 }

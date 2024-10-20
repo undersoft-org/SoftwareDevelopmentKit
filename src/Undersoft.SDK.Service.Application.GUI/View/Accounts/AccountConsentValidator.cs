@@ -22,7 +22,7 @@ public class AccountConsentValidator<TModel> : ViewValidator<TModel> where TMode
     public AccountConsentValidator(IServicer servicer) : base(servicer)
     {
         ValidationScope(
-            OperationType.Any,
+            OperationKind.Any,
             () =>
             {
                 ValidateRequired(p => p.Model.TermsConsent);

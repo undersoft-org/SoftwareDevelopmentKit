@@ -13,11 +13,11 @@ public class CommandSetStream<TDto>
 {
     protected CommandSetStream() : base() { }
 
-    protected CommandSetStream(OperationType commandMode) : base(commandMode) { }
+    protected CommandSetStream(OperationKind commandMode) : base(commandMode) { }
 
     protected CommandSetStream(
-        OperationType commandMode,
-        EventPublishMode publishPattern,
+        OperationKind commandMode,
+        PublishMode publishPattern,
         Command<TDto>[] DtoCommands
     ) : base(commandMode, publishPattern, DtoCommands) { }
 }

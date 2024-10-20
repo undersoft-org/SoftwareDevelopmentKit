@@ -1,5 +1,6 @@
 ﻿using FluentValidation.Results;
 using System.Text.Json.Serialization;
+using Undersoft.SDK.Service.Data.Event;
 
 namespace Undersoft.SDK.Service.Operation.Invocation;
 
@@ -17,56 +18,59 @@ public abstract class InvocationBase : IInvocation
     public virtual object Response { get; set; }
 
     [JsonIgnore]
-    public ValidationResult Result { get; set; }
+    public ValidationResult Validation { get; set; }
 
-    public string ErrorMessages => Result.ToString();
+    public string ErrorMessages => Validation.ToString();
 
-    public OperationType CommandMode { get; set; }
+    public PublishMode Mode {  get; set; }
+
+    public OperationKind Kind { get; set; }
+
+    public virtual OperationSite Site => OperationSite.Internal;
 
     public virtual object Input => Arguments;
 
     public virtual object Output => IsValid ? Response : ErrorMessages;
 
-    public bool IsValid => Result.IsValid;
+    public bool IsValid => Validation.IsValid;
 
     protected InvocationBase()
     {
-        Result = new ValidationResult();
+        Validation = new ValidationResult();
     }
 
-    protected InvocationBase(OperationType commandMode) : this()
+    protected InvocationBase(OperationKind commandMode) : this()
     {
-        CommandMode = commandMode;
+        Kind = commandMode;
     }
 
-    protected InvocationBase(OperationType commandMode, Type serviceType, string method, object argument)
+    protected InvocationBase(OperationKind commandMode, Type serviceType, string method, object argument)
         : this(commandMode)
     {
-        Arguments = new Arguments(method, argument, serviceType.FullName);
-        Arguments.TargetType = serviceType;
+        Arguments = new Arguments(method, argument, serviceType.FullName, serviceType);
     }
 
-    protected InvocationBase(OperationType commandMode, Type serviceType, string method, Arguments arguments)
+    protected InvocationBase(OperationKind commandMode, Type serviceType, string method, Arguments arguments)
         : this(commandMode)
     {
         Arguments = arguments;
-        Arguments.ForEach(a => a.TargetName = serviceType.FullName);
         Arguments.TargetType = serviceType;
+        Arguments.ForEach(a => a.TargetName = serviceType.FullName);       
     }
 
-    protected InvocationBase(OperationType commandMode, Type serviceType, string method, object[] arguments)
+    protected InvocationBase(OperationKind commandMode, Type serviceType, string method, object[] arguments)
        : this(commandMode)
     {
-        var args = new Arguments(method, serviceType.FullName);
-        arguments.ForEach(a => args.New(a.GetType().Name, a, method, serviceType.FullName));
+        var args = new Arguments(serviceType);
+        arguments.ForEach(a => args.New(a, method, serviceType.FullName));
         args.TargetType = serviceType;
         Arguments = args;
     }
 
-    protected InvocationBase(OperationType commandMode, Type serviceType, string method, byte[] binaries)
+    protected InvocationBase(OperationKind commandMode, Type serviceType, string method, byte[] binaries)
        : this(commandMode)
     {
-        Arguments = new Arguments(method, binaries);
+        Arguments = new Arguments(method, binaries, serviceType.FullName, serviceType);
         Arguments.TargetType = serviceType;
     }
 

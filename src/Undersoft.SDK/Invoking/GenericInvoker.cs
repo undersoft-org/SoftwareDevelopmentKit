@@ -1,4 +1,6 @@
-﻿using Undersoft.SDK.Utilities;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using Undersoft.SDK.Utilities;
 
 namespace Undersoft.SDK.Invoking
 {
@@ -9,13 +11,10 @@ namespace Undersoft.SDK.Invoking
         public Invoker() : base(typeof(T)) { }
 
         public Invoker(T targetObject)
-            : base(
-                targetObject,
-                targetObject.GetType().GetMethods().FirstOrDefault(m => m.IsPublic)
-            )
+            : base(targetObject.GetType().GetMethods().FirstOrDefault(m => m.IsPublic), targetObject)
         { }
 
-        public Invoker(Arguments arguemnts) : base(typeof(T).New(), arguemnts) { }
+        public Invoker(Arguments arguemnts) : base(arguemnts) { }
 
         public Invoker(T targetObject, Arguments arguemnts) : base(targetObject, arguemnts) { }
 
@@ -31,7 +30,7 @@ namespace Undersoft.SDK.Invoking
         public Invoker(Func<T, Delegate> method, params object[] constructorParams)
             : base(
                 typeof(T),
-                method(typeof(T).New<T>(constructorParams)).Method.Name,
+                method(typeof(T).New<T>()).Method.Name,
                 constructorParams
             )
         { }

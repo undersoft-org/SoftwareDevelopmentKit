@@ -13,25 +13,27 @@ public class CommandSet<TDto>
         IRequest<CommandSet<TDto>>,
         ICommandSet<TDto> where TDto : class, IOrigin, IInnerProxy
 {
-    public OperationType CommandMode { get; set; }
+    public OperationSite Site => OperationSite.Server;
 
-    public EventPublishMode PublishMode { get; set; }
+    public OperationKind Kind { get; set; }
+
+    public PublishMode Mode { get; set; }
 
     protected CommandSet() : base() { }
 
-    protected CommandSet(OperationType commandMode) : base()
+    protected CommandSet(OperationKind commandMode) : base()
     {
-        CommandMode = commandMode;
+        Kind = commandMode;
     }
 
     protected CommandSet(
-        OperationType commandMode,
-        EventPublishMode publishPattern,
+        OperationKind commandMode,
+        PublishMode publishPattern,
         Command<TDto>[] commands
     ) : base(commands)
     {
-        CommandMode = commandMode;
-        PublishMode = publishPattern;
+        Kind = commandMode;
+        Mode = publishPattern;
     }
 
     public IEnumerable<Command<TDto>> Commands
@@ -39,11 +41,11 @@ public class CommandSet<TDto>
         get => AsValues();
     }
 
-    public ValidationResult ValidationResult { get; set; } = new ValidationResult();
+    public ValidationResult Validation { get; set; } = new ValidationResult();
 
     public object Input => Commands.Select(c => c.Contract);
 
-    public object Output => Commands.ForEach(c => c.ValidationResult.IsValid ? c.Id as object : c.ValidationResult);
+    public object Output => Commands.ForEach(c => c.Validation.IsValid ? c.Id as object : c.Validation);
 
     IEnumerable<ICommand> ICommandSet.Commands
     {

@@ -9,6 +9,8 @@ using Undersoft.SDK.Service.Data.Object;
 
 public abstract class RemoteNotification<TCommand> : Event, INotification where TCommand : RemoteCommandBase
 {
+    public virtual OperationSite Site => OperationSite.Producer;
+
     public TCommand Command { get; }
 
     protected RemoteNotification(TCommand command)
@@ -27,7 +29,7 @@ public abstract class RemoteNotification<TCommand> : Event, INotification where 
         Modified = dto.Modified;
         Creator = dto.Creator;
         Created = dto.Created;
-        PublishStatus = EventPublishStatus.Ready;
+        PublishStatus = PublishStatus.Ready;
         PublishTime = Log.Clock;
 
         Data = JsonSerializer.SerializeToUtf8Bytes((RemoteCommandBase)command);

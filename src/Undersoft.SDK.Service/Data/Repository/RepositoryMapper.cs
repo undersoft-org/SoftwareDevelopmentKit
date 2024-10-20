@@ -58,12 +58,6 @@ public partial class Repository<TEntity> : IRepositoryMapper<TEntity>
         return entity.PutTo<TDto>();
     }
 
-    public virtual TDto Generalize<TDto>(TDto model)
-    {
-        SerializeDocuments((IInnerProxy)model);
-        return model;
-    }
-
     public virtual TDto MapTo<TDto>(object entity)
     {
         return entity.PutTo<TDto>();
@@ -99,25 +93,7 @@ public partial class Repository<TEntity> : IRepositoryMapper<TEntity>
     public virtual IList<TEntity> MapToList<TDto>(IEnumerable<TDto> model)
     {
         return model.ForEach(m => m.PutTo<TEntity>()).Commit();
-    }
-
-    public virtual IList<TEntity> GeneralizeToList<TDto>(IEnumerable<TDto> model)
-    {
-        return model.ForEach(e =>
-        {
-            SerializeDocuments((IInnerProxy)e);
-            return e.PutTo<TEntity>();
-        }).Commit();
-    }
-
-    public virtual IEnumerable<TDto> Generalize<TDto>(IEnumerable<TDto> model)
-    {
-        foreach (var item in model)
-        {
-            SerializeDocuments((IInnerProxy)item);
-            yield return item;
-        }
-    }
+    }  
 
     public virtual async IAsyncEnumerable<TEntity> MapToAsync<TDto>(IEnumerable<TDto> model)
     {
@@ -160,23 +136,7 @@ public partial class Repository<TEntity> : IRepositoryMapper<TEntity>
         return await Task.FromResult(
             entity.AsEnumerable().ForEach(e => e.PutTo<TDto>()).AsQueryable()
         );
-    }
-
-    public virtual async Task<IQueryable<TDto>> DetalizeQueryAsync<TDto>(IQueryable<TEntity> entity)
-        where TDto : class
-    {
-        return await Task.FromResult(
-            entity
-                .AsEnumerable()
-                .ForEach(e =>
-                {
-                    var contract = e.PutTo<TDto>();
-                    DeserializeDocuments((IInnerProxy)contract);
-                    return contract;
-                })
-                .AsQueryable()
-        );
-    }
+    }  
 
     public virtual IQueryable<TDto> MapQuery<TDto>(IQueryable<TEntity> entity) where TDto : class
     {

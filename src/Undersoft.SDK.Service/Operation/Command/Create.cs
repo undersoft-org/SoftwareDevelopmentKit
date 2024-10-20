@@ -16,23 +16,23 @@ public class Create<TStore, TEntity, TDto> : Command<TDto>
     [JsonIgnore]
     public Func<TEntity, Expression<Func<TEntity, bool>>> Predicate { get; }
 
-    public Create(EventPublishMode publishPattern, TDto input)
-        : base(OperationType.Create, publishPattern, input)
+    public Create(PublishMode publishPattern, TDto input)
+        : base(OperationKind.Create, publishPattern, input)
     {
         input.AutoId();
     }
 
-    public Create(EventPublishMode publishPattern, TDto input, object key)
-        : base(OperationType.Create, publishPattern, input)
+    public Create(PublishMode publishPattern, TDto input, object key)
+        : base(OperationKind.Create, publishPattern, input)
     {
         input.SetId(key);
     }
 
     public Create(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto input,
         Func<TEntity, Expression<Func<TEntity, bool>>> predicate
-    ) : base(OperationType.Create, publishPattern, input)
+    ) : base(OperationKind.Create, publishPattern, input)
     {
         input.AutoId();
         Predicate = predicate;

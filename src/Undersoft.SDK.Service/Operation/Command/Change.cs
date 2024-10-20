@@ -16,14 +16,14 @@ public class Change<TStore, TEntity, TDto> : Command<TDto>
     [JsonIgnore]
     public Func<TDto, Expression<Func<TEntity, bool>>> Predicate { get; }
 
-    public Change(EventPublishMode publishMode, TDto input, params object[] keys)
-        : base(OperationType.Change, publishMode, input, keys) { }
+    public Change(PublishMode publishMode, TDto input, params object[] keys)
+        : base(OperationKind.Change, publishMode, input, keys) { }
 
     public Change(
-        EventPublishMode publishMode,
+        PublishMode publishMode,
         TDto input,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate
-    ) : base(OperationType.Change, publishMode, input)
+    ) : base(OperationKind.Change, publishMode, input)
     {
         Predicate = predicate;
     }

@@ -15,7 +15,7 @@ public class AccountAddressValidator<TModel> : ViewValidator<TModel> where TMode
     public AccountAddressValidator(IServicer servicer) : base(servicer)
     {
         ValidationScope(
-            OperationType.Any,
+            OperationKind.Any,
             () =>
             {
                 ValidateRequired(p => p.Model.Country);

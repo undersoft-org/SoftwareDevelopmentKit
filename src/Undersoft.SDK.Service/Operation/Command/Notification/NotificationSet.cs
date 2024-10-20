@@ -9,11 +9,11 @@ using Undersoft.SDK.Service.Data.Event;
 public abstract class NotificationSet<TCommand> : Listing<Notification<TCommand>>, INotification
     where TCommand : CommandBase
 {
-    public EventPublishMode PublishMode { get; set; }
+    public PublishMode PublishMode { get; set; }
 
     public NotificationSet() : base() { }
 
-    protected NotificationSet(EventPublishMode publishPattern, Notification<TCommand>[] commands)
+    protected NotificationSet(PublishMode publishPattern, Notification<TCommand>[] commands)
         : base(commands)
     {
         PublishMode = publishPattern;

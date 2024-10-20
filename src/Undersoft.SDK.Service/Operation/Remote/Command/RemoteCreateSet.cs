@@ -12,17 +12,17 @@ public class RemoteCreateSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     [JsonIgnore]
     public Func<TDto, Expression<Func<TDto, bool>>> Predicate { get; }
 
-    public RemoteCreateSet(EventPublishMode publishPattern, TModel input, object key)
+    public RemoteCreateSet(PublishMode publishPattern, TModel input, object key)
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             new[] { new RemoteCreate<TStore, TDto, TModel>(publishPattern, input, key) }
         )
     { }
 
-    public RemoteCreateSet(EventPublishMode publishPattern, TModel[] inputs)
+    public RemoteCreateSet(PublishMode publishPattern, TModel[] inputs)
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             inputs
                 .Select(input => new RemoteCreate<TStore, TDto, TModel>(publishPattern, input))
@@ -31,12 +31,12 @@ public class RemoteCreateSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     { }
 
     public RemoteCreateSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel[] inputs,
         Func<TDto, Expression<Func<TDto, bool>>> predicate
     )
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             inputs
                 .Select(

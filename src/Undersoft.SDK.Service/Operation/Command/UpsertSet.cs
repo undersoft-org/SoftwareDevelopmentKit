@@ -19,9 +19,9 @@ public class UpsertSet<TStore, TEntity, TDto> : CommandSet<TDto>
     [JsonIgnore]
     public Func<TEntity, Expression<Func<TEntity, bool>>>[] Conditions { get; }
 
-    public UpsertSet(EventPublishMode publishPattern, TDto input, object key)
+    public UpsertSet(PublishMode publishPattern, TDto input, object key)
         : base(
-            OperationType.Change,
+            OperationKind.Change,
             publishPattern,
             new[]
             {
@@ -35,12 +35,12 @@ public class UpsertSet<TStore, TEntity, TDto> : CommandSet<TDto>
     { }
 
     public UpsertSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TEntity, Expression<Func<TEntity, bool>>> predicate
     )
         : base(
-            OperationType.Upsert,
+            OperationKind.Upsert,
             publishPattern,
             inputs
                 .Select(
@@ -53,13 +53,13 @@ public class UpsertSet<TStore, TEntity, TDto> : CommandSet<TDto>
     }
 
     public UpsertSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TEntity, Expression<Func<TEntity, bool>>> predicate,
         params Func<TEntity, Expression<Func<TEntity, bool>>>[] conditions
     )
         : base(
-            OperationType.Upsert,
+            OperationKind.Upsert,
             publishPattern,
             inputs
                 .Select(

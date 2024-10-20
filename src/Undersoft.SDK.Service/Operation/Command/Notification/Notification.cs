@@ -11,6 +11,8 @@ using Uniques;
 
 public abstract class Notification<TCommand> : Event, INotification where TCommand : CommandBase
 {
+    public virtual OperationSite Site => OperationSite.Consumer;
+
     public TCommand Command { get; }
 
     public Notification() : base() { }
@@ -31,7 +33,7 @@ public abstract class Notification<TCommand> : Event, INotification where TComma
         Modified = entity.Modified;
         Creator = entity.Creator;
         Created = entity.Created;
-        PublishStatus = EventPublishStatus.Ready;
+        PublishStatus = PublishStatus.Ready;
         PublishTime = Log.Clock;
 
         Data = JsonSerializer.SerializeToUtf8Bytes((CommandBase)command);

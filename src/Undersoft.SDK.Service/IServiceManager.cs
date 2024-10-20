@@ -13,6 +13,7 @@ namespace Undersoft.SDK.Service
         IServiceRegistry Registry { get; }
         IServiceProvider RootProvider { get; }
         IServiceProvider SessionProvider { get; }
+        bool IsScoped { get; }
 
         object Activate(Type type, params object[] besidesInjectedArguments);
         T Activate<T>(params object[] besidesInjectedArguments);
@@ -50,7 +51,6 @@ namespace Undersoft.SDK.Service
         T GetRootService<T>() where T : class;
         IEnumerable<T> GetRootServices<T>() where T : class;
         IServiceScope GetScope();
-        object GetService(Type type);
         T GetService<T>() where T : class;
         Lazy<T> GetServiceLazy<T>() where T : class;
         IEnumerable<object> GetServices(Type type);
@@ -69,7 +69,9 @@ namespace Undersoft.SDK.Service
         IServiceManager SetManager(IServiceManager serviceManager);
         IServiceScope SetScope(IServiceScope scope);
         IServicer SetServicer(IServicer servicer);
+        IServicer SetServicer();
         IServicer SetTenantServicer(ClaimsPrincipal tenantUser, IServicer servicer);
+        IServicer SetTenantServicer(long tenantId, IServicer servicer);
         bool TryGetKeyedManager(object key, out IServiceManager manager);
         bool TryGetKeyedObject<T>(object key, out T output) where T : class;
         bool TryGetKeyedService<T>(object key, out T output) where T : class;

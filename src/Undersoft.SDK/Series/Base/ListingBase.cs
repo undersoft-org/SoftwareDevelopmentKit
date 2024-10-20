@@ -366,6 +366,18 @@
             }
         }
 
+        public override void Insert(int index, ISeriesItem<V> seriesItem)
+        {
+            InnerAdd(seriesItem);
+            InnerInsert(index, seriesItem);
+        }
+        public override void Insert(int index, V seriesItem)
+        {
+            var newitem = NewItem(seriesItem);
+            InnerAdd(newitem);
+            InnerInsert(index, newitem);
+        }
+
         protected override ISeriesItem<V> InnerPut(ISeriesItem<V> value)
         {
             long key = value.Id;

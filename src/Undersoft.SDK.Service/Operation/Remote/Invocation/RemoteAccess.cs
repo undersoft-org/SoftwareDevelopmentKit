@@ -7,17 +7,19 @@ public class RemoteAccess<TStore, TService, TModel> : Invocation<TModel>
     where TModel : class
     where TStore : IDataServiceStore
 {
+    public override OperationSite Site => OperationSite.Client;
+
     public RemoteAccess() : base() { }
 
     public RemoteAccess(string method, object argument)
-        : base(OperationType.Access, typeof(TService), method, argument) { }
+        : base(OperationKind.Access, typeof(TService), method, argument) { }
 
     public RemoteAccess(string method, Arguments arguments)
-        : base(OperationType.Access, typeof(TService), method, arguments) { }
+        : base(OperationKind.Access, typeof(TService), method, arguments) { }
 
     public RemoteAccess(string method, object[] arguments)
-        : base(OperationType.Access, typeof(TService), method, arguments) { }
+        : base(OperationKind.Access, typeof(TService), method, arguments) { }
 
     public RemoteAccess(string method, byte[] arguments)
-        : base(OperationType.Access, typeof(TService), method, arguments) { }
+        : base(OperationKind.Access, typeof(TService), method, arguments) { }
 }

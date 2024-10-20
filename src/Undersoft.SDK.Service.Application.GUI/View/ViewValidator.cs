@@ -20,12 +20,12 @@ public class ViewValidator<TModel> : AbstractValidator<IViewData<TModel>>, IVali
         _servicer = servicer;
     }
 
-    protected void ValidationScope<T>(OperationType commandMode, Action actions)
+    protected void ValidationScope<T>(OperationKind commandMode, Action actions)
     {
         ValidationScope(typeof(T), commandMode, actions);
     }
 
-    protected void ValidationScope(Type type, OperationType commandMode, Action actions)
+    protected void ValidationScope(Type type, OperationKind commandMode, Action actions)
     {
         WhenAsync(
             (cmd, cancel) =>
@@ -41,7 +41,7 @@ public class ViewValidator<TModel> : AbstractValidator<IViewData<TModel>>, IVali
         );
     }
 
-    protected void ValidationScope(OperationType GenericDataMode, Action actions)
+    protected void ValidationScope(OperationKind GenericDataMode, Action actions)
     {
         WhenAsync(
             (cmd, cancel) =>

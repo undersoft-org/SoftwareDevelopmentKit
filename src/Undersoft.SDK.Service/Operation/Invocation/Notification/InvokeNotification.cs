@@ -24,7 +24,7 @@ public abstract class InvokeNotification<TCommand> : Event, INotification where 
         EntityTypeName = aggregateTypeFullName;
         EventType = eventTypeFullName;
         var response = command.Response;
-        PublishStatus = EventPublishStatus.Ready;
+        PublishStatus = PublishStatus.Ready;
         PublishTime = Log.Clock;
 
         Data = JsonSerializer.SerializeToUtf8Bytes((InvocationBase)command);

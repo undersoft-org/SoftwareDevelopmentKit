@@ -12,25 +12,25 @@ public class RemoteDeleteSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     [JsonIgnore]
     public Func<TModel, Expression<Func<TDto, bool>>> Predicate { get; }
 
-    public RemoteDeleteSet(EventPublishMode publishPattern, object key)
+    public RemoteDeleteSet(PublishMode publishPattern, object key)
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             new[] { new RemoteDelete<TStore, TDto, TModel>(publishPattern, key) }
         )
     { }
 
-    public RemoteDeleteSet(EventPublishMode publishPattern, TModel input, object key)
+    public RemoteDeleteSet(PublishMode publishPattern, TModel input, object key)
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             new[] { new RemoteDelete<TStore, TDto, TModel>(publishPattern, input, key) }
         )
     { }
 
-    public RemoteDeleteSet(EventPublishMode publishPattern, TModel[] inputs)
+    public RemoteDeleteSet(PublishMode publishPattern, TModel[] inputs)
         : base(
-            OperationType.Delete,
+            OperationKind.Delete,
             publishPattern,
             inputs
                 .Select(input => new RemoteDelete<TStore, TDto, TModel>(publishPattern, input))
@@ -39,12 +39,12 @@ public class RemoteDeleteSet<TStore, TDto, TModel> : RemoteCommandSet<TModel>
     { }
 
     public RemoteDeleteSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel[] inputs,
         Func<TModel, Expression<Func<TDto, bool>>> predicate
     )
         : base(
-            OperationType.Delete,
+            OperationKind.Delete,
             publishPattern,
             inputs
                 .Select(

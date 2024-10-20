@@ -18,7 +18,7 @@ public class CreatedSet<TStore, TEntity, TDto> : NotificationSet<Command<TDto>>
 
     public CreatedSet(CreateSet<TStore, TEntity, TDto> commands)
         : base(
-            commands.PublishMode,
+            commands.Mode,
             commands
                 .ForOnly(
                     c => c.Result != null,

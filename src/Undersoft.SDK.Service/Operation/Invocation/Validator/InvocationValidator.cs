@@ -12,19 +12,19 @@ public class InvocationValidator<TDto> : InvocationValidatorBase<Invocation<TDto
 {
     public InvocationValidator(IServicer ultimateService) : base(ultimateService) { }
 
-    protected void ValidationScope<T>(OperationType commandMode, Action actions)
+    protected void ValidationScope<T>(OperationKind commandMode, Action actions)
     {
         ValidationScope(typeof(T), commandMode, actions);
     }
 
-    protected void ValidationScope(Type type, OperationType commandMode, Action actions)
+    protected void ValidationScope(Type type, OperationKind commandMode, Action actions)
     {
         WhenAsync(
             (cmd, cancel) =>
                 Task.Run(
                     () =>
                     {
-                        return ((int)cmd.CommandMode & (int)commandMode) > 0
+                        return ((int)cmd.Kind & (int)commandMode) > 0
                             && GetType().UnderlyingSystemType.IsAssignableTo(type);
                     },
                     cancel
@@ -33,14 +33,14 @@ public class InvocationValidator<TDto> : InvocationValidatorBase<Invocation<TDto
         );
     }
 
-    protected void ValidationScope(OperationType commandMode, Action actions)
+    protected void ValidationScope(OperationKind commandMode, Action actions)
     {
         WhenAsync(
             (cmd, cancel) =>
                 Task.Run(
                     () =>
                     {
-                        return ((int)cmd.CommandMode & (int)commandMode) > 0;
+                        return ((int)cmd.Kind & (int)commandMode) > 0;
                     },
                     cancel
                 ),

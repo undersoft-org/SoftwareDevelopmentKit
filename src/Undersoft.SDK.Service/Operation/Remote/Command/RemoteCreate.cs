@@ -12,23 +12,23 @@ public class RemoteCreate<TStore, TDto, TModel> : RemoteCommand<TModel>
     [JsonIgnore]
     public Func<TDto, Expression<Func<TDto, bool>>> Predicate { get; }
 
-    public RemoteCreate(EventPublishMode publishPattern, TModel input)
-        : base(OperationType.Create, publishPattern, input)
+    public RemoteCreate(PublishMode publishPattern, TModel input)
+        : base(OperationKind.Create, publishPattern, input)
     {
         input.AutoId();
     }
 
-    public RemoteCreate(EventPublishMode publishPattern, TModel input, object key)
-        : base(OperationType.Create, publishPattern, input)
+    public RemoteCreate(PublishMode publishPattern, TModel input, object key)
+        : base(OperationKind.Create, publishPattern, input)
     {
         input.SetId(key);
     }
 
     public RemoteCreate(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel input,
         Func<TDto, Expression<Func<TDto, bool>>> predicate
-    ) : base(OperationType.Create, publishPattern, input)
+    ) : base(OperationKind.Create, publishPattern, input)
     {
         input.AutoId();
         Predicate = predicate;

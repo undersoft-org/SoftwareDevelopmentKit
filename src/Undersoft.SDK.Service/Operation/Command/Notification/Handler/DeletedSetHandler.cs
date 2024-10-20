@@ -49,7 +49,7 @@ public class DeletedSetHandler<TStore, TEntity, TDto>
         if (_eventStore != null)
             _eventStore.Add(request.ForEach(r => r.GetEvent())).Commit();
 
-        if (_repository == null || request.PublishMode != EventPublishMode.PropagateCommand)
+        if (_repository == null || request.PublishMode != PublishMode.Propagate)
             return Task.CompletedTask;
 
         ISeries<TEntity> entities;
@@ -69,8 +69,8 @@ public class DeletedSetHandler<TStore, TEntity, TDto>
             (r) =>
             {
                 _ = entities.ContainsKey(r.EntityId)
-                    ? r.PublishStatus = EventPublishStatus.Complete
-                    : r.PublishStatus = EventPublishStatus.Uncomplete;
+                    ? r.PublishStatus = PublishStatus.Complete
+                    : r.PublishStatus = PublishStatus.Uncomplete;
             }
         );
         return Task.CompletedTask;

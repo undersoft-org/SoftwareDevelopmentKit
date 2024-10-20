@@ -26,6 +26,5 @@ public interface IRemoteQuery : IOperation
     IQueryParameters Parameters { get; set; }
     IQueryable Result { get; set; }
     IInnerProxy SingleResult { get; set; }
-    ValidationResult ValidationResult { get; set; }
     object Data { get; set; }
 }

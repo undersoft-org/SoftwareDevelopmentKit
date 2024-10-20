@@ -9,9 +9,9 @@ public class Find<TStore, TEntity, TDto> : Query<TEntity, TDto>
     where TStore : IDataServerStore
     where TDto : class, IOrigin, IInnerProxy
 {
-    public Find(params object[] keys) : base(OperationType.Find | OperationType.Query, keys) { }
+    public Find(params object[] keys) : base(OperationKind.Find | OperationKind.Query, keys) { }
 
-    public Find(IQueryParameters<TEntity> parameters) : base(OperationType.Find | OperationType.Query, parameters) { }
+    public Find(IQueryParameters<TEntity> parameters) : base(OperationKind.Find | OperationKind.Query, parameters) { }
 
-    public Find() : base(OperationType.Find | OperationType.Query) { }
+    public Find() : base(OperationKind.Find | OperationKind.Query) { }
 }

@@ -12,17 +12,17 @@ public class CreateSet<TStore, TEntity, TDto> : CommandSet<TDto>
     [JsonIgnore]
     public Func<TEntity, Expression<Func<TEntity, bool>>> Predicate { get; }
 
-    public CreateSet(EventPublishMode publishPattern, TDto input, object key)
+    public CreateSet(PublishMode publishPattern, TDto input, object key)
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             new[] { new Create<TStore, TEntity, TDto>(publishPattern, input, key) }
         )
     { }
 
-    public CreateSet(EventPublishMode publishPattern, TDto[] inputs)
+    public CreateSet(PublishMode publishPattern, TDto[] inputs)
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             inputs
                 .Select(input => new Create<TStore, TEntity, TDto>(publishPattern, input))
@@ -31,12 +31,12 @@ public class CreateSet<TStore, TEntity, TDto> : CommandSet<TDto>
     { }
 
     public CreateSet(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TEntity, Expression<Func<TEntity, bool>>> predicate
     )
         : base(
-            OperationType.Create,
+            OperationKind.Create,
             publishPattern,
             inputs
                 .Select(

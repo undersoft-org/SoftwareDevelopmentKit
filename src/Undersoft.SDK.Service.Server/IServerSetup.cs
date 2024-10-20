@@ -4,11 +4,12 @@ namespace Undersoft.SDK.Service.Server
 {
     using Undersoft.SDK.Service.Access;
     using Undersoft.SDK.Service.Data.Store;
+    using Undersoft.SDK.Service.Server.Builders;
 
     public partial interface IServerSetup : IServiceSetup
     {
         IServerSetup AddDataServer<TServiceStore>(
-            DataServerTypes dataServiceTypes = DataServerTypes.All,
+            DataServiceTypes dataServiceTypes = DataServiceTypes.All,
             Action<DataServerBuilder> builder = null
         ) where TServiceStore : IDataStore;
         IServerSetup AddAccessServer<TContext, TAccount>() where TContext : DbContext where TAccount : class, IOrigin, IAuthorization;

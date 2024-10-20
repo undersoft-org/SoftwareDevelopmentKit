@@ -35,8 +35,8 @@ namespace Undersoft.SDK.Invoking
                 if (parameters.Length > 0)
                 {
                     Arguments = args;
-                    Parameters = m.GetParameters();
-                    NumberOfArguments = Parameters.Length;
+                    Parameters = parameters;
+                    NumberOfArguments = parameters.Length;
                 }
             }
             createUniqueKey();
@@ -46,13 +46,13 @@ namespace Undersoft.SDK.Invoking
         {
             TargetObject = targetObject;
             MethodInfo m = methodInvokeInfo;
-
-            if (m.GetParameters().Any())
+            Info = m;
+            var parameters = m.GetParameters();
+            if (parameters.Length > 0)            
             {
-                NumberOfArguments = m.GetParameters().Length;
-                Info = m;
-                Parameters = m.GetParameters();
-                Arguments = new Arguments(m.Name, Parameters);
+                NumberOfArguments = parameters.Length;                
+                Parameters = parameters;
+                Arguments = new Arguments(m.Name, Parameters, null, m.DeclaringType);
             }
             createUniqueKey();
         }
@@ -63,11 +63,12 @@ namespace Undersoft.SDK.Invoking
             Type t = TargetObject.GetType();
             MethodInfo m = targetMethod.Method;
             Info = m;
-            if (m.GetParameters().Any())
+            var parameters = m.GetParameters();
+            if (parameters.Length > 0)
             {
-                NumberOfArguments = m.GetParameters().Length;
-                Parameters = m.GetParameters();
-                Arguments = new Arguments(m.Name, Parameters);
+                NumberOfArguments = parameters.Length;
+                Parameters = parameters;
+                Arguments = new Arguments(m.Name, Parameters, null, t);
             }
             createUniqueKey();
         }
@@ -84,13 +85,14 @@ namespace Undersoft.SDK.Invoking
 
             if (m != null)
             {
-                if (m.GetParameters().Any())
-                {
-                    Parameters = m.GetParameters();
-                    NumberOfArguments = Parameters.Length;
-                    Arguments = new Arguments(methodName, Parameters, t.FullName);
-                }
                 Info = m;
+                var parameters = m.GetParameters();
+                if (parameters.Length > 0)
+                {
+                    NumberOfArguments = parameters.Length;
+                    Parameters = parameters;
+                    Arguments = new Arguments(m.Name, Parameters, null, t);
+                }                
             }
             createUniqueKey();
         }

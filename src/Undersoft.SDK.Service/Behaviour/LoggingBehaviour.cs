@@ -8,13 +8,6 @@ public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest,
     where TRequest : IRequest<TResponse>, IOperation
     where TResponse : IOperation
 {
-    //private ActivitySource activitySource;
-
-    //public LoggingBehaviour(Instrumentation instrumentation)
-    //{
-    //    activitySource = instrumentation.ActivitySource;
-    //}
-
     public LoggingBehaviour()
     {
     }
@@ -24,8 +17,6 @@ public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest,
         CancellationToken cancellationToken
        )
     {
-        //using var activity = activitySource.StartActivity($"Operation Request: {request.GetType().Name}");
-
         request.Info<Apilog>($"Request data source", request.Input);
 
         var response = await next();

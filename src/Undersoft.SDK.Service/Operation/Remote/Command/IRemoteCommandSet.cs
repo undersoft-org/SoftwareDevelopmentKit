@@ -13,6 +13,4 @@ public interface IRemoteCommandSet<TModel> : IRemoteCommandSet where TModel : cl
 public interface IRemoteCommandSet : IOperation
 {
     public IEnumerable<IRemoteCommand> Commands { get; }
-
-    public ValidationResult Result { get; set; }
 }

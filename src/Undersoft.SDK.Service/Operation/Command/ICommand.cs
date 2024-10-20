@@ -11,7 +11,5 @@ public interface ICommand : IOperation
 
     object Contract { get; set; }
 
-    ValidationResult ValidationResult { get; set; }
-
     bool IsValid { get; }
 }

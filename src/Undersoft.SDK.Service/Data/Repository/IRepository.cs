@@ -8,7 +8,6 @@ namespace Undersoft.SDK.Service.Data.Repository
             IRepositoryCommand<TEntity>,
             IRepositoryMappedCommand<TEntity>,
             IRepositoryIndexer<TEntity>,
-            IRepositoryDocumentCommands<TEntity>,
             IRepository,
             IOrderedQueryable<TEntity>,
             IEnumerable<TEntity> where TEntity : class, IOrigin, IInnerProxy

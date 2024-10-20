@@ -14,14 +14,14 @@ public class ChangeSetAsync<TStore, TEntity, TDto>
     where TDto : class, IOrigin, IInnerProxy
     where TStore : IDataServerStore
 {
-    public ChangeSetAsync(EventPublishMode publishPattern, TDto input, object key)
+    public ChangeSetAsync(PublishMode publishPattern, TDto input, object key)
         : base(publishPattern, input, key) { }
 
-    public ChangeSetAsync(EventPublishMode publishPattern, TDto[] inputs)
+    public ChangeSetAsync(PublishMode publishPattern, TDto[] inputs)
         : base(publishPattern, inputs) { }
 
     public ChangeSetAsync(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto[] inputs,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate
     ) : base(publishPattern, inputs, predicate) { }

@@ -95,7 +95,7 @@ public partial class ConfirmPasswordResetBase<TLogo, TAccount> : ComponentBase w
     {
         var data = new ViewData<Credentials>(
             new Credentials() { Email = Email },
-            OperationType.Delete,
+            OperationKind.Delete,
             title
         );
         data.SetVisible("PasswordResetToken");

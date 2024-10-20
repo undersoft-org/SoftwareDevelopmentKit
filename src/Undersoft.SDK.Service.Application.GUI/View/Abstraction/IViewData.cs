@@ -59,7 +59,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Abstraction
 
         IViewItem? ViewItem { get; set; }
 
-        OperationType Operation { get; set; }
+        OperationKind Operation { get; set; }
 
         HorizontalAlignment PanelAlignment { get; set; }
 

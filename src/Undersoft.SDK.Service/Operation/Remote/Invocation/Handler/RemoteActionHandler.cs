@@ -30,7 +30,7 @@ public class RemoteActionHandler<TStore, TService, TModel>
         CancellationToken cancellationToken
     )
     {
-        if (!request.Result.IsValid)
+        if (!request.Validation.IsValid)
             return request;
 
         request.Response =

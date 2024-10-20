@@ -15,7 +15,7 @@ public class AccountValidator<TModel> : ViewValidator<TModel> where TModel : cla
     public AccountValidator(IServicer servicer) : base(servicer)
     {
         ValidationScope(
-            OperationType.Any,
+            OperationKind.Any,
             () =>
             {
             }

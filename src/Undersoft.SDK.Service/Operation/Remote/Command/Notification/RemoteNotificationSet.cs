@@ -9,9 +9,9 @@ using Undersoft.SDK.Service.Data.Event;
 public abstract class RemoteNotificationSet<TCommand> : Catalog<RemoteNotification<TCommand>>, INotification
     where TCommand : RemoteCommandBase
 {
-    public EventPublishMode PublishMode { get; set; }
+    public PublishMode PublishMode { get; set; }
 
-    protected RemoteNotificationSet(EventPublishMode publishPattern, RemoteNotification<TCommand>[] commands)
+    protected RemoteNotificationSet(PublishMode publishPattern, RemoteNotification<TCommand>[] commands)
         : base(commands)
     {
         PublishMode = publishPattern;

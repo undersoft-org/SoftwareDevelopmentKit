@@ -7,7 +7,7 @@ namespace Undersoft.SDK.Service.Access.Identity;
 public class Personal : DataObject, IPersonal
 {
     [VisibleRubric]
-    [DisplayRubric("Upload image")]
+    [DisplayRubric("Compute image")]
     [ViewImage(ViewImageMode.Persona, "30px", "30px")]
     [FileRubric(FileRubricType.Property, "ImageData")]
     public string Image { get; set; }

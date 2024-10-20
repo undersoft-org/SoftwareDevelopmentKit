@@ -9,25 +9,27 @@ public class RemoteCommandSet<TModel>
         IRequest<RemoteCommandSet<TModel>>,
         IRemoteCommandSet<TModel> where TModel : class, IOrigin, IInnerProxy
 {
-    public OperationType CommandMode { get; set; }
+    public OperationSite Site => OperationSite.Client;
 
-    public EventPublishMode PublishMode { get; set; }
+    public OperationKind Kind { get; set; }
+
+    public PublishMode Mode { get; set; }
 
     protected RemoteCommandSet() : base(true) { }
 
-    protected RemoteCommandSet(OperationType commandMode) : base()
+    protected RemoteCommandSet(OperationKind commandMode) : base()
     {
-        CommandMode = commandMode;
+        Kind = commandMode;
     }
 
     protected RemoteCommandSet(
-        OperationType commandMode,
-        EventPublishMode publishPattern,
+        OperationKind commandMode,
+        PublishMode publishPattern,
         RemoteCommand<TModel>[] DtoCommands
     ) : base(DtoCommands)
     {
-        CommandMode = commandMode;
-        PublishMode = publishPattern;
+        Kind = commandMode;
+        Mode = publishPattern;
     }
 
     public IEnumerable<RemoteCommand<TModel>> Commands
@@ -35,11 +37,11 @@ public class RemoteCommandSet<TModel>
         get => AsValues();
     }
 
-    public ValidationResult Result { get; set; } = new ValidationResult();
+    public ValidationResult Validation { get; set; } = new ValidationResult();
 
     public object Input => Commands.Select(c => c.Model);
 
-    public object Output => Commands.ForEach(c => c.ValidationResult.IsValid ? c.Id as object : c.ValidationResult);
+    public object Output => Commands.ForEach(c => c.Validation.IsValid ? c.Id as object : c.Validation);
 
     public Delegate Processings { get; set; }
 

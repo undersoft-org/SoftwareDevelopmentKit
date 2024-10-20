@@ -39,6 +39,11 @@
             Set(name, type.Default(), method, target);
         }
 
+        public Argument(string name, Type type, byte[] data, string method, string target = null)
+        {
+            Set(name, data, type, method, target);
+        }
+
         public Argument(string name, string argTypeName, string method, string target = null)
         {
             Set(name, AssemblyUtilities.FindTypeByFullName(argTypeName), method, target);
@@ -75,9 +80,14 @@
             if (value != null)
             {
                 var vt = value.GetType();
-                if (vt.IsAssignableTo(typeof(IIdentifiable)))
-                    DataKey = ((IIdentifiable)value).Id;
-                Data = value.ToJsonBytes();
+                if (vt == typeof(byte[]))
+                    Data = (byte[])value;
+                else
+                {
+                    if (vt.IsAssignableTo(typeof(IIdentifiable)))
+                        DataKey = ((IIdentifiable)value).Id;
+                    Data = value.ToJsonBytes();
+                }
                 ArgumentTypeName = vt.FullName;
             }
         }
@@ -88,7 +98,11 @@
             {
                 var t = ResolveType();
                 if (t != null)
+                {
+                    if (t == typeof(byte[]))
+                        return Data;
                     return Data.FromJson(t);
+                }
             }
             return null;
         }
@@ -154,6 +168,26 @@
         )
         {
             Name = name;
+            _type = type;
+            ArgumentTypeName = _type.FullName;
+            Position = position;
+            MethodName = method;
+            TargetName = target;
+            Id = $"{ArgumentTypeName}_{Name}".UniqueKey();
+            TypeId = ArgumentTypeName.UniqueKey();
+        }
+
+        public void Set(
+          string name,
+          byte[] data,
+          Type type,
+          string method,
+          string target = null,
+          int position = 0
+      )
+        {
+            Name = name;
+            Data = data;
             _type = type;
             ArgumentTypeName = _type.FullName;
             Position = position;

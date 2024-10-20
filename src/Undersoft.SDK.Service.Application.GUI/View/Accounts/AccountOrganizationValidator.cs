@@ -21,7 +21,7 @@ public class AccountOrganizationValidator<TModel> : ViewValidator<TModel> where 
     public AccountOrganizationValidator(IServicer servicer) : base(servicer)
     {
         ValidationScope(
-            OperationType.Any,
+            OperationKind.Any,
             () =>
             {
                 ValidateEmail(p => p.Model.OrganizationEmail);

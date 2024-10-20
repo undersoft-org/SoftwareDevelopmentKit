@@ -6,9 +6,9 @@ namespace Undersoft.SDK.Service.Data.Client
 {
     public partial class DataClientContext : DataServiceContext
     {
-        protected ApiClientContext Api;
+        protected DataClientService Service;
 
-        protected StreamClientContext Stream;
+        protected DataClientStream Stream;
 
         private IAccessString _securityString;
 
@@ -17,8 +17,8 @@ namespace Undersoft.SDK.Service.Data.Client
             if (serviceUri == null)
                 throw new ArgumentNullException(nameof(serviceUri));
 
-            Api = new ApiClientContext(
-                new Uri(serviceUri.OriginalString.Replace("open", "api"))
+            Service = new DataClientService(
+                new Uri(serviceUri.OriginalString)
             );
 
             MergeOption = MergeOption.NoTracking;
@@ -86,13 +86,13 @@ namespace Undersoft.SDK.Service.Data.Client
             {
                 var token = securityString.Split(" ").LastOrDefault();
                 _securityString = new AccessString(token);
-                Api.SetAuthorization(token);
+                Service.SetAuthorization(token);
             }
         }
 
         public virtual Task CommandAsync<TEntity>(CommandType command, TEntity payload, string name)
         {
-            return Api.CommandAsync(command, payload, name);
+            return Service.CommandAsync(command, payload, name);
         }
 
         public virtual Task CommandSetAsync<TEntity>(
@@ -101,12 +101,12 @@ namespace Undersoft.SDK.Service.Data.Client
             string name
         )
         {
-            return Api.CommandSetAsync(command, payload, name);
+            return Service.CommandSetAsync(command, payload, name);
         }
 
         public virtual void Command<TEntity>(CommandType command, TEntity payload, string name)
         {
-            Api.Command(command, payload, name);
+            Service.Command(command, payload, name);
         }
 
         public virtual void CommandSet<TEntity>(
@@ -115,12 +115,12 @@ namespace Undersoft.SDK.Service.Data.Client
             string name
         )
         {
-            Api.CommandSet(command, payload, name);
+            Service.CommandSet(command, payload, name);
         }
 
         public Task CommandAsync(CommandType command, object payload, string name)
         {
-            return Api.CommandAsync(command, payload, name);
+            return Service.CommandAsync(command, payload, name);
         }
 
         public Task CommandSetAsync(
@@ -129,12 +129,12 @@ namespace Undersoft.SDK.Service.Data.Client
             string name
         )
         {
-            return Api.CommandSetAsync(command, payload, name);
+            return Service.CommandSetAsync(command, payload, name);
         }
 
         public void Command(CommandType command, object payload, string name)
         {
-            Api.Command(command, payload, name);
+            Service.Command(command, payload, name);
         }
 
         public void CommandSet(
@@ -143,13 +143,13 @@ namespace Undersoft.SDK.Service.Data.Client
             string name
         )
         {
-            Api.CommandSet(command, payload, name);
+            Service.CommandSet(command, payload, name);
         }
 
 
         public async Task<string[]> CommitChanges(bool changesets = false)
         {
-            var responseContents = await Api.SendCommands(changesets);
+            var responseContents = await Service.SendCommands(changesets);
             if (responseContents != null)
             {
                 return responseContents;

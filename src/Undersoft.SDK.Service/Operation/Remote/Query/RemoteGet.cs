@@ -7,17 +7,17 @@ public class RemoteGet<TStore, TDto, TModel> : RemoteQuery<TDto, TModel>
     where TStore : IDataServiceStore
     where TDto : class, IOrigin, IInnerProxy
 {
-    public RemoteGet() : base(OperationType.Get | OperationType.Query | OperationType.Remote) { }
+    public RemoteGet() : base(OperationKind.Get | OperationKind.Query | OperationKind.Remote) { }
 
     public RemoteGet(int offset, int limit)
-        : base(OperationType.Get | OperationType.Query | OperationType.Remote)
+        : base(OperationKind.Get | OperationKind.Query | OperationKind.Remote)
     {
         Offset = offset;
         Limit = limit;
     }
 
     public RemoteGet(int offset, int limit, IQueryParameters<TDto> parameters)
-        : base(OperationType.Get | OperationType.Query | OperationType.Remote, parameters)
+        : base(OperationKind.Get | OperationKind.Query | OperationKind.Remote, parameters)
     {
         Offset = offset;
         Limit = limit;

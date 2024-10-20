@@ -15,23 +15,23 @@ public class Command<TDto> : CommandBase, IRequest<Command<TDto>>, IIdentifiable
 
     protected Command() { }
 
-    protected Command(OperationType commandMode, TDto dataObject)
+    protected Command(OperationKind commandMode, TDto dataObject)
     {
-        CommandMode = commandMode;
+        Kind = commandMode;
         base.Contract = dataObject;
     }
 
-    protected Command(OperationType commandMode, EventPublishMode publishMode, TDto dataObject)
+    protected Command(OperationKind commandMode, PublishMode publishMode, TDto dataObject)
         : base(dataObject, commandMode, publishMode) { }
 
     protected Command(
-        OperationType commandMode,
-        EventPublishMode publishMode,
+        OperationKind commandMode,
+        PublishMode publishMode,
         TDto dataObject,
         params object[] keys
     ) : base(dataObject, commandMode, publishMode, keys) { }
 
-    protected Command(OperationType commandMode, EventPublishMode publishMode, params object[] keys)
+    protected Command(OperationKind commandMode, PublishMode publishMode, params object[] keys)
         : base(commandMode, publishMode, keys) { }
 
     public override long Id

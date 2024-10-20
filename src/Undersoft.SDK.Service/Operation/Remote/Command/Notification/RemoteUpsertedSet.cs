@@ -20,7 +20,7 @@ public class RemoteUpsertedSet<TStore, TDto, TModel> : RemoteNotificationSet<Rem
 
     public RemoteUpsertedSet(RemoteUpsertSet<TStore, TDto, TModel> commands)
         : base(
-            commands.PublishMode,
+            commands.Mode,
             commands
                 .ForOnly(
                     c => c.Result != null,

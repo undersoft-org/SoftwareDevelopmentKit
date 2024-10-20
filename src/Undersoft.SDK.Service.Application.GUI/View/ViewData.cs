@@ -19,15 +19,15 @@ public class ViewData<TModel> : ListingBase<IViewData>, IViewData<TModel>
     protected IViewItem _viewItem = default!;
     protected long? typeId;
 
-    public ViewData() : this(null, OperationType.Any) { }
+    public ViewData() : this(null, OperationKind.Any) { }
 
-    public ViewData(OperationType mode) : this(null, mode) { }
+    public ViewData(OperationKind mode) : this(null, mode) { }
 
-    public ViewData(TModel? data) : this(data, OperationType.Any) { }
+    public ViewData(TModel? data) : this(data, OperationKind.Any) { }
 
-    public ViewData(TModel? data, IViewData parent) : this(data, OperationType.Any) { Parent = parent; }
+    public ViewData(TModel? data, IViewData parent) : this(data, OperationKind.Any) { Parent = parent; }
 
-    public ViewData(TModel? data, OperationType mode, string title = "") : base(true)
+    public ViewData(TModel? data, OperationKind mode, string title = "") : base(true)
     {
         Model = data ?? typeof(TModel).New<TModel>();
         Title = title;
@@ -246,7 +246,7 @@ public class ViewData<TModel> : ListingBase<IViewData>, IViewData<TModel>
 
     public StateFlags StateFlags { get; set; } = new();
 
-    public OperationType Operation { get; set; }
+    public OperationKind Operation { get; set; }
 
     public IViewRubric? ActiveRubric { get; set; }
 

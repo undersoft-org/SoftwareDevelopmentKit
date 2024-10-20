@@ -20,7 +20,7 @@ public class UpsertedSet<TStore, TEntity, TDto> : NotificationSet<Command<TDto>>
 
     public UpsertedSet(UpsertSet<TStore, TEntity, TDto> commands)
         : base(
-            commands.PublishMode,
+            commands.Mode,
             commands
                 .ForOnly(
                     c => c.Result != null,

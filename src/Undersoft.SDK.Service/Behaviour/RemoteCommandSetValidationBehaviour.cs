@@ -28,7 +28,7 @@ namespace Undersoft.SDK.Service.Behaviour
                                  .ElementAt((int)f
                                     .FormattedMessagePlaceholderValues
                                      ["CollectionIndex"])
-                                    .ValidationResult.Errors.Add(f));
+                                    .Validation.Errors.Add(f));
             }
 
             return await next();

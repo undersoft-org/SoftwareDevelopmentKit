@@ -149,7 +149,7 @@ namespace Undersoft.SDK.Service
 
         public override void Insert(int index, ServiceDescriptor item)
         {
-            base.Insert(index, GetItem(GetKey(item), item));
+            base.Insert(index, NewItem(GetKey(item), item));
         }
 
         public override bool Contains(ServiceDescriptor item)
@@ -211,14 +211,14 @@ namespace Undersoft.SDK.Service
 
                 sourceServices.ForEach(s =>
                 {
-                    tempRegistry.Add(GetKey(s.ServiceType), s);
+                    tempRegistry.Add(GetKey(s), s);
                     if (!Contains(s))
                         Add(s);
                 });
 
                 this.ForEach(c =>
                 {
-                    if (!tempRegistry.Contains(GetKey(c.ServiceType), c))
+                    if (!tempRegistry.Contains(GetKey(c), c))
                         sourceServices.Add(c);
                 });
             }

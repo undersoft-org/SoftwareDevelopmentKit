@@ -12,26 +12,26 @@ public class RemoteDelete<TStore, TDto, TModel> : RemoteCommand<TModel>
     [JsonIgnore]
     public Func<TModel, Expression<Func<TDto, bool>>> Predicate { get; }
 
-    public RemoteDelete(EventPublishMode publishPattern, TModel input)
-        : base(OperationType.Delete, publishPattern, input) { }
+    public RemoteDelete(PublishMode publishPattern, TModel input)
+        : base(OperationKind.Delete, publishPattern, input) { }
 
     public RemoteDelete(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TModel input,
         Func<TModel, Expression<Func<TDto, bool>>> predicate
-    ) : base(OperationType.Delete, publishPattern, input)
+    ) : base(OperationKind.Delete, publishPattern, input)
     {
         Predicate = predicate;
     }
 
     public RemoteDelete(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         Func<TModel, Expression<Func<TDto, bool>>> predicate
-    ) : base(OperationType.Delete, publishPattern)
+    ) : base(OperationKind.Delete, publishPattern)
     {
         Predicate = predicate;
     }
 
-    public RemoteDelete(EventPublishMode publishPattern, params object[] keys)
-        : base(OperationType.Delete, publishPattern, keys) { }
+    public RemoteDelete(PublishMode publishPattern, params object[] keys)
+        : base(OperationKind.Delete, publishPattern, keys) { }
 }

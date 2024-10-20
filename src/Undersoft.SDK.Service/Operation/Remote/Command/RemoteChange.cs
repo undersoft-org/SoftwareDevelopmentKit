@@ -12,14 +12,14 @@ public class RemoteChange<TStore, TDto, TModel> : RemoteCommand<TModel>
     [JsonIgnore]
     public Func<TModel, Expression<Func<TDto, bool>>> Predicate { get; }
 
-    public RemoteChange(EventPublishMode publishMode, TModel input, params object[] keys)
-        : base(OperationType.Change, publishMode, input, keys) { }
+    public RemoteChange(PublishMode publishMode, TModel input, params object[] keys)
+        : base(OperationKind.Change, publishMode, input, keys) { }
 
     public RemoteChange(
-        EventPublishMode publishMode,
+        PublishMode publishMode,
         TModel input,
         Func<TModel, Expression<Func<TDto, bool>>> predicate
-    ) : base(OperationType.Change, publishMode, input)
+    ) : base(OperationKind.Change, publishMode, input)
     {
         Predicate = predicate;
     }

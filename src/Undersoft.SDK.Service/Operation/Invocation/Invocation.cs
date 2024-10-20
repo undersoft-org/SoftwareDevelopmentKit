@@ -13,16 +13,16 @@ public class Invocation<TDto> : InvocationBase, IRequest<Invocation<TDto>> where
 
     protected Invocation() { }
 
-    protected Invocation(OperationType commandMode, Type serviceType, string method, object argument)
+    protected Invocation(OperationKind commandMode, Type serviceType, string method, object argument)
         : base(commandMode, serviceType, method, argument) { }
 
-    protected Invocation(OperationType commandMode, Type serviceType, string method, Arguments arguemnts)
+    protected Invocation(OperationKind commandMode, Type serviceType, string method, Arguments arguemnts)
         : base(commandMode, serviceType, method, arguemnts) { }
 
-    protected Invocation(OperationType commandMode, Type serviceType, string method, object[] arguments)
+    protected Invocation(OperationKind commandMode, Type serviceType, string method, object[] arguments)
        : base(commandMode, serviceType, method, arguments) { }
 
-    protected Invocation(OperationType commandMode, Type serviceType, string method, byte[] binaries)
+    protected Invocation(OperationKind commandMode, Type serviceType, string method, byte[] binaries)
       : base(commandMode, serviceType, method, binaries) { }
 
     public int CompareTo(IUnique other)

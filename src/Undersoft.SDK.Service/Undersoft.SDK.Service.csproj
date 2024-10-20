@@ -18,6 +18,12 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Data\Contract\Attributes\**" />
+    <EmbeddedResource Remove="Data\Contract\Attributes\**" />
+    <None Remove="Data\Contract\Attributes\**" />
+  </ItemGroup>
+
   <ItemGroup>  
     <PackageReference Include="IdentityModel" Version="6.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.*-*" />
@@ -59,10 +65,6 @@
     <Using Include="Undersoft.SDK.Uniques" />
     <Using Include="Undersoft.SDK.Service.Data.Remote" />
     <Using Include="Undersoft.SDK.Service.Data.Store" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Data\Contract\Attributes\" />
   </ItemGroup>
 
 </Project>

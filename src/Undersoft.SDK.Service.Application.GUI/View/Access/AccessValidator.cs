@@ -22,7 +22,7 @@ public class AccessValidator : ViewValidator<Credentials>
     public AccessValidator(IServicer servicer) : base(servicer)
     {
         ValidationScope(
-            OperationType.Access | OperationType.Create | OperationType.Update,
+            OperationKind.Access | OperationKind.Create | OperationKind.Update,
             () =>
             {
                 ValidateEmail(p => p.Model.Email);
@@ -30,14 +30,14 @@ public class AccessValidator : ViewValidator<Credentials>
             }
         );
         ValidationScope(
-            OperationType.Access | OperationType.Create | OperationType.Change,
+            OperationKind.Access | OperationKind.Create | OperationKind.Change,
             () =>
             {
                 ValidateRequired(p => p.Model.Password);
             }
         );
         ValidationScope(
-            OperationType.Create,
+            OperationKind.Create,
             () =>
             {
                 ValidateRequired(p => p.Model.FirstName);
@@ -46,7 +46,7 @@ public class AccessValidator : ViewValidator<Credentials>
             }
         );
         ValidationScope(
-            OperationType.Change,
+            OperationKind.Change,
             () =>
             {
                 ValidateRequired(p => p.Model.NewPassword);
@@ -54,14 +54,14 @@ public class AccessValidator : ViewValidator<Credentials>
             }
         );
         ValidationScope(
-            OperationType.Setup,
+            OperationKind.Setup,
             () =>
             {
                 ValidateRequired(p => p.Model.EmailConfirmationToken);
             }
         );
         ValidationScope(
-            OperationType.Delete,
+            OperationKind.Delete,
             () =>
             {
                 ValidateRequired(p => p.Model.PasswordResetToken);

@@ -83,7 +83,7 @@ public partial class ChangePasswordBase<TLogo, TAccount> : ComponentBase where T
     /// <returns>A <see cref="Task"/></returns>
     private async Task ChangingPassword(string title, string description = "")
     {
-        var data = new ViewData<Credentials>(new Credentials(), OperationType.Change, title);
+        var data = new ViewData<Credentials>(new Credentials(), OperationKind.Change, title);
         data.SetVisible(
             nameof(Credentials.Password),
             nameof(Credentials.NewPassword),

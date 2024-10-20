@@ -47,7 +47,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Accounts
 
                     var _account = await access.Registered(typeof(TModel).New<TModel>());
                     if (_account != null)
-                        _panel.Content = new ViewData<TModel>(_account, OperationType.Any);
+                        _panel.Content = new ViewData<TModel>(_account, OperationKind.Any);
 
                     Data.Model.Proxy[_rubrics["Account"].RubricId] = _panel;
 

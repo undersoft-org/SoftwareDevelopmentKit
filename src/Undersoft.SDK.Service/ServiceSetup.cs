@@ -30,7 +30,7 @@ public partial class ServiceSetup : IServiceSetup
     protected IServiceConfiguration configuration => manager.Configuration;
     protected IServiceManager manager { get; }
     protected IServiceRegistry registry => manager.Registry;
-    protected IServiceCollection services => registry.Services;
+    protected IServiceCollection services => registry.Services;    
 
     public ServiceSetup(IServiceCollection services) : this(services, null)
     {        
@@ -46,6 +46,9 @@ public partial class ServiceSetup : IServiceSetup
     public IServiceRegistry Services => registry;
 
     public IServiceManager Manager => manager;
+
+    protected virtual Func<Type> ForMainBehaviour { get; set; } 
+        = () => typeof(LoggingBehaviour<,>);
 
     public IServiceSetup AddCaching()
     {
@@ -85,27 +88,11 @@ public partial class ServiceSetup : IServiceSetup
 
     public void AddJsonSerializerDefaults()
     {
-#if NET6_0
-        var fld = (
-            typeof(JsonSerializerOptions).GetField(
-                "s_defaultOptions",
-                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic
-            )
-        );
-
-        var opt = (JsonSerializerOptions)fld.GetValue(newopts);
-        if (opt == null)
-            fld.SetValue(newopts, newopts);
-        else
-            manager.Mapper.Map(newopts, opt);
-#endif
-#if NET8_0
         var flds = typeof(JsonSerializerOptions).GetRuntimeFields();
         flds.Single(f => f.Name == "_defaultIgnoreCondition")
             .SetValue(JsonSerializerOptions.Default, JsonIgnoreCondition.WhenWritingNull);
         flds.Single(f => f.Name == "_referenceHandler")
             .SetValue(JsonSerializerOptions.Default, ReferenceHandler.IgnoreCycles);
-#endif
     }
 
     public IServiceSetup AddLogging()
@@ -149,16 +136,12 @@ public partial class ServiceSetup : IServiceSetup
 
     public IServiceSetup AddMediator(Assembly[] assemblies = null)
     {
-        registry.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
+        registry.AddTransient(typeof(IPipelineBehavior<,>), ForMainBehaviour());
+
         registry.AddTransient(typeof(IPipelineBehavior<,>), typeof(CommandValidationBehaviour<,>));
-        registry.AddTransient(
-            typeof(IPipelineBehavior<,>),
-            typeof(CommandSetValidationBehaviour<,>)
-        );
+        registry.AddTransient(typeof(IPipelineBehavior<,>), typeof(CommandSetValidationBehaviour<,>));
         registry.AddTransient(typeof(IPipelineBehavior<,>), typeof(QueryValidationBehaviour<,>));
-        registry.AddTransient(
-            typeof(IPipelineBehavior<,>),
-            typeof(RemoteQueryValidationBehaviour<,>)
+        registry.AddTransient(typeof(IPipelineBehavior<,>), typeof(RemoteQueryValidationBehaviour<,>)
         );
         registry.AddTransient(
             typeof(IPipelineBehavior<,>),
@@ -193,9 +176,8 @@ public partial class ServiceSetup : IServiceSetup
             ClientProvider provider = config.ClientProvider(client);
             string connectionString = config.ClientConnectionString(client).Trim();
             int poolsize = config.ClientPoolSize(client);
-            Type contextType = serviceTypes
-                .Where(t => t.FullName.Contains(client.Key))
-                .FirstOrDefault();
+            
+            Type contextType = serviceTypes.Where(t => t.FullName.Contains(client.Key)).FirstOrDefault();
 
             if (
                 (provider == ClientProvider.None)
@@ -204,16 +186,12 @@ public partial class ServiceSetup : IServiceSetup
             )
                 continue;
 
-            string routePrefix = AddDataClientPrefix(contextType).Trim();
             if (!connectionString.EndsWith('/'))
                 connectionString += "/";
 
+            string routePrefix = AddDataClientPrefix(contextType).Trim();
             if (routePrefix.StartsWith('/'))
                 routePrefix = routePrefix.Substring(1);
-
-            routePrefix =
-                provider.ToString().ToLower()
-                + (!routePrefix.IsNullOrEmpty() ? ("/" + routePrefix) : "");
 
             string _connectionString = $"{connectionString}{routePrefix}";
 
@@ -223,10 +201,7 @@ public partial class ServiceSetup : IServiceSetup
             IRepositoryClient repoClient = (IRepositoryClient)repoType.New(_connectionString);
 
             Type storeType = DataClientRegistry.GetLinkedStoreType(contextType);
-
-            Type storeDbType = typeof(DataClient<>).MakeGenericType(
-                storeType
-            );
+            Type storeDbType = typeof(DataClient<>).MakeGenericType(storeType);
             Type storeRepoType = typeof(RepositoryClient<>).MakeGenericType(storeDbType);
 
             IRepositoryClient storeClient = (IRepositoryClient)storeRepoType.New(repoClient);

@@ -15,24 +15,24 @@ public class Update<TStore, TEntity, TDto> : Command<TDto>
     [JsonIgnore]
     public Func<TDto, Expression<Func<TEntity, bool>>>[] Conditions { get; }
 
-    public Update(EventPublishMode publishPattern, TDto input, params object[] keys)
-        : base(OperationType.Update, publishPattern, input, keys) { }
+    public Update(PublishMode publishPattern, TDto input, params object[] keys)
+        : base(OperationKind.Update, publishPattern, input, keys) { }
 
     public Update(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto input,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate
-    ) : base(OperationType.Update, publishPattern, input)
+    ) : base(OperationKind.Update, publishPattern, input)
     {
         Predicate = predicate;
     }
 
     public Update(
-        EventPublishMode publishPattern,
+        PublishMode publishPattern,
         TDto input,
         Func<TDto, Expression<Func<TEntity, bool>>> predicate,
         params Func<TDto, Expression<Func<TEntity, bool>>>[] conditions
-    ) : base(OperationType.Update, publishPattern, input)
+    ) : base(OperationKind.Update, publishPattern, input)
     {
         Predicate = predicate;
         Conditions = conditions;

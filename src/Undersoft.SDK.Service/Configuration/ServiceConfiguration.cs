@@ -3,9 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 
 namespace Undersoft.SDK.Service.Configuration;
-
-using System.Reflection;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Data.Client;
 using Undersoft.SDK.Service.Data.Repository;
@@ -145,7 +142,7 @@ public class ServiceConfiguration : IServiceConfiguration
 
     public IEnumerable<IConfigurationSection> Sources()
     {
-        return config.GetSection("Repository").GetSection("Sources").GetChildren();
+        return Repository().GetSection("Sources").GetChildren();
     }
 
     public IEnumerable<IConfigurationSection> Clients()

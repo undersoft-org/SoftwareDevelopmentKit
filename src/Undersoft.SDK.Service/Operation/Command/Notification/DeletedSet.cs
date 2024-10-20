@@ -17,7 +17,7 @@ public class DeletedSet<TStore, TEntity, TDto> : NotificationSet<Command<TDto>>
 
     public DeletedSet(DeleteSet<TStore, TEntity, TDto> commands)
         : base(
-            commands.PublishMode,
+            commands.Mode,
             commands
                 .ForOnly(
                     c => c.Result != null,

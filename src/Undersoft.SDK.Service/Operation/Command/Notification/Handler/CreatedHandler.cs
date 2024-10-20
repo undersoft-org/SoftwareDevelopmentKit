@@ -40,7 +40,7 @@ public class CreatedHandler<TStore, TEntity, TDto>
         if (_eventStore != null)
             _eventStore.Add(request);
 
-        if (_repository == null || request.Command.PublishMode != EventPublishMode.PropagateCommand)
+        if (_repository == null || request.Command.Mode != PublishMode.Propagate)
             return Task.CompletedTask;
 
         if (_repository.Add((TEntity)request.Command.Result, request.Predicate) == null)
@@ -48,7 +48,7 @@ public class CreatedHandler<TStore, TEntity, TDto>
                 $"{$"{GetType().Name} "}{$"for entity {typeof(TEntity).Name} unable create report"}"
             );
 
-        request.PublishStatus = EventPublishStatus.Complete;
+        request.PublishStatus = PublishStatus.Complete;
 
         return Task.CompletedTask;
     }

@@ -1,5 +1,5 @@
-﻿using Microsoft.OData.Client;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
+using Microsoft.OData.Client;
 
 namespace Undersoft.SDK.Service.Data.Remote.Repository;
 
@@ -24,14 +24,13 @@ public class RemoteRepository<TStore, TEntity>
     where TStore : IDataServiceStore
 {
     public RemoteRepository(IRepositoryContextPool<DataClient<TStore>> pool)
-        : base(pool.ContextPool)
-    {
-    }
+        : base(pool.ContextPool) { }
 
     public RemoteRepository(
         IRepositoryContextPool<DataClient<TStore>> pool,
         IEntityCache<TStore, TEntity> cache
-    ) : base(pool.ContextPool)
+    )
+        : base(pool.ContextPool)
     {
         this.cache = cache;
     }
@@ -40,10 +39,11 @@ public class RemoteRepository<TStore, TEntity>
         IRepositoryContextPool<DataClient<TStore>> pool,
         IEntityCache<TStore, TEntity> cache,
         IServicer servicer
-    ) : base(pool.ContextPool)
+    )
+        : base(pool.ContextPool)
     {
         var authorization = servicer.GetService<IAuthorization>();
-        if(authorization.Credentials.SessionToken != null)
+        if (authorization.Credentials.SessionToken != null)
             SetAuthorization(authorization.Credentials.SessionToken);
         this.cache = cache;
     }
@@ -54,7 +54,8 @@ public class RemoteRepository<TStore, TEntity>
         IServicer servicer,
         IEnumerable<IRemoteProperty<IDataStore, TEntity>> remoteProps,
         IRemoteSynchronizer synchronizer
-    ) : this(pool, cache, servicer)
+    )
+        : this(pool, cache, servicer)
     {
         synchronizer.AddRepository(this);
         RemoteProperties = remoteProps.DoEach(
@@ -75,13 +76,13 @@ public class RemoteRepository<TStore, TEntity>
 public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRepository<TEntity>
     where TEntity : class, IOrigin, IInnerProxy
 {
-
     protected DataClientContext RemoteContext => (DataClientContext)InnerContext;
     protected DataServiceQuery<TEntity> RemoteQuery;
 
     public RemoteRepository() { }
 
-    public RemoteRepository(IRepositoryClient repositorySource) : base(repositorySource)
+    public RemoteRepository(IRepositoryClient repositorySource)
+        : base(repositorySource)
     {
         if (RemoteContext != null)
         {
@@ -91,7 +92,8 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         }
     }
 
-    public RemoteRepository(DataClientContext context) : base(context)
+    public RemoteRepository(DataClientContext context)
+        : base(context)
     {
         if (RemoteContext != null)
         {
@@ -101,7 +103,8 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         }
     }
 
-    public RemoteRepository(IRepositoryContextPool context) : base(context)
+    public RemoteRepository(IRepositoryContextPool context)
+        : base(context)
     {
         if (RemoteContext != null)
         {
@@ -118,24 +121,36 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         Expression = expression;
     }
 
+    public DataClientContext Context => RemoteContext;
+    public override string Name => Context.GetMappedName(ElementType);
+    public override string FullName => Context.GetMappedFullName(ElementType);
+    public override DataServiceQuery<TEntity> Query =>
+        RemoteContext.CreateQuery<TEntity>(Name, true);
+
+    public string KeyString(params object[] keys)
+    {
+        return $"{Name}({(keys.Length > 1 ? keys.Aggregate(string.Empty, (a, b) => $"{a},{b}") : keys[0])})";
+    }
+
     public override TEntity this[params object[] keys]
     {
-        get => lookup(keys);
+        get => Lookup(keys);
         set
         {
-            TEntity entity = lookup(keys);
+            TEntity entity = Lookup(keys);
             if (entity != null)
             {
-                InnerPatch(value, entity);
+                PatchBy(value, entity);
             }
             else
                 Add(value);
         }
     }
-
-    public override TEntity this[object[] keys, params Expression<
-        Func<TEntity, object>
-    >[] expanders]
+    
+    public override TEntity this[
+        object[] keys,
+        params Expression<Func<TEntity, object>>[] expanders
+    ]
     {
         get
         {
@@ -157,7 +172,7 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
             TEntity entity = query.GetValue();
             if (entity != null)
             {
-                InnerPatch(value, entity);
+                PatchBy(value, entity);
             }
             else
             {
@@ -165,10 +180,12 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
             }
         }
     }
-
-    public override object this[Expression<
-        Func<TEntity, object>
-    > selector, object[] keys, params Expression<Func<TEntity, object>>[] expanders]
+    
+    public override object this[
+        Expression<Func<TEntity, object>> selector,
+        object[] keys,
+        params Expression<Func<TEntity, object>>[] expanders
+    ]
     {
         get
         {
@@ -189,11 +206,11 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
             if (query != null)
             {
                 object item = query.Select(selector);
-                RemoteContext.Command(CommandType.PATCH, value.PatchTo(item), Name);                
+                RemoteContext.Command(CommandType.PATCH, value.PatchTo(item), Name);
             }
         }
     }
-
+    
     public override IQueryable<TEntity> this[Expression<Func<TEntity, object>>[] expanders]
     {
         get
@@ -211,7 +228,7 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         }
     }
 
-    public override ISeries<TEntity> lookup<TModel>(IEnumerable<TModel> entities)
+    public override ISeries<TEntity> Lookup<TModel>(IEnumerable<TModel> entities)
     {
         var dtos = entities.ToListing();
         var deck = dtos.ForEach(e => cache.Lookup<TEntity>(e)).Where(i => i != null).ToListing();
@@ -228,12 +245,12 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         return deck;
     }
 
-    public override TEntity lookup<TModel>(TModel entity)
+    public override TEntity Lookup<TModel>(TModel entity)
     {
-        return lookup(entity.Id);
+        return Lookup(entity.Id);
     }
 
-    private TEntity lookup(object key)
+    private TEntity Lookup(object key)
     {
         var item = cache.Lookup<TEntity>(key);
         if (item == null)
@@ -241,7 +258,7 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         return item;
     }
 
-    private TEntity lookup(params object[] keys)
+    private TEntity Lookup(params object[] keys)
     {
         var item = cache.Lookup<TEntity>(keys);
         if (item == null)
@@ -249,7 +266,7 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         return item;
     }
 
-    private async Task<TEntity> lookupAsync(params object[] keys)
+    private async Task<TEntity> LookupAsync(params object[] keys)
     {
         var item = cache.Lookup<TEntity>(keys);
         if (item == null)
@@ -257,56 +274,11 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         return item;
     }
 
-    public override TEntity InnerPatch<TModel>(TModel source, TEntity target) where TModel : class
+    public override TEntity NewEntry(params object[] parameters)
     {
-        return Patch((TEntity)source.PatchTo(target.Proxy).Target);
-    }
-
-    public override TEntity InnerPut<TModel>(TModel source, TEntity target) where TModel : class
-    {
-        return Update((TEntity)source.PutTo(target.Proxy).Target);
-    }
-
-    public override TEntity InnerSet<TModel>(TModel source, TEntity target) where TModel : class
-    {
-        return InnerPut(source, target);
-    }
-
-    public override TEntity AddBy<TModel>(TModel model)
-    {
-        return Add(model.PutTo<TEntity>());
-    }
-
-    public override async Task<TEntity> PatchBy<TModel>(TModel model)
-    {
-        return await Task.FromResult(Patch(model.PutTo<TEntity>()));
-    }
-
-    public override async Task<TEntity> SetBy<TModel>(TModel model)
-    {
-        return await Task.FromResult(Update(model.PutTo<TEntity>()));
-    }
-
-    public override async Task<TEntity> DeleteBy<TModel>(TModel model)
-    {
-        return await Task.FromResult(Delete(model.PutTo<TEntity>()));
-    }
-
-    public override TEntity Delete(TEntity entity)
-    {
-        RemoteContext.Command(CommandType.DELETE, entity, Name);
+        TEntity entity = Sign(typeof(TEntity).New<TEntity>(parameters));
+        Add(entity);
         return entity;
-    }
-
-    public override TEntity Update(TEntity entity)
-    {
-        if (entity != null)
-        {
-            entity = Stamp(entity);
-            RemoteContext.Command(CommandType.PUT, entity, Name);
-            return entity;
-        }
-        return null;
     }
 
     public override TEntity Patch(TEntity entity)
@@ -315,6 +287,87 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         {
             entity = Stamp(entity);
             RemoteContext.Command(CommandType.PATCH, entity, Name);
+            return entity;
+        }
+        return null;
+    }
+
+    public override TEntity PatchBy<TModel>(TModel source, TEntity target)
+        where TModel : class
+    {
+        return Patch((TEntity)source.PatchTo(target.Proxy).Target);
+    }
+
+    public override async Task<TEntity> PatchBy<TModel>(TModel model)
+    {
+        return await Task.FromResult(Patch(model.PutTo<TEntity>()));
+    }
+
+    public override TEntity PutBy<TModel>(TModel source, TEntity target)
+        where TModel : class
+    {
+        return Update((TEntity)source.PutTo(target.Proxy).Target);
+    }
+
+    public override IEnumerable<TEntity> Put(
+        IEnumerable<TEntity> entities,
+        Func<TEntity, Expression<Func<TEntity, bool>>> predicate,
+        params Func<TEntity, Expression<Func<TEntity, bool>>>[] conditions
+    )
+    {
+        ISeries<TEntity> deck = null;
+        if (predicate != null)
+        {
+            deck = entities.SelectMany(e => Query.Where(predicate(e))).ToRegistry();
+        }
+        else
+        {
+            deck = Lookup<TEntity>(entities);
+        }
+
+        foreach (var entity in entities)
+        {
+            foreach (var condition in conditions)
+                if (!Query.Any(condition(entity)))
+                    yield return null;
+
+            if (deck.TryGet(entity.Id, out TEntity settin))
+            {
+                yield return PutBy(entity, settin);
+            }
+            else
+                yield return Add(entity);
+        }
+    }
+
+    public override TEntity SetBy<TModel>(TModel source, TEntity target)
+        where TModel : class
+    {
+        return PutBy(source, target);
+    }
+
+    public override async Task<TEntity> SetBy<TModel>(TModel model)
+    {
+        return await Task.FromResult(Update(model.PutTo<TEntity>()));
+    }
+
+    public override TEntity Delete(TEntity entity)
+    {
+        RemoteContext.Command(CommandType.DELETE, entity, Name);
+        return entity;
+    }
+
+    public override async Task<TEntity> DeleteBy<TModel>(TModel model)
+    {
+        return await Task.FromResult(Delete(model.PutTo<TEntity>()));
+    }
+
+    public override TEntity Update(TEntity entity)
+    {
+        if (entity != null)
+        {
+            entity = Stamp(entity);
+            RemoteContext.Command(CommandType.PUT, entity, Name);
             return entity;
         }
         return null;
@@ -337,45 +390,19 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
             yield return Add(e);
     }
 
-    public override IEnumerable<TEntity> Put(
-        IEnumerable<TEntity> entities,
-        Func<TEntity, Expression<Func<TEntity, bool>>> predicate,
-        params Func<TEntity, Expression<Func<TEntity, bool>>>[] conditions
-    )
-    {
-        ISeries<TEntity> deck = null;
-        if (predicate != null)
-        {
-            deck = entities.SelectMany(e => Query.Where(predicate(e))).ToRegistry();
-        }
-        else
-        {
-            deck = lookup<TEntity>(entities);
-        }
-
-        foreach (var entity in entities)
-        {
-            foreach (var condition in conditions)
-                if (!Query.Any(condition(entity)))
-                    yield return null;
-
-            if (deck.TryGet(entity.Id, out TEntity settin))
-            {
-                yield return InnerPut(entity, settin);
-            }
-            else
-                yield return Add(entity);
-        }
-    }
-
     public override IAsyncEnumerable<TEntity> AddAsync(IEnumerable<TEntity> entity)
     {
         return entity.ForEachAsync((e) => Add(e));
     }
 
+    public override TEntity AddBy<TModel>(TModel model)
+    {
+        return Add(model.PutTo<TEntity>());
+    }
+
     public override Task<TEntity> Find(params object[] keys)
     {
-        return lookupAsync(keys);
+        return LookupAsync(keys);
     }
 
     public async Task<IEnumerable<TEntity>> FindMany(params object[] keys)
@@ -388,21 +415,9 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
             else
                 _batch.Put(key, RemoteContext.CreateQuery<TEntity>(KeyString(key), true));
         }
-        return (await RemoteContext.ExecuteBatchAsync(_batch.ToArray())).SelectMany(
-            o => o as QueryOperationResponse<TEntity>
+        return (await RemoteContext.ExecuteBatchAsync(_batch.ToArray())).SelectMany(o =>
+            o as QueryOperationResponse<TEntity>
         );
-    }
-
-    public string KeyString(params object[] keys)
-    {
-        return $"{Name}({(keys.Length > 1 ? keys.Aggregate(string.Empty, (a, b) => $"{a},{b}") : keys[0])})";
-    }
-
-    public override TEntity NewEntry(params object[] parameters)
-    {
-        TEntity entity = Sign(typeof(TEntity).New<TEntity>(parameters));
-        Add(entity);
-        return entity;
     }
 
     public DataServiceQuerySingle<TEntity> FindQuerySingle(params object[] keys)
@@ -423,15 +438,6 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
     {
         return Query;
     }
-
-    public DataClientContext Context => RemoteContext;
-
-    public override string Name => Context.GetMappedName(ElementType);
-
-    public override string FullName => Context.GetMappedFullName(ElementType);
-
-    public override DataServiceQuery<TEntity> Query =>
-        RemoteContext.CreateQuery<TEntity>(Name, true);
 
     public virtual async Task<ISeries<TEntity>> LoadAsync(int offset = 0, int limit = 0)
     {
@@ -527,8 +533,8 @@ public partial class RemoteRepository<TEntity> : Repository<TEntity>, IRemoteRep
         if (target == null)
         {
             if (
-                !RemoteContext.EntityTracker.Entities
-                    .Select(e => ((IIdentifiable)e.Entity).Id)
+                !RemoteContext
+                    .EntityTracker.Entities.Select(e => ((IIdentifiable)e.Entity).Id)
                     .Contains(((IIdentifiable)((IProxy)source).Target).Id)
             )
                 target = ((IProxy)source)[propertyName];

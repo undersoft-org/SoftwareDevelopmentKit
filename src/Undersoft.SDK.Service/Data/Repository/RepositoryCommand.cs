@@ -142,19 +142,19 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         yield return null;
     }
 
-    public virtual TEntity InnerPatch<TModel>(TModel source, TEntity target) where TModel : class
+    public virtual TEntity PatchBy<TModel>(TModel source, TEntity target) where TModel : class
     {
         return Stamp((TEntity)source.PatchTo(target.Proxy).Target);
     }
 
-    public virtual TEntity InnerPut<TModel>(TModel source, TEntity target) where TModel : class
+    public virtual TEntity PutBy<TModel>(TModel source, TEntity target) where TModel : class
     {
         return Stamp((TEntity)source.PutTo(target.Proxy).Target);
     }
 
-    public virtual TEntity InnerSet<TModel>(TModel source, TEntity target) where TModel : class
+    public virtual TEntity SetBy<TModel>(TModel source, TEntity target) where TModel : class
     {
-        return InnerPut(source, target);
+        return PutBy(source, target);
     }
 
     public abstract TEntity Update(TEntity entity);
@@ -167,7 +167,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         var _entity = await Find(key);
         if (_entity != null)
         {
-            return InnerSet(entity, _entity);
+            return SetBy(entity, _entity);
         }
         return null;
     }
@@ -186,7 +186,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             if (condition != null && !Query.Any(condition.Invoke(_entity)))
                 return null;
 
-            return InnerSet(entity, _entity);
+            return SetBy(entity, _entity);
         }
         return _entity;
     }
@@ -197,20 +197,20 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             return null;
         var _entity = await Find(entity.Id);
         if (_entity != null)
-            return InnerPut(entity, _entity);
+            return PutBy(entity, _entity);
         return null;
     }
 
     public virtual IEnumerable<TEntity> Set<TModel>(IEnumerable<TModel> models)
         where TModel : class, IOrigin
     {
-        var deck = lookup<TModel>(models);
+        var deck = Lookup<TModel>(models);
 
         foreach (var model in models)
         {
             if (deck.TryGet(model.Id, out TEntity entity))
             {
-                yield return InnerSet(model, entity);
+                yield return SetBy(model, entity);
             }
         }
     }
@@ -246,7 +246,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
                     return null;
             }
 
-            return InnerSet(entity, _entity);
+            return SetBy(entity, _entity);
         });
     }
 
@@ -261,7 +261,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             deck = entities.Select(e => this[false, predicate(e)]).Where(e => e != null).ToListing();
         if (deck == null)
         {
-            deck = lookup<TModel>(entities).ToCatalog();
+            deck = Lookup<TModel>(entities).ToCatalog();
         }
         if (deck == null)
             yield return null;
@@ -282,7 +282,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
                     yield return null;
             }
 
-            yield return InnerSet(entity, deck.Get(entity)
+            yield return SetBy(entity, deck.Get(entity)
             );
         }
     }
@@ -298,7 +298,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             deck = entities.Select(e => this[false, predicate(e)]).Where(e => e != null).ToListing();
         if (deck == null)
         {
-            deck = lookup<TModel>(entities);
+            deck = Lookup<TModel>(entities);
         }
         if (deck == null)
             yield return null;
@@ -320,7 +320,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             }
             yield return await Task.Run(
                 () =>
-                    InnerSet(entity, deck.Get(entity)));
+                    SetBy(entity, deck.Get(entity)));
         }
     }
 
@@ -339,7 +339,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
 
             if (entity != null)
             {
-                return InnerSet(delta, entity);
+                return SetBy(delta, entity);
             }
             return default;
         });
@@ -348,14 +348,14 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
     public virtual async IAsyncEnumerable<TEntity> SetAsync<TModel>(IEnumerable<TModel> models)
         where TModel : class, IOrigin
     {
-        var deck = lookup<TModel>(models);
+        var deck = Lookup<TModel>(models);
 
         foreach (var model in models)
         {
             if (deck.TryGet(model.Id, out TEntity entity))
             {
                 yield return await Task.Run(
-                    () => InnerSet(model, entity)
+                    () => SetBy(model, entity)
                 );
             }
         }
@@ -370,12 +370,12 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         var entity = await Find(delta.Id);
         if (entity != null)
         {
-            return InnerPatch(delta, entity);
+            return PatchBy(delta, entity);
         }
         return null;
     }
 
-    public virtual ISeries<TEntity> lookup<TModel>(IEnumerable<TModel> entities)
+    public virtual ISeries<TEntity> Lookup<TModel>(IEnumerable<TModel> entities)
         where TModel : class, IOrigin
     {
         var listing = entities.ToListing();
@@ -397,7 +397,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         return items;
     }
 
-    public virtual TEntity lookup<TModel>(TModel entity) where TModel : class, IOrigin
+    public virtual TEntity Lookup<TModel>(TModel entity) where TModel : class, IOrigin
     {
         var item = cache.Lookup<TEntity>(entity.Id);
         if (item != null)
@@ -417,11 +417,11 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         }
         else
         {
-            deck = lookup<TModel>(entities);
+            deck = Lookup<TModel>(entities);
         }
         return entities.ForOnly(
             entity => deck.ContainsKey(entity.Id),
-            entity => InnerPatch(entity, deck[entity.Id])
+            entity => PatchBy(entity, deck[entity.Id])
         ).Commit();
     }
 
@@ -436,7 +436,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             var entity = await Find(keys);
 
             if (entity != null)
-                return InnerPatch(delta, entity);
+                return PatchBy(delta, entity);
 
             return null;
         });
@@ -449,7 +449,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
     {
         return await Task.Run(() =>
         {
-            TEntity entity = lookup<TModel>(delta);
+            TEntity entity = Lookup<TModel>(delta);
             if (entity == null || predicate != null && !entity.ToQueryable().Where(predicate(delta)).Commit().Any())
             {
                 if (predicate != null)
@@ -459,7 +459,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             }
             if (entity != null)
             {
-                return InnerPatch(delta, entity);
+                return PatchBy(delta, entity);
             }
             return default;
         });
@@ -492,7 +492,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         foreach (var entity in entities)
         {
             if (deck.TryGet(entity.Id, out TEntity _entity))
-                yield return InnerPatch(entity, _entity);
+                yield return PatchBy(entity, _entity);
         }
     }
 
@@ -509,7 +509,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             ].ToCatalog();
         else
         {
-            deck = lookup<TModel>(entities);
+            deck = Lookup<TModel>(entities);
         }
 
         foreach (var entity in entities)
@@ -517,7 +517,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             if (deck.TryGet(entity.Id, out TEntity _entity))
             {
                 yield return await Task.Run(
-                    () => InnerPatch(entity, _entity)
+                    () => PatchBy(entity, _entity)
                 );
             }
         }
@@ -551,7 +551,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         {
             if (deck.TryGet(entity.Id, out TEntity _entity))
                 yield return await Task.Run(
-                    () => InnerPatch(entity, _entity)
+                    () => PatchBy(entity, _entity)
                 );
         }
     }
@@ -588,7 +588,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             if (_entity == null)
                 return Add(entity);
 
-            return InnerPut(entity, _entity);
+            return PutBy(entity, _entity);
         });
     }
 
@@ -604,7 +604,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
 
         if (deck == null)
         {
-            deck = lookup<TEntity>(entities);
+            deck = Lookup<TEntity>(entities);
         }
 
         foreach (var entity in entities)
@@ -625,7 +625,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
 
             if (deck.TryGet(entity.Id, out TEntity settin))
             {
-                yield return InnerPut(entity, settin);
+                yield return PutBy(entity, settin);
             }
             else
                 yield return Add(entity);
@@ -645,7 +645,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
         }
         if (deck == null)
         {
-            deck = lookup<TEntity>(entities);
+            deck = Lookup<TEntity>(entities);
         }
 
         foreach (var entity in entities)
@@ -667,7 +667,7 @@ public abstract partial class Repository<TEntity> : IRepositoryCommand<TEntity> 
             if (deck.TryGet(entity.Id, out TEntity settin))
             {
                 yield return await Task.Run(
-                    () => InnerPut(entity, settin)
+                    () => PutBy(entity, settin)
                 );
             }
             else
