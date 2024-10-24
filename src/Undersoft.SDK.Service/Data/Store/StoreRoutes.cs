@@ -2,11 +2,11 @@
 {
     public static class StoreRoutes
     {
-        public const string EntryStore = "entry";
-        public const string ReportStore = "report";
+        public const string EntryStore = "Entry";
+        public const string ReportStore = "Report";
         public const string EventStore = "";
-        public const string DataStore = "data";
-        public const string AccountStore = "auth";           
+        public const string DataStore = "Data";
+        public const string AccountStore = "Auth";           
     }
 
     public class StoreRouteRegistry : Registry<(Type, string)>
