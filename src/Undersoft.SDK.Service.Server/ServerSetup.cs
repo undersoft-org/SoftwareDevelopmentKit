@@ -12,21 +12,17 @@ using Undersoft.SDK.Service.Server.Accounts.Identity;
 
 namespace Undersoft.SDK.Service.Server;
 
-using System.Diagnostics.Metrics;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Accounts;
 using Accounts.Email;
 using Documentation;
-using IdentityModel;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using System.Diagnostics.Metrics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Undersoft.SDK.Service.Access;
 using Undersoft.SDK.Service.Access.MultiTenancy;
-using Undersoft.SDK.Service.Behaviour;
 using Undersoft.SDK.Service.Configuration;
 using Undersoft.SDK.Service.Data.Repository.Source;
 using Undersoft.SDK.Service.Data.Store;
@@ -185,9 +181,9 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
         if(histogramAggregation != null)
             histogramAggregation = histogramAggregation.ToLowerInvariant();
 
-        var _operationInstrumentation = new OperationInstrumentation();        
+        var _operationInstrumentation = new OperationTelemetry();        
         
-        registry.AddObject(typeof(OperationInstrumentation), _operationInstrumentation);
+        registry.AddObject(typeof(OperationTelemetry), _operationInstrumentation);
 
         ForMainBehaviour = () => typeof(TelemetryBehaviour<,>);
 
@@ -282,7 +278,7 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
                     case "otlp":
                         builder.AddOtlpExporter(otlpOptions =>
                         {
-                            otlpOptions.Endpoint = new Uri(config.GetValue<string>("Otlp:Source"));
+                            otlpOptions.Endpoint = new Uri(config.GetValue<string>("Otlp:Host"));
                         });
                         break;
                     default:
@@ -359,6 +355,8 @@ public partial class ServerSetup : ServiceSetup, IServerSetup
                 x.RequireHttpsMetadata = false;
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
+                    RoleClaimType = "role",
+                    NameClaimType = "name",
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,

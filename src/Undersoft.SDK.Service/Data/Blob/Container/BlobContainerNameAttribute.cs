@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Undersoft.SDK.Service.Data.Blob.Container
@@ -11,7 +10,7 @@ namespace Undersoft.SDK.Service.Data.Blob.Container
 
         public BlobContainerNameAttribute([DisallowNull] string name)
         {
-            if (!name.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(name))
             {
                 Name = name;
             }

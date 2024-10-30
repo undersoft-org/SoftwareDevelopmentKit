@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using Undersoft.SDK.Service.Data.Blob.Container;
 
 namespace Undersoft.SDK.Service.Data.Blob
@@ -32,8 +31,8 @@ namespace Undersoft.SDK.Service.Data.Blob
                         .GetRequiredService(normalizerType.GetType())
                          as IBlobNamingNormalizer;
 
-                    containerName = containerName.IsNullOrEmpty() ? containerName : normalizer.NormalizeContainerName(containerName);
-                    blobName = blobName.IsNullOrEmpty() ? blobName : normalizer.NormalizeBlobName(blobName);
+                    containerName = string.IsNullOrEmpty(containerName) ? containerName : normalizer.NormalizeContainerName(containerName);
+                    blobName = string.IsNullOrEmpty(blobName) ? blobName : normalizer.NormalizeBlobName(blobName);
                 }
 
                 return new BlobNormalizeNaming(containerName, blobName);

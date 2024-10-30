@@ -1,7 +1,7 @@
-using IdentityModel.Client;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Net.Http.Headers;
 
 namespace Undersoft.SDK.Service.Data.Client
 {
@@ -29,7 +29,7 @@ namespace Undersoft.SDK.Service.Data.Client
         {
             if (token != null)
             {
-                this.SetBearerToken(token);
+                this.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
         }
 

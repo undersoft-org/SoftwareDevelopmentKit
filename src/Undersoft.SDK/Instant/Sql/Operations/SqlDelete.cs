@@ -1,6 +1,6 @@
 ﻿namespace Undersoft.SDK.Instant.Sql
 {
-    using Microsoft.Data.SqlClient;
+    using Npgsql;
     using System;
     using System.Globalization;
     using System.Linq;
@@ -16,16 +16,16 @@
 
     internal class SqlDelete
     {
-        private SqlConnection _cn;
+        private NpgsqlConnection _cn;
 
-        public SqlDelete(SqlConnection cn)
+        public SqlDelete(NpgsqlConnection cn)
         {
             _cn = cn;
         }
 
         public SqlDelete(string cnstring)
         {
-            _cn = new SqlConnection(cnstring);
+            _cn = new NpgsqlConnection(cnstring);
         }
 
         public ISeries<ISeries<IInstant>> BatchDelete(

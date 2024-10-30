@@ -156,6 +156,8 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="scan.h" />
     <ClInclude Include="submix.h" />
+    <ClInclude Include="ring.h" />
+    <ClInclude Include="ring.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bitscan.cpp" />

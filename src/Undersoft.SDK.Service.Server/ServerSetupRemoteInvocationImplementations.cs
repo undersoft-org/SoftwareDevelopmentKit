@@ -5,7 +5,6 @@ using System.Reflection;
 
 namespace Undersoft.SDK.Service.Server;
 
-using Microsoft.IdentityModel.Tokens;
 using Undersoft.SDK.Service.Data.Client.Attributes;
 using Undersoft.SDK.Service.Operation.Invocation;
 using Undersoft.SDK.Service.Operation.Remote.Invocation;
@@ -64,7 +63,7 @@ public partial class ServerSetup
             modelType = list[1];
 
             var concatNames = storeType.FullName + modelType.FullName + serviceType.FullName;
-            if (!concatNames.IsNullOrEmpty() && duplicateCheck.Add(concatNames))
+            if (!string.IsNullOrEmpty(concatNames) && duplicateCheck.Add(concatNames))
             {
                 service.AddTransient(
                     typeof(IRequest<>).MakeGenericType(

@@ -3,13 +3,13 @@ using System.Diagnostics.Metrics;
 
 namespace Undersoft.SDK.Service.Infrastructure.Telemetry
 {    
-    public class OperationInstrumentation : Origin, IDisposable
+    public class OperationTelemetry : Origin, IDisposable
     {       
         private ActivityListener activityListener { get; }
 
-        public OperationInstrumentation()
+        public OperationTelemetry()
         {
-            string? version = typeof(OperationInstrumentation).Assembly.GetName().Version?.ToString();
+            string? version = typeof(OperationTelemetry).Assembly.GetName().Version?.ToString();
 
             this.ActivitySource = new ActivitySource("Undersoft.SDK.Service.Operation", version);
             
@@ -39,7 +39,7 @@ namespace Undersoft.SDK.Service.Infrastructure.Telemetry
             request.Info<Apilog>($"Operation request input", request.Input);
          
             var activity = ActivitySource.StartActivity(
-                $"{request.GetType().BaseType?.Name.FirstDelimited('`')}OperationActivity",
+                $"{request.GetType().BaseType?.Name.FirstDelimited('`')} Operation",
                 Enum.Parse<ActivityKind>(request.Site.ToString())
             );
 
@@ -53,13 +53,10 @@ namespace Undersoft.SDK.Service.Infrastructure.Telemetry
                 var type = request.GetType();
                 var genericTypes = type.GetGenericArguments();
 
-                activity!.AddTag("type", type.Name.FirstDelimited('`'));
-                activity!.AddTag("base", type.BaseType?.Name.FirstDelimited('`'));
-                activity!.AddTag("kind", request.Kind.ToString());
-                activity!.AddTag("site", request.Site.ToString());
+                activity!.AddTag("type", type.Name.FirstDelimited('`'));                
+                activity!.AddTag("kind", request.Kind.ToString());                
                 activity!.AddTag("store", genericTypes[0].Name.Substring(1));
                 activity!.AddTag("valid", response.Validation.IsValid.ToString());
-                activity!.AddTag("errors", response.Validation.ToString());
                 if (request.Site == OperationSite.Client)
                 {
                     activity!.AddTag("contract", genericTypes[1].FullName);

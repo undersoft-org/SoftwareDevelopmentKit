@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using Undersoft.SDK.Service.Data.Blob.Container;
+﻿using Undersoft.SDK.Service.Data.Blob.Container;
 
 namespace Undersoft.SDK.Service.Infrastructure.FileSystem
 {
@@ -8,7 +7,7 @@ namespace Undersoft.SDK.Service.Infrastructure.FileSystem
         public string BasePath
         {
             get => BlobContainerConfigurationExtensions.GetConfiguration<string>(_containerConfiguration, FileSystemBlobProviderConfigurationNames.BasePath);
-            set => _containerConfiguration.SetConfiguration(FileSystemBlobProviderConfigurationNames.BasePath, value.IsNullOrEmpty());
+            set => _containerConfiguration.SetConfiguration(FileSystemBlobProviderConfigurationNames.BasePath, string.IsNullOrEmpty(value));
         }
 
         /// <summary>

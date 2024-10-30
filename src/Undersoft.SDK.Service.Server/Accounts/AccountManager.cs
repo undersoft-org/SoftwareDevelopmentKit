@@ -1,5 +1,4 @@
-﻿using IdentityModel;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Undersoft.SDK.Service.Access;
@@ -137,11 +136,11 @@ public class AccountManager : Registry<IAccount>, IAccountManager
             };
             if (roles != null)
                 basicClaims = basicClaims
-                    .Concat(roles?.Select(r => new Claim(JwtClaimTypes.Role, r)))
+                    .Concat(roles?.Select(r => new Claim("role", r)))
                     .ToArray();
             if (scopes != null)
                 basicClaims = basicClaims
-                    .Concat(scopes?.Select(r => new Claim(JwtClaimTypes.Scope, r)))
+                    .Concat(scopes?.Select(r => new Claim("scope", r)))
                     .ToArray();
 
             result = await User.AddClaimsAsync(account.User, basicClaims);

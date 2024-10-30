@@ -1,6 +1,6 @@
 ﻿namespace Undersoft.SDK.Instant.Sql
 {
-    using Microsoft.Data.SqlClient;
+    using Npgsql;
     using Undersoft.SDK.Instant.Series;
     using Undersoft.SDK.Series;
 
@@ -12,15 +12,15 @@
         private SqlInsert _insert;
         private SqlMapper _mapper;
         private SqlMutator _mutator;
-        private SqlConnection _sqlcn;
+        private NpgsqlConnection _sqlcn;
         private SqlUpdate _update;
 
-        public InstantSqlDb(SqlConnection SqlDbConnection) : this(SqlDbConnection.ConnectionString) { }
+        public InstantSqlDb(NpgsqlConnection SqlDbConnection) : this(SqlDbConnection.ConnectionString) { }
 
         public InstantSqlDb(InstantSqlOptions sqlIdentity)
         {
             _options = sqlIdentity;
-            _sqlcn = new SqlConnection(cnString);
+            _sqlcn = new NpgsqlConnection(cnString);
             Initialization();
         }
 
@@ -28,7 +28,7 @@
         {
             _options = new InstantSqlOptions();
             cnString = SqlConnectionString;
-            _sqlcn = new SqlConnection(cnString);
+            _sqlcn = new NpgsqlConnection(cnString);
             Initialization();
         }
 
@@ -137,7 +137,7 @@
 
         public int Execute(string query)
         {
-            SqlCommand cmd = _sqlcn.CreateCommand();
+            NpgsqlCommand cmd = _sqlcn.CreateCommand();
             cmd.CommandType = System.Data.CommandType.Text;
             cmd.CommandText = query;
             return cmd.ExecuteNonQuery();

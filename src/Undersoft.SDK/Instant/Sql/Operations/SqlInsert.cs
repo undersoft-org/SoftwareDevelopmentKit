@@ -1,6 +1,6 @@
 ﻿namespace Undersoft.SDK.Instant.Sql
 {
-    using Microsoft.Data.SqlClient;
+    using Npgsql;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -12,16 +12,16 @@
 
     public class SqlInsert
     {
-        private SqlConnection _cn;
+        private NpgsqlConnection _cn;
 
-        public SqlInsert(SqlConnection cn)
+        public SqlInsert(NpgsqlConnection cn)
         {
             _cn = cn;
         }
 
         public SqlInsert(string cnstring)
         {
-            _cn = new SqlConnection(cnstring);
+            _cn = new NpgsqlConnection(cnstring);
         }
 
         public ISeries<ISeries<IInstant>> BatchInsert(

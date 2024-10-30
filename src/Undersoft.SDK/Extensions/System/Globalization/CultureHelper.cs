@@ -1,6 +1,5 @@
 ﻿namespace System
 {
-    using Microsoft.IdentityModel.Tokens;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
 
@@ -26,7 +25,7 @@
 
         public static bool IsValidCultureCode(string cultureCode)
         {
-            if (cultureCode.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(cultureCode))
             {
                 return false;
             }

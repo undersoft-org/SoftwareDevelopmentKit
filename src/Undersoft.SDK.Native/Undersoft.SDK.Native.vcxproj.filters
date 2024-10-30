@@ -30,6 +30,12 @@
     <ClInclude Include="submix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ring.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ring.cpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bitscan.cpp">

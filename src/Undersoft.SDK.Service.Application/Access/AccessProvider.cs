@@ -1,5 +1,4 @@
-﻿using IdentityModel;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using System.Security.Claims;
 using System.Text.Json;
@@ -146,7 +145,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
                 claims.Add(kvp.Key, new Claim(kvp.Key, kvp.Value.ToString() ?? ""));
             });
 
-        if (claims.TryGet(JwtClaimTypes.Expiration, out Claim expiration))
+        if (claims.TryGet("exp", out Claim expiration))
         {
             this._expiration = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiration.Value)).LocalDateTime;
             js.SetInLocalStorage(EXPIRATIONTOKENKEY, expiration.Value);

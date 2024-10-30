@@ -1,11 +1,11 @@
 ﻿namespace Undersoft.SDK.Instant.Sql
 {
-    using Microsoft.Data.SqlClient;
+    using Npgsql;
     using System.Collections.Generic;
 
     public class DataDbSchema
     {
-        public DataDbSchema(SqlConnection sqlDbConnection)
+        public DataDbSchema(NpgsqlConnection sqlDbConnection)
         {
             DataDbTables = new DbTables();
             DbConfig = new DbConfig(sqlDbConnection.ConnectionString);
@@ -15,7 +15,7 @@
         {
             DataDbTables = new DbTables();
             DbConfig = new DbConfig(dbConnectionString);
-            SqlDbConnection = new SqlConnection(dbConnectionString);
+            SqlDbConnection = new NpgsqlConnection(dbConnectionString);
         }
 
         public DbTables DataDbTables { get; set; }
@@ -30,7 +30,7 @@
             set { DataDbTables.List = value; }
         }
 
-        public SqlConnection SqlDbConnection { get; set; }
+        public NpgsqlConnection SqlDbConnection { get; set; }
     }
 
     public class DbConfig
@@ -38,25 +38,24 @@
         public DbConfig() { }
 
         public DbConfig(
-            string _User,
-            string _Password,
-            string _Source,
-            string _Catalog,
-            string _Provider = "SQLNCLI11"
+            string user,
+            string password,
+            string host,
+            string dataBase,
+            string provider = "PostgreSql"
         )
         {
-            User = _User;
-            Password = _Password;
-            Provider = _Provider;
-            Source = _Source;
-            InitCatalog = _Catalog;
+            User = user;
+            Password = password;
+            Provider = provider;
+            Host = host;
+            Database = dataBase;
             DbConnectionString = string.Format(
-                "Provider={0};Data Source = {1}; Persist Security Info=True;Password={2};User ID = {3}; Initial Catalog = {4}",
-                Provider,
-                Source,
+                "Host={0};Password={1};Username={2};Database={3}",
+                Host,
                 Password,
                 User,
-                InitCatalog
+                Database
             );
         }
 
@@ -65,7 +64,7 @@
             DbConnectionString = dbConnectionString;
         }
 
-        public string InitCatalog { get; set; }
+        public string Database { get; set; }
 
         public string DbConnectionString { get; set; }
 
@@ -73,7 +72,7 @@
 
         public string Provider { get; set; }
 
-        public string Source { get; set; }
+        public string Host { get; set; }
 
         public string User { get; set; }
     }

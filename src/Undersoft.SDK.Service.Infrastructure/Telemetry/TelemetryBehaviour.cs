@@ -8,9 +8,9 @@ public class TelemetryBehaviour<TRequest, TResponse> : IPipelineBehavior<TReques
     where TRequest : IRequest<TResponse>, IOperation
     where TResponse : IOperation
 {
-    private OperationInstrumentation _telemetry;
+    private OperationTelemetry _telemetry;
 
-    public TelemetryBehaviour(OperationInstrumentation telemetry)
+    public TelemetryBehaviour(OperationTelemetry telemetry)
     {
         _telemetry = telemetry;        
     }

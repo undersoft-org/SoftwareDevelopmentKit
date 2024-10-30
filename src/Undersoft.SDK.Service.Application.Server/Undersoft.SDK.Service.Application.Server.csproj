@@ -34,8 +34,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.*-*" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.*-*" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.*-*" NoWarn="NU1605" />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.*-* " />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.*-* " />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.10.3" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.10.3" />
     <PackageReference Include="Microsoft.Identity.Web" Version="1.19.0" />
   </ItemGroup>
   

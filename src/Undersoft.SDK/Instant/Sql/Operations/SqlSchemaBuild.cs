@@ -1,6 +1,6 @@
 ﻿namespace Undersoft.SDK.Instant.Sql
 {
-    using Microsoft.Data.SqlClient;
+    using Npgsql;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -14,9 +14,9 @@
 
     public class SqlSchemaBuild
     {
-        private SqlConnection sqlcn;
+        private NpgsqlConnection sqlcn;
 
-        public SqlSchemaBuild(SqlConnection _sqlcn)
+        public SqlSchemaBuild(NpgsqlConnection _sqlcn)
         {
             sqlcn = _sqlcn;
         }

@@ -1,6 +1,6 @@
 ﻿namespace Undersoft.SDK.Instant.Sql
 {
-    using Microsoft.Data.SqlClient;
+    using Npgsql;
     using System.Collections.Generic;
     using System.Data;
     using Undersoft.SDK.Instant.Series;
@@ -51,9 +51,9 @@
                 string sqlConnectString = param["ConnectionString"].ToString();
 
                 DataTable Table = new DataTable();
-                SqlConnection sqlcn = new SqlConnection(sqlConnectString);
+                NpgsqlConnection sqlcn = new NpgsqlConnection(sqlConnectString);
                 sqlcn.Open();
-                SqlDataAdapter adapter = new SqlDataAdapter(sqlQry, sqlcn);
+                NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(sqlQry, sqlcn);
                 adapter.Fill(Table);
                 return Table;
             }
@@ -63,14 +63,14 @@
             }
         }
 
-        public DataTable GetSqlDataTable(SqlCommand cmd)
+        public DataTable GetSqlDataTable(NpgsqlCommand cmd)
         {
             try
             {
                 DataTable Table = new DataTable();
                 if (cmd.Connection.State == ConnectionState.Closed)
                     cmd.Connection.Open();
-                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(cmd);
                 adapter.Fill(Table);
                 return Table;
             }
@@ -80,14 +80,14 @@
             }
         }
 
-        public DataTable GetSqlDataTable(string qry, SqlConnection cn)
+        public DataTable GetSqlDataTable(string qry, NpgsqlConnection cn)
         {
             try
             {
                 DataTable Table = new DataTable();
                 if (cn.State == ConnectionState.Closed)
                     cn.Open();
-                SqlDataAdapter adapter = new SqlDataAdapter(qry, cn);
+                NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(qry, cn);
                 adapter.Fill(Table);
                 return Table;
             }

@@ -66,7 +66,7 @@ public class ServerHostSetup : IServerHostSetup
                 endpoints.MapFallbackToFile("/index.html");
             }
 
-            if (_manager.Registry.ContainsService<OperationInstrumentation>())
+            if (_manager.Registry.ContainsService<OperationTelemetry>())
                 endpoints.MapPrometheusScrapingEndpoint();
         });
         

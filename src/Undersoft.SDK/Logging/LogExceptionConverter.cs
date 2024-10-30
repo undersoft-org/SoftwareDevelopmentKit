@@ -24,7 +24,7 @@ namespace Undersoft.SDK.Logging
             writer.WriteString("Message", value.Message);
             writer.WriteString("HelpLink", value.HelpLink);
             writer.WriteString("HResult", value.HResult.ToString());
-            writer.WriteString("Source", value.Source);
+            writer.WriteString("Host", value.Source);
             writer.WriteString("StackTrace", value.StackTrace);
             writer.WriteEndObject();
         }

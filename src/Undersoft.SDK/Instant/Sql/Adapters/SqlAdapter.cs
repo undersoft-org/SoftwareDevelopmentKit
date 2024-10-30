@@ -1,6 +1,6 @@
 ﻿namespace Undersoft.SDK.Instant.Sql
 {
-    using Microsoft.Data.SqlClient;
+    using Npgsql;    
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -25,17 +25,17 @@
 
     public class SqlAdapter
     {
-        private SqlCommand _cmd;
-        private SqlConnection _cn;
+        private NpgsqlCommand _cmd;
+        private NpgsqlConnection _cn;
 
-        public SqlAdapter(SqlConnection cn)
+        public SqlAdapter(NpgsqlConnection cn)
         {
             _cn = cn;
         }
 
         public SqlAdapter(string cnstring)
         {
-            _cn = new SqlConnection(cnstring);
+            _cn = new NpgsqlConnection(cnstring);
         }
 
         public bool DataBulk(
@@ -96,7 +96,7 @@
                                     " [" + column.RubricName + "] " + sqlTypeString + ",";
                             }
                             createTable = createTable.TrimEnd(new char[] { ',' }) + " ) ";
-                            SqlCommand createcmd = new SqlCommand(createTable, _cn);
+                            NpgsqlCommand createcmd = new NpgsqlCommand(createTable, _cn);
                             createcmd.ExecuteNonQuery();
                         }
                     }
@@ -107,16 +107,25 @@
                     if (prepareType == BulkPrepareType.Trunc)
                     {
                         string deleteData = "Truncate Table [" + buforTable + "]";
-                        SqlCommand delcmd = new SqlCommand(deleteData, _cn);
+                        NpgsqlCommand delcmd = new NpgsqlCommand(deleteData, _cn);
                         delcmd.ExecuteNonQuery();
                     }
 
                     try
                     {
+                        object[] values = null;
+                        bool first = true;
                         DataReader ndr = new DataReader(cards);
-                        SqlBulkCopy bulkcopy = new SqlBulkCopy(_cn);
-                        bulkcopy.DestinationTableName = "[" + buforTable + "]";
-                        bulkcopy.WriteToServer(ndr);
+                        using (var writer = _cn.BeginBinaryImport($"COPY [{buforTable}] FROM STDIN BINARY"))
+                        {
+                            while (ndr.Read())
+                            {
+                                if (first)
+                                    values = new object[ndr.FieldCount];
+                                ndr.GetValues(values);
+                                writer.WriteRow(values);
+                            }
+                        }
                     }
                     catch (SqlException ex)
                     {
@@ -182,7 +191,7 @@
                             createTable += " [" + column.RubricName + "] " + sqlTypeString + ",";
                         }
                         createTable = createTable.TrimEnd(new char[] { ',' }) + " ) ";
-                        SqlCommand createcmd = new SqlCommand(createTable, _cn);
+                        NpgsqlCommand createcmd = new NpgsqlCommand(createTable, _cn);
                         createcmd.ExecuteNonQuery();
                     }
                 }
@@ -193,16 +202,25 @@
                 if (prepareType == BulkPrepareType.Trunc)
                 {
                     string deleteData = "Truncate Table [" + buforTable + "]";
-                    SqlCommand delcmd = new SqlCommand(deleteData, _cn);
+                    NpgsqlCommand delcmd = new NpgsqlCommand(deleteData, _cn);
                     delcmd.ExecuteNonQuery();
                 }
 
                 try
                 {
+                    object[] values = null;
+                    bool first = true;
                     DataReader ndr = new DataReader(deck);
-                    SqlBulkCopy bulkcopy = new SqlBulkCopy(_cn);
-                    bulkcopy.DestinationTableName = "[" + buforTable + "]";
-                    bulkcopy.WriteToServer(ndr);
+                    using (var writer = _cn.BeginBinaryImport($"COPY [{buforTable}] FROM STDIN BINARY"))
+                    {
+                        while (ndr.Read())
+                        {
+                            if (first)
+                                values = new object[ndr.FieldCount];
+                            ndr.GetValues(values);
+                            writer.WriteRow(values);
+                        }
+                    }
                 }
                 catch (SqlException ex)
                 {
@@ -220,9 +238,9 @@
         {
             if (_cmd == null)
                 _cmd = _cn.CreateCommand();
-            SqlCommand cmd = _cmd;
+            NpgsqlCommand cmd = _cmd;
             cmd.CommandText = sqlqry;
-            SqlTransaction tr = _cn.BeginTransaction();
+            NpgsqlTransaction tr = _cn.BeginTransaction();
             cmd.Transaction = tr;
             cmd.Prepare();
             if (_cn.State == ConnectionState.Closed)
@@ -242,7 +260,7 @@
         {
             if (_cmd == null)
                 _cmd = _cn.CreateCommand();
-            SqlCommand cmd = _cmd;
+            NpgsqlCommand cmd = _cmd;
             cmd.CommandText = sqlqry;
             cmd.Prepare();
             if (_cn.State == ConnectionState.Closed)
@@ -258,7 +276,7 @@
 
         public IInstantSeries ExecuteSelect(string sqlqry, string tableName = null)
         {
-            SqlCommand cmd = new SqlCommand(sqlqry, _cn);
+            NpgsqlCommand cmd = new NpgsqlCommand(sqlqry, _cn);
             cmd.Prepare();
             if (_cn.State == ConnectionState.Closed)
                 _cn.Open();
@@ -278,7 +296,7 @@
         {
             try
             {
-                SqlCommand cmd = new SqlCommand(sqlqry, _cn);
+                NpgsqlCommand cmd = new NpgsqlCommand(sqlqry, _cn);
                 cmd.Prepare();
                 if (_cn.State == ConnectionState.Closed)
                     _cn.Open();
@@ -299,9 +317,9 @@
         {
             if (_cmd == null)
                 _cmd = _cn.CreateCommand();
-            SqlCommand cmd = _cmd;
+            NpgsqlCommand cmd = _cmd;
             cmd.CommandText = sqlqry;
-            SqlTransaction tr = _cn.BeginTransaction();
+            NpgsqlTransaction tr = _cn.BeginTransaction();
             cmd.Transaction = tr;
             cmd.Prepare();
             if (_cn.State == ConnectionState.Closed)
@@ -321,7 +339,7 @@
         {
             if (_cmd == null)
                 _cmd = _cn.CreateCommand();
-            SqlCommand cmd = _cmd;
+            NpgsqlCommand cmd = _cmd;
             cmd.CommandText = sqlqry;
             cmd.Prepare();
             if (_cn.State == ConnectionState.Closed)
@@ -339,9 +357,9 @@
         {
             if (_cmd == null)
                 _cmd = _cn.CreateCommand();
-            SqlCommand cmd = _cmd;
+            NpgsqlCommand cmd = _cmd;
             cmd.CommandText = sqlqry;
-            SqlTransaction tr = _cn.BeginTransaction();
+            NpgsqlTransaction tr = _cn.BeginTransaction();
             cmd.Transaction = tr;
             cmd.Prepare();
             if (_cn.State == ConnectionState.Closed)
@@ -361,7 +379,7 @@
         {
             if (_cmd == null)
                 _cmd = _cn.CreateCommand();
-            SqlCommand cmd = _cmd;
+            NpgsqlCommand cmd = _cmd;
             cmd.CommandText = sqlqry;
             cmd.Prepare();
             if (_cn.State == ConnectionState.Closed)

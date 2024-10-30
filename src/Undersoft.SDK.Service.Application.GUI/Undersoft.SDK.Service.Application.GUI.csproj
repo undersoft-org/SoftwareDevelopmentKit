@@ -24,12 +24,8 @@
     <PackageReference Include="Microsoft.JSInterop" Version="8.*-*" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.*-*" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.*-*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.*-*" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.*-*" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.*-*" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="8.*-*" />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.*-*" />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.*-* " />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.10.3" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.10.3" />
   </ItemGroup>
 
   <ItemGroup>

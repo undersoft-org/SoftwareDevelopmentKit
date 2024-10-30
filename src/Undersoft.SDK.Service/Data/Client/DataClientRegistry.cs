@@ -123,7 +123,7 @@ public static class DataClientRegistry
 
             client.Warning<Datalog>(
                 "Object Client Client - Retry Connection Limit Exceeded "
-                    + "- Unable To Retrieve Metadata From Source",
+                    + "- Unable To Retrieve Metadata From Host",
                 client.BaseAddress
             );
         }

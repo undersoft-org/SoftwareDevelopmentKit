@@ -1,7 +1,6 @@
 ﻿namespace Undersoft.SDK.Instant
 {
     using Extracting;
-    using Microsoft.IdentityModel.Tokens;
     using Rubrics;
     using System.Linq;
     using System.Reflection;
@@ -526,7 +525,7 @@
 
         public override TypeBuilder GetTypeBuilder(string typeName)
         {
-            string typeSignature = !typeName.IsNullOrEmpty() ? typeName : Unique.NewId.ToString();
+            string typeSignature = !string.IsNullOrEmpty(typeName) ? typeName : Unique.NewId.ToString();
 
             AssemblyName an = new AssemblyName(typeSignature);
             AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(

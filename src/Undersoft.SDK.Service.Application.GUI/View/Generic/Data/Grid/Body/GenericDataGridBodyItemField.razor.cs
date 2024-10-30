@@ -1,4 +1,3 @@
-using Azure;
 using Microsoft.AspNetCore.Components.Web;
 using Undersoft.SDK.Service.Application.GUI.Models;
 using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
