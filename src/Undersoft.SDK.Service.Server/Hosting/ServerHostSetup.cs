@@ -142,22 +142,32 @@ public class ServerHostSetup : IServerHostSetup
 
     public IServerHostSetup UseDataMigrations()
     {
+        int tryoutCount = 4;
+
         using (IServiceScope scope = _manager.CreateScope())
         {
-            try
+
+            while (tryoutCount-- > 0)
             {
-                scope.ServiceProvider
-                    .GetRequiredService<IServicer>()
-                    .GetSources()
-                    .ForEach(e => ((IDataStoreContext)e.Context).Database.Migrate());
-            }
-            catch (Exception ex)
-            {
-                this.Error<Applog>(
-                    "DataServer migration initial create - unable to connect the database engine",
-                    null,
-                    ex
-                );
+                try
+                {
+                    scope.ServiceProvider
+                        .GetRequiredService<IServicer>()
+                        .GetSources()
+                        .ForEach(e => ((IDataStoreContext)e.Context).Database.Migrate());
+
+                   break;
+                }
+                catch (Exception ex)
+                {
+                    this.Error<Applog>(
+                        "DataServer migration initial create - unable to connect the database engine",
+                        null,
+                        ex
+                    );
+
+                    Task.Delay(5000);
+                }
             }
         }
 

@@ -34,13 +34,10 @@
             return null;
         }
 
-        public static object New(Type type)
-        {
-            return Activator.CreateInstance(type);
-        }
-
         public static object New(Type type, params object[] ctorArguments)
         {
+            if(ctorArguments == null)
+                return Activator.CreateInstance(type);
             return Activator.CreateInstance(type, ctorArguments);
         }
 
@@ -60,11 +57,6 @@
         public static object New(this Type type, params object[] ctorArguments)
         {
             return InstanceUtilities.New(type, ctorArguments);
-        }
-
-        public static object New(this Type type)
-        {
-            return InstanceUtilities.New(type);
         }
 
         public static T New<T>(this Type type, params object[] ctorArguments)

@@ -6,8 +6,7 @@ using Undersoft.SDK.Service.Data.Repository.Source;
 namespace Undersoft.SDK.Service
 {
     public interface IServicer : IServiceManager, IDisposable
-    {
-        bool IsScoped { get; set; }
+    {    
         IMediator Mediator { get; }
         void SetAuthorization(IAuthorization auth);
         IAsyncEnumerable<object> CreateStream(object request, CancellationToken cancellationToken = default);

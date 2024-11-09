@@ -13,7 +13,7 @@ namespace Undersoft.SDK.Service
         IServiceRegistry Registry { get; }
         IServiceProvider RootProvider { get; }
         IServiceProvider SessionProvider { get; }
-        bool IsScoped { get; }
+        bool IsScoped { get; set; }
 
         object Activate(Type type, params object[] besidesInjectedArguments);
         T Activate<T>(params object[] besidesInjectedArguments);

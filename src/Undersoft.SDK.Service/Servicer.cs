@@ -13,7 +13,7 @@ using Undersoft.SDK.Service.Operation.Command.Notification;
 
 public class Servicer : ServiceManager, IServicer, IMediator
 {
-    new bool disposedValue;
+    bool disposedValue;
     protected IMediator mediator;
 
     protected override IServiceScope SessionScope { get ; set; }
@@ -25,7 +25,7 @@ public class Servicer : ServiceManager, IServicer, IMediator
 
     public IMediator Mediator => mediator ??= GetService<IMediator>();
 
-    public bool IsScoped { get; set; }
+    public override bool IsScoped { get; set; }
 
     public Task<R> Run<T, R>(Func<T, Task<R>> function) where T : class
     {
