@@ -7,7 +7,7 @@
 
 @inherits ViewItem
 
-@foreach (var rubric in Data.Rubrics)
+@foreach (var rubric in Data.ExtendedRubrics)
 {
     <GenericAppItem Rubric="@rubric" Data="@Data" Parent="@this" />
 }

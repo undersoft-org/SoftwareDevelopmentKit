@@ -8,12 +8,11 @@ using Undersoft.SDK.Utilities;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Accounts
 {
-    public partial class GenericAccountMenu<TModel, TValidator> : ViewItem
-        where TModel : class, IOrigin, IInnerProxy, IAuthorization
-        where TValidator : class, IValidator<IViewData<TModel>>
+    public partial class GenericAccountMenu<TAccount> : ViewItem
+        where TAccount : class, IOrigin, IInnerProxy, IAuthorization
     {
         [Inject]
-        private AccessProvider<TModel> access { get; set; } = default!;
+        private AccessProvider<TAccount> access { get; set; } = default!;
 
         [Inject]
         private IServicer servicer { get; set; } = default!;
@@ -42,12 +41,12 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Accounts
                 else
                 {
                     var _panel = servicer.Activate<
-                        ViewPanel<GenericAccountPanel<TModel, TValidator>, TModel>
+                        ViewPanel<GenericAccountPanel<TAccount>, TAccount>
                     >(DialogService);
 
-                    var _account = await access.Registered(typeof(TModel).New<TModel>());
+                    var _account = await access.Registered(typeof(TAccount).New<TAccount>());
                     if (_account != null)
-                        _panel.Content = new ViewData<TModel>(_account, OperationKind.Any);
+                        _panel.Content = new ViewData<TAccount>(_account, OperationKind.Any);
 
                     Data.Model.Proxy[_rubrics["Account"].RubricId] = _panel;
 

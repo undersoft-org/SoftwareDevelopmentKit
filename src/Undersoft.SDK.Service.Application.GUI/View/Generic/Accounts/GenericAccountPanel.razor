@@ -1,7 +1,7 @@
-﻿@typeparam TModel where TModel : class, IOrigin, IInnerProxy, IAuthorization
-@typeparam TValidator where TValidator : class, IValidator<IViewData<TModel>>
+﻿@using Undersoft.SDK.Service.Application.GUI.View.Accounts
+@typeparam TAccount where TAccount : class, IOrigin, IInnerProxy, IAuthorization
 
-@implements IDialogContentComponent<IViewData<TModel>>
+@implements IDialogContentComponent<IViewData<TAccount>>
 @implements IView
 @inject IMessageService MessageService
 
@@ -10,29 +10,29 @@
 <CascadingValue Value="@Content">
 
     <!-- Header -->
-    <GenericFormTabsHeader TModel="TModel" />
+    <GenericFormTabsHeader TModel="TAccount" />
 
     <FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center" VerticalGap="20" Style="height:100%;">        
         <!-- Body -->
-        <GenericFormTabsBody TValidator="TValidator" TModel="TModel" Orientation="Orientation.Vertical" />
+        <GenericFormTabsBody TValidator="AccountValidator<TAccount>" TModel="TAccount" Orientation="Orientation.Vertical" />
 
     </FluentStack>
     <FluentSpacer />
     <!-- Footer -->
-    <GenericFormTabsFooter TModel="TModel" HorizontalAlignment="HorizontalAlignment.Left"  />
+    <GenericFormTabsFooter TModel="TAccount" HorizontalAlignment="HorizontalAlignment.Left"  />
 
 </CascadingValue>
 
 @code
 {
     [Parameter]
-    public IViewData<TModel> Content { get; set; } = default!;
+    public IViewData<TAccount> Content { get; set; } = default!;
 
     [CascadingParameter]
     public FluentDialog Dialog { get; set; } = default!;
 
     [Inject]
-    public IAccessProvider<TModel> Access { get; set; } = default!;
+    public IAccessProvider<TAccount> Access { get; set; } = default!;
 
     public void RenderView()
     {

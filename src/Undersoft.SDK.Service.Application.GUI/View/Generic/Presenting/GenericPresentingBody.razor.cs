@@ -3,7 +3,7 @@ using Undersoft.SDK.Proxies;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Presenting
 {
-    public partial class GenericPresentingBody<TMenu> : FluentComponentBase where TMenu : class, IOrigin, IInnerProxy
+    public partial class GenericPresentingBody<TNavMenu> : FluentComponentBase where TNavMenu : class, IOrigin, IInnerProxy
     {
         private GenericPageContents? _toc = null;
 

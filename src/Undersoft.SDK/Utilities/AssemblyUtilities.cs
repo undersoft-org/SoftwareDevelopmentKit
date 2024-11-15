@@ -81,8 +81,42 @@
             return null;
         }
 
+        public static Type FindGenericTypeByFullName(string fullnameWithoutArgs, char fullnameArgsNumber)
+        {            
+            var asms = AppDomain.CurrentDomain.GetAssemblies();
+            string namespaceFirstBlock = fullnameWithoutArgs.FirstDelimited('.');
+            foreach (var asm in asms)
+            {
+                if (asm.IsDynamic)
+                    continue;
+
+                var extypes = asm.GetExportedTypes();
+
+                foreach (var extype in extypes)
+                {
+                    if (extype.IsGenericType)
+                    {
+                        if (namespaceFirstBlock == null || extype.Namespace == null || !extype.Namespace.Contains(namespaceFirstBlock) || extype.FullName == null)
+                            continue;
+                        var extypeFullnameSplit = extype.FullName.Split('`');
+                        if (extypeFullnameSplit[0].Equals(fullnameWithoutArgs) && extypeFullnameSplit[1][0].Equals(fullnameArgsNumber))
+                            return extype;
+                    }
+                }
+            }
+            return null;
+        }
+
         public static Type FindType(string name, string nameSpace = null)
         {
+            if (name.Contains('`'))
+            {
+                var nameSplit = name.Split('`');
+                var nameWithoutArgs = nameSplit[0];
+                var nameArgsNumber = nameSplit[1][0];
+                return FindGenericType(nameWithoutArgs, nameArgsNumber, nameSpace);
+            }
+
             if (name.Contains('.'))
                 return FindTypeByFullName(name);
 
@@ -105,6 +139,40 @@
                     {
                         if (extype.Name.Equals(name))
                             return extype;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static Type FindGenericType(string nameWithoutArgs, char nameArgsNumber, string nameSpace = null)
+        {
+            if (nameWithoutArgs.Contains('.'))
+                return FindGenericTypeByFullName(nameWithoutArgs, nameArgsNumber);
+
+            var asms = AppDomain.CurrentDomain.GetAssemblies();
+            var namespaceFirstBlock = AppDomain.CurrentDomain.FriendlyName.FirstDelimited('.');
+            foreach (var asm in asms)
+            {
+
+                if (asm.IsDynamic)
+                    continue;
+
+                var extypes = asm.GetExportedTypes();
+
+                foreach (var extype in extypes)
+                {
+                    if (extype.IsGenericType)
+                    {
+                        if (
+                        extype.Namespace.Contains(namespaceFirstBlock)
+                        && (nameSpace == null || extype.Namespace == nameSpace)
+                        )
+                        {
+                            var extypeNameSplit = extype.Name.Split('`');
+                            if (extypeNameSplit[0].Equals(nameWithoutArgs) && extypeNameSplit[1][0].Equals(nameArgsNumber))
+                                return extype;
+                        }
                     }
                 }
             }

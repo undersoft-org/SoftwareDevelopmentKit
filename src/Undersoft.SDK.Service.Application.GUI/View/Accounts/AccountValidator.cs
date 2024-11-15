@@ -7,6 +7,7 @@
 // ********************************************************
 
 using Undersoft.SDK.Service.Access;
+using Undersoft.SDK.Service.Access.Identity;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Accounts;
 
@@ -18,6 +19,15 @@ public class AccountValidator<TModel> : ViewValidator<TModel> where TModel : cla
             OperationKind.Any,
             () =>
             {
+                ValidateEmail(p => ((Personal)p.Model.Proxy["Personal"])!.Email);
+                ValidateRequired(p => ((Personal)p.Model.Proxy["Personal"])!.Email);
+                ValidateRequired(p => ((Personal)p.Model.Proxy["Personal"])!.PhoneNumber);
+                ValidateRequired(p => ((Personal)p.Model.Proxy["Personal"])!.FirstName);
+                ValidateRequired(p => ((Personal)p.Model.Proxy["Personal"])!.LastName);
+                ValidateRequired(p => ((Address)p.Model.Proxy["Address"])!.Country);
+                ValidateRequired(p => ((Address)p.Model.Proxy["Address"])!.City);
+                ValidateRequired(p => ((Address)p.Model.Proxy["Address"])!.Postcode);
+                ValidateRequired(p => ((Professional)p.Model.Proxy["Professional"])!.Profession);
             }
         );
     }

@@ -4,17 +4,14 @@
 @layout GenericLayout
 
 @typeparam TLogo where TLogo : Icon, new()
-@typeparam TMenu where TMenu : class, IOrigin, IInnerProxy
-@typeparam TAccount where TAccount : class, IOrigin, IInnerProxy
-@typeparam TModel where TModel : class, IOrigin, IInnerProxy, IAuthorization
-@typeparam TValidator where TValidator : class, IValidator<IViewData<TModel>>
+@typeparam TNavMenu where TNavMenu : class, IOrigin, IInnerProxy
+@typeparam TAccount where TAccount : class, IOrigin, IInnerProxy, IAuthorization
 
- 
-<GenericPresentingHeader Logo="@Logo" TMenu="TMenu" TModel="TModel" TAccount="TAccount" TValidator="TValidator" />
+<GenericPresentingHeader Logo="@Logo" TNavMenu="TNavMenu" TAccount="TAccount" />
 
 <CascadingValue Value="@Body">
 
-    <GenericPresentingBody TMenu="TMenu" />
+    <GenericPresentingBody TNavMenu="TNavMenu" />
 
 </CascadingValue>
 

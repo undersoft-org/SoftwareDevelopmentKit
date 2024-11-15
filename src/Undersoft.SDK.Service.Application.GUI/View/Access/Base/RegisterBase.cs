@@ -1,4 +1,3 @@
-using FluentValidation;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Undersoft.SDK.Proxies;
 // ********************************************************
@@ -20,10 +19,9 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Access.Base;
 /// <summary>
 /// The register base.
 /// </summary>
-public partial class RegisterBase<TLogo, TAccount, TValidator> : ComponentBase
+public partial class RegisterBase<TLogo, TAccount> : ComponentBase
     where TLogo : Icon, new()
     where TAccount : class, IAuthorization
-    where TValidator : class, IValidator<IViewData<TAccount>>
 {
     /// <summary>
     /// Gets or sets the access.
@@ -71,7 +69,7 @@ public partial class RegisterBase<TLogo, TAccount, TValidator> : ComponentBase
     protected override void OnInitialized()
     {
         _dialog = _servicer.Activate<
-            AccessDialog<TLogo, RegisterDialog<TAccount, TValidator>, TAccount>
+            AccessDialog<TLogo, RegisterDialog<TAccount>, TAccount>
         >(DialogService);
     }
 

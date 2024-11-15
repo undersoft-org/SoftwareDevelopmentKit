@@ -6,7 +6,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.App
     {
         protected override void OnInitialized()
         {
-            Data.MapRubrics(t => t.Rubrics, p => p.Visible);
+            Data.MapRubrics(t => t.ExtendedRubrics, p => p.Extended);
             if (Parent == null)
                 Root = this;
 

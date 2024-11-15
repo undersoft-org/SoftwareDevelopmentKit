@@ -5,15 +5,15 @@ using Undersoft.SDK.Utilities;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
 {
-    public partial class GenericNavMenu<TMenu> : ViewItem<TMenu>, IDisposable where TMenu : class, IOrigin, IInnerProxy
+    public partial class GenericNavMenu<TNavMenu> : ViewItem<TNavMenu>, IDisposable where TNavMenu : class, IOrigin, IInnerProxy
     {
-        private DotNetObjectReference<GenericNavMenu<TMenu>>? _dotNetHelper = null;
+        private DotNetObjectReference<GenericNavMenu<TNavMenu>>? _dotNetHelper = null;
         private IJSObjectReference _jsModule = default!;
 
         protected override void OnInitialized()
         {
             if (Content == null)
-                Content = new ViewData<TMenu>(typeof(TMenu).New<TMenu>());
+                Content = new ViewData<TNavMenu>(typeof(TNavMenu).New<TNavMenu>());
 
             if (Parent == null)
                 Root = this;

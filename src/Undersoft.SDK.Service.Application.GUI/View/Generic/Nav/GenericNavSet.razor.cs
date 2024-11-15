@@ -5,8 +5,8 @@ using Undersoft.SDK.Utilities;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
 {
-    public partial class GenericNavSet<TMenu> : ViewItem<TMenu>
-        where TMenu : class, IOrigin, IInnerProxy
+    public partial class GenericNavSet<TNavMenu> : ViewItem<TNavMenu>
+        where TNavMenu : class, IOrigin, IInnerProxy
     {
         private IJSObjectReference _jsModule = default!;
 
@@ -50,7 +50,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
         protected override void OnParametersSet()
         {
             if (Content == null)
-                Content = new ViewData<TMenu>(typeof(TMenu).New<TMenu>());
+                Content = new ViewData<TNavMenu>(typeof(TNavMenu).New<TNavMenu>());
 
             Content.MapRubrics(t => t.ExtendedRubrics, p => p.Extended);
             Content.ExtendedRubrics.ForEach(r =>

@@ -24,14 +24,15 @@ public class ProxyGenerator : IInstantGenerator
     public ProxyGenerator(Type figureModelType) : this(figureModelType, null) { }
 
     public ProxyGenerator(Type figureModelType, string figureTypeName)
-    {
-        Traceable = figureModelType.IsAssignableTo(typeof(ITracedSeries));
-
+    {        
         BaseType = figureModelType;
 
         Name = string.IsNullOrEmpty(figureTypeName)
             ? figureModelType.FullName
             : figureTypeName;
+
+        if (figureModelType.IsGenericType)
+            Name = Name.Split('`')[0];
 
         Name += "Proxy";
 

@@ -3,9 +3,9 @@
 @using Undersoft.SDK.Invoking
 @using Undersoft.SDK.Proxies
 
-@inherits ViewItem<TMenu>
+@inherits ViewItem<TNavMenu>
 
-@typeparam TMenu where TMenu : class, IOrigin, IInnerProxy
+@typeparam TNavMenu where TNavMenu : class, IOrigin, IInnerProxy
 
 <div id="@BindingId" role="button" class="nav-expander" style="@Style">
     <FluentStack Orientation="Orientation.Horizontal" Style="padding: 1px 13px;" VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="@HorizontalAlignment" VerticalGap="0" HorizontalGap="5">

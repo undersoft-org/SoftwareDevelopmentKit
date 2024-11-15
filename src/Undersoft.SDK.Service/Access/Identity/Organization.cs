@@ -5,7 +5,6 @@ using Undersoft.SDK.Service.Operation;
 
 namespace Undersoft.SDK.Service.Access.Identity;
 
-[Validator("OrganizationValidator")]
 [OpenSearch("OrganizationIndustry", "OrganizationName", "PositionInOrganization")]
 [ViewSize("350px", "550px")]
 public class Organization : DataObject, IOrganization

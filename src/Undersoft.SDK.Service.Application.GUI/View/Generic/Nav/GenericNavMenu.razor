@@ -5,9 +5,9 @@
 @using Undersoft.SDK
 @using Undersoft.SDK.Invoking
 
-@inherits ViewItem<TMenu>
+@inherits ViewItem<TNavMenu>
 
-@typeparam TMenu where TMenu : class, IOrigin, IInnerProxy
+@typeparam TNavMenu where TNavMenu : class, IOrigin, IInnerProxy
 
 <div class="navmenu">
     <CascadingValue Value="@Root">
@@ -19,7 +19,7 @@
                     
                     @if (!SingleMenu)
                     {
-                        <GenericNavSet TMenu="TMenu" Content="@Content" Parent="this" />
+                        <GenericNavSet TNavMenu="TNavMenu" Content="@Content" Parent="this" />
                     }
                     else
                     {

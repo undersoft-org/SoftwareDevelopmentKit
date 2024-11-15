@@ -995,8 +995,7 @@ public class ProxyCompiler : ProxyCompilerBase
 
     public override TypeBuilder GetTypeBuilder(string typeName)
     {
-        string typeSignature =
-            typeName != null && typeName != "" ? typeName : Unique.NewId.ToString();
+        string typeSignature = !string.IsNullOrEmpty(typeName) ? typeName : Unique.NewId.ToString();
         AssemblyName an = new AssemblyName(typeSignature);
 
         AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
@@ -1014,7 +1013,7 @@ public class ProxyCompiler : ProxyCompilerBase
         tb.SetCustomAttribute(
             new CustomAttributeBuilder(
                 typeof(DataContractAttribute).GetConstructor(Type.EmptyTypes),
-                new object[0]
+                Array.Empty<object>()
             )
         );
 

@@ -2,10 +2,8 @@
 
 @inherits FluentComponentBase
 
-@typeparam TMenu where TMenu : class, IOrigin, IInnerProxy
-@typeparam TAccount where TAccount : class, IOrigin, IInnerProxy
-@typeparam TModel where TModel : class, IOrigin, IInnerProxy, IAuthorization
-@typeparam TValidator where TValidator : class, IValidator<IViewData<TModel>>
+@typeparam TNavMenu where TNavMenu : class, IOrigin, IInnerProxy
+@typeparam TAccount where TAccount : class, IOrigin, IInnerProxy, IAuthorization
 
 <FluentHeader class="siteheader" Height="40" Style="margin-left:-1.0rem">
     <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" Width="100%" Style="height:40px">
@@ -36,7 +34,7 @@
                     <GenericAppearancePanelButton />
                 </div>
                 <div class="account" style="margin-right:-15px;">
-                    <GenericAccountMenuPersona TAccount="TAccount" TModel="TModel" TValidator="TValidator" ImageSize="30px" />
+                    <GenericAccountMenuPersona TAccount="TAccount" ImageSize="30px" />
                 </div>
             </FluentStack>
         </div>

@@ -3,9 +3,9 @@
 @using Undersoft.SDK.Invoking
 @using Undersoft.SDK.Proxies
 
-@inherits ViewItem<TMenu>
+@inherits ViewItem<TNavMenu>
 
-@typeparam TMenu where TMenu : class, IOrigin, IInnerProxy
+@typeparam TNavMenu where TNavMenu : class, IOrigin, IInnerProxy
 
 <div class="generic-nav-set nav-menu">
     <CascadingValue Value="@Root">

@@ -3,13 +3,13 @@ using Undersoft.SDK.Proxies;
 
 namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
 {
-    public partial class GenericNavExpander<TMenu> : ViewItem<TMenu> where TMenu : class, IOrigin, IInnerProxy
+    public partial class GenericNavExpander<TNavMenu> : ViewItem<TNavMenu> where TNavMenu : class, IOrigin, IInnerProxy
     {
         [Parameter]
         public bool ShowLabel { get; set; }
 
         [Parameter]
-        public override string? Label { get; set; } = typeof(TMenu).Name;
+        public override string? Label { get; set; } = typeof(TNavMenu).Name;
 
         [Parameter]
         public Icon? ExpandedIcon { get; set; } = new Icons.Regular.Size20.MoreHorizontal();
