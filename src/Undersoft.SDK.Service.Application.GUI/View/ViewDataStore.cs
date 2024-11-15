@@ -462,43 +462,10 @@ public class ViewDataStore<TStore, TDto, TModel> : ViewData<TModel>, IViewDataSt
     {
         if (!TryGet(model.Id, out IViewData data))
         {
-            data = new ViewData<TModel>(model) { Root = this.Root, Parent = this };
-
-            data.Rubrics.Add(Rubrics);
-            data.ExtendedRubrics.Add(ExtendedRubrics);
+            data = new ViewData<TModel>(model) { Root = this.Root, Parent = this };           
             data.ValidatorType = this.ValidatorType;
             data.Validator = this.Validator;
-
-            var extends = ExtendedRubrics
-                .ForEach(r =>
-                {
-                    var type = r.RubricType;
-                    var id = r.RubricId;
-                    var value = model.Proxy[id];
-                    if (value == null)
-                    {
-                        value = type.New();
-                        model.Proxy[id] = value;
-                    }
-
-                    if (type.IsAssignableTo(typeof(IEnumerable)))
-                        type = type.GetEnumerableElementType();
-
-                    IViewDataStore extend = typeof(ViewDataStore<,>)
-                        .MakeGenericType(typeof(TStore), type)
-                        .New<IViewDataStore>(value, this.Root);
-
-                    extend.Title = r.DisplayName ?? r.RubricName;
-
-                    return extend;
-
-                })
-                .Commit();
-
-            if (extends.Any())
-                data.Add(extends);
-
-            this.Add(data);
+            AddViewData(data);
         }
         else if (patch)
         {
@@ -515,38 +482,7 @@ public class ViewDataStore<TStore, TDto, TModel> : ViewData<TModel>, IViewDataSt
             data = viewData;
             data.Root = this.Root;
             data.Parent = this;
-            data.Rubrics.Add(Rubrics);
-            data.ExtendedRubrics.Add(ExtendedRubrics);
-
-            var extends = ExtendedRubrics
-                .ForEach(r =>
-                {
-                    var type = r.RubricType;
-                    var id = r.RubricId;
-                    var value = data.Model.Proxy[id];
-                    if (value == null)
-                    {
-                        value = type.New();
-                        data.Model.Proxy[id] = value;
-                    }
-
-                    if (type.IsAssignableTo(typeof(IEnumerable)))
-                        type = type.GetEnumerableElementType();
-
-                    IViewDataStore extend = typeof(ViewDataStore<,>)
-                          .MakeGenericType(typeof(TStore), type)
-                          .New<IViewDataStore>(value, this.Root);
-
-                    extend.Title = r.DisplayName ?? r.RubricName;
-
-                    return extend;
-                })
-                .Commit();
-
-            if (extends.Any())
-                data.Add(extends);
-
-            this.Add(data);
+            AddViewData(data);
         }
         else if (patch && ((TModel)viewData.Model).Modified != ((TModel)data.Model).Modified)
         {
@@ -554,6 +490,44 @@ public class ViewDataStore<TStore, TDto, TModel> : ViewData<TModel>, IViewDataSt
         }
         data.StateFlags.ClearCommandStates();
         return data;
+    }
+
+    private IViewData AddViewData(IViewData data)
+    { 
+        data.Rubrics.Add(Rubrics);
+        data.ExtendedRubrics.Add(ExtendedRubrics);
+
+        var extends = ExtendedRubrics
+            .ForEach(r =>
+            {
+                var type = r.RubricType;
+                var id = r.RubricId;
+                var value = data.Model.Proxy[id];
+                if (value == null)
+                {
+                    value = type.New();
+                    data.Model.Proxy[id] = value;
+                }
+
+                if (type.IsAssignableTo(typeof(IEnumerable)))
+                    type = type.GetEnumerableElementType();
+
+                IViewDataStore extend = typeof(ViewDataStore<,>)
+                      .MakeGenericType(typeof(TStore), type)
+                      .New<IViewDataStore>(value, this.Root);
+
+                extend.Title = r.DisplayName ?? r.RubricName;
+
+                return extend;
+            })
+            .Commit();
+
+        if (extends.Any())
+            data.Add(extends);
+
+        this.Add(data);
+
+        return data; 
     }
 
     public virtual IViewData Detach(TModel model)
