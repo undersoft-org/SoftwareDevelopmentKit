@@ -19,9 +19,9 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
     private readonly IJSRuntime js;
     private IAuthorization _authorization;
     private readonly IRemoteRepository<IAccountStore, TAccount> _repository;
-    private readonly string TOKENKEY = "TOKENKEY";
-    private readonly string EXPIRATIONTOKENKEY = "EXPIRATIONTOKENKEY";
-    private readonly string EMAILKEY = "EMAILKEY";
+    private readonly string TOKEN_STORAGE = "token";
+    private readonly string TOKEN_EXPIRATION_STORAGE = "token_exp";
+    private readonly string EMAIL_STORAGE = "email";
     private TAccount? _account;
     private AccessState? _accessState;
     private DateTime? _expiration;
@@ -47,15 +47,15 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var token = await js.GetFromLocalStorage(TOKENKEY);
-        var email = await js.GetFromLocalStorage(EMAILKEY);
+        var token = await js.GetFromLocalStorage(TOKEN_STORAGE);
+        var email = await js.GetFromLocalStorage(EMAIL_STORAGE);
 
         if (string.IsNullOrEmpty(token))
         {
             return Anonymous;
         }
        
-        var expirationTimeString = await js.GetFromLocalStorage(EXPIRATIONTOKENKEY);
+        var expirationTimeString = await js.GetFromLocalStorage(TOKEN_EXPIRATION_STORAGE);
 
         if (expirationTimeString != null)
         {
@@ -148,7 +148,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
         if (claims.TryGet("exp", out Claim expiration))
         {
             this._expiration = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiration.Value)).LocalDateTime;
-            js.SetInLocalStorage(EXPIRATIONTOKENKEY, expiration.Value);
+            js.SetInLocalStorage(TOKEN_EXPIRATION_STORAGE, expiration.Value);
         }
 
         return claims;
@@ -184,8 +184,8 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
         _authorization.Notes = result.Notes;
         if (result.Credentials.SessionToken != null)
         {
-            await js.SetInLocalStorage(TOKENKEY, result.Credentials.SessionToken);
-            await js.SetInLocalStorage(EMAILKEY, result.Credentials.Email);
+            await js.SetInLocalStorage(TOKEN_STORAGE, result.Credentials.SessionToken);
+            await js.SetInLocalStorage(EMAIL_STORAGE, result.Credentials.Email);
             var authState = await GetAccessStateAsync(result.Credentials.SessionToken);
             NotifyAuthenticationStateChanged(Task.FromResult((AuthenticationState)authState));
         }
@@ -202,7 +202,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<IAuthorization> SignOut(IAuthorization auth)
     {
-        auth.Credentials.Email = await js.GetFromLocalStorage(EMAILKEY);
+        auth.Credentials.Email = await js.GetFromLocalStorage(EMAIL_STORAGE);
 
         var result = await _repository.Access(nameof(SignOut), auth);
 
@@ -221,8 +221,8 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
         result.PatchTo(_authorization);
         if (result.Credentials.SessionToken != null)
         {
-            await js.SetInLocalStorage(TOKENKEY, result.Credentials.SessionToken);
-            await js.SetInLocalStorage(EMAILKEY, result.Credentials.Email);
+            await js.SetInLocalStorage(TOKEN_STORAGE, result.Credentials.SessionToken);
+            await js.SetInLocalStorage(EMAIL_STORAGE, result.Credentials.Email);
             var authState = await GetAccessStateAsync(result.Credentials.SessionToken);
             NotifyAuthenticationStateChanged(Task.FromResult((AuthenticationState)authState));
         }
@@ -326,9 +326,9 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
     private async Task CleanUp()
     {
         var auth = _authorization;
-        await js.RemoveItem(TOKENKEY);
-        await js.RemoveItem(EXPIRATIONTOKENKEY);
-        await js.RemoveItem(EMAILKEY);
+        await js.RemoveItem(TOKEN_STORAGE);
+        await js.RemoveItem(TOKEN_EXPIRATION_STORAGE);
+        await js.RemoveItem(EMAIL_STORAGE);
         auth.Notes = new OperationNotes();
         auth.Credentials = new Credentials();
         _repository.Context.SetAuthorization(null);

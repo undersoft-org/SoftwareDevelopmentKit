@@ -1,0 +1,16 @@
+﻿@inherits FluentComponentBase
+
+@typeparam TApps where TApps : class, IOrigin, IInnerProxy
+
+<FluentFooter Style="@("display:flex; height: 40px; width:100%;")">
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" Width="100%">
+       
+        <GenericAppBar TMenu="TApps" />
+       
+        <FluentSpacer />
+     
+        <a class="undersoft-footer-logo" href="" style="height:30px">
+            <FluentIcon Value="@(new ViewGraphic.CompanyLogo.Reactangle.MonoSmall())" Color="Color.FillInverse" Width="100" />
+        </a>
+    </FluentStack>
+</FluentFooter>

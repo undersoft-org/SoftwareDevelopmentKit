@@ -1,0 +1,32 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using FluentValidation
+@using Undersoft.SDK.Proxies
+@using Undersoft.SDK.Rubrics
+@using Undersoft.SDK
+@using Undersoft.SDK.Invoking
+
+@inherits ViewItem<TMenu>
+
+@typeparam TMenu where TMenu : class, IOrigin, IInnerProxy
+
+<style>
+    .fluent-appbar.smallicons {
+        --appbar-item-size: 58;
+    }
+</style>
+
+<div class="@Class">
+    <CascadingValue Value="@Root">
+
+        <FluentAppBar Orientation="@Orientation" PopoverShowSearch="@ShowSearch" Style="@Style" Class="@Class">
+
+            <GenericApp Rubric="@Rubric" Data="@Data" Parent="this" />
+
+        </FluentAppBar>
+
+        @ChildContent
+
+    </CascadingValue>
+</div>
+
+

@@ -19,7 +19,7 @@
         {
             try
             {
-                if (DbHand.Schema == null || DbHand.Schema.DbTables.Count == 0)
+                if (DbHelper.Schema == null || DbHelper.Schema.DbTables.Count == 0)
                 {
                     _ = new InstantSqlDb(sqlConnectString);
                 }

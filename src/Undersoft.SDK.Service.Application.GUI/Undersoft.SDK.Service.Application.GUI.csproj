@@ -24,8 +24,8 @@
     <PackageReference Include="Microsoft.JSInterop" Version="8.*-*" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.*-*" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.*-*" />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.10.3" />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.10.3" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.*-*" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.*-*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +42,12 @@
     <Using Include="Microsoft.Extensions.Options" />
     <Using Include="Microsoft.JSInterop" />
     <Using Include="System.ComponentModel.DataAnnotations" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="View\Generic\Presenting\GenericPresentingSet.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
   </ItemGroup>
 
 </Project>

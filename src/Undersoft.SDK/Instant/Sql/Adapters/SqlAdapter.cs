@@ -58,7 +58,7 @@
                         if (dbType == BulkDbType.TempDB)
                             _cn.ChangeDatabase("tempdb");
                         if (
-                            !DbHand.Temp.DataDbTables.Have(buforTable)
+                            !DbHelper.Temp.DataDbTables.Have(buforTable)
                             || prepareType == BulkPrepareType.Drop
                         )
                         {
@@ -82,7 +82,7 @@
                                     "numeric"
                                 };
                                 int colLenght = column.RubricSize;
-                                sqlTypeString = SqlNetType.NetTypeToSql(column.RubricType);
+                                sqlTypeString = DbNetType.NetTypeToSql(column.RubricType);
                                 string addSize =
                                     (colLenght > 0)
                                         ? (defineStr.Contains(sqlTypeString))
@@ -158,7 +158,7 @@
                     if (dbType == BulkDbType.TempDB)
                         _cn.ChangeDatabase("tempdb");
                     if (
-                        !DbHand.Schema.DataDbTables.Have(buforTable)
+                        !DbHelper.Schema.DataDbTables.Have(buforTable)
                         || prepareType == BulkPrepareType.Drop
                     )
                     {
@@ -178,7 +178,7 @@
                             };
                             List<string> defineDec = new List<string>() { "decimal", "numeric" };
                             int colLenght = column.RubricSize;
-                            sqlTypeString = SqlNetType.NetTypeToSql(column.RubricType);
+                            sqlTypeString = DbNetType.NetTypeToSql(column.RubricType);
                             string addSize =
                                 (colLenght > 0)
                                     ? (defineOne.Contains(sqlTypeString))

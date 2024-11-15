@@ -1,3 +1,20 @@
 ﻿.navmenu {
     height:calc(100vh - 80px);
 }
+
+/* level indenting */
+::deep .fluent-nav-group * .fluent-nav-menu .fluent-nav-item .content-region {
+    padding-inline-start: 0px;
+}
+
+::deep .fluent-nav-group * .fluent-nav-menu .fluent-nav-item * .fluent-nav-menu .fluent-nav-item .content-region {
+    padding-inline-start: 0px;
+}
+
+::deep .fluent-nav-group * .fluent-nav-menu .fluent-nav-item * .fluent-nav-menu .fluent-nav-item * .fluent-nav-menu .fluent-nav-item .content-region {
+    padding-inline-start: 0px;
+}
+
+::deep .fluent-nav-group * .fluent-nav-menu .fluent-nav-item * .fluent-nav-menu .fluent-nav-item * .fluent-nav-menu .fluent-nav-item * .fluent-nav-menu .fluent-nav-item .content-region {
+    padding-inline-start: 0px;
+}

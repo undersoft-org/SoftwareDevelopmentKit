@@ -3,14 +3,14 @@ using System.Text.Json.Serialization;
 
 namespace Undersoft.SDK.Service.Application.GUI.Models;
 
-public class AppearanceState : ViewwModel
+public class AppearanceState : ViewModel
 {
     public LocalizationDirection Dir { get; set; } = LocalizationDirection.LeftToRight;
     public StandardLuminance Luminance { get; set; } = StandardLuminance.DarkMode;
 
     public ElementReference Container { get; set; } = default!;
 
-    public string? Color { get; set; } = "#00d7ff";
+    public string? PrimaryColor { get; set; } = "#00d7ff";
 
     public event Action? OnChange;
 
@@ -19,6 +19,9 @@ public class AppearanceState : ViewwModel
     public bool IsDarkMode { get; set; }
 
     public bool IsDevice { get; set; }
+
+    [Parameter]
+    public DesignThemeModes Mode { get; set; }
 
     [JsonIgnore]
     public bool IsLoaded { get; set; }
@@ -68,7 +71,7 @@ public class AppearanceState : ViewwModel
 
     public void SetColor(string? color)
     {
-        Color = color;
+        PrimaryColor = color;
         NotifyStateHasChanged();
     }
 

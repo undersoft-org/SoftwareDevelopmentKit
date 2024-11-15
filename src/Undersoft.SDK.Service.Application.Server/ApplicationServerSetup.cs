@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Undersoft.SDK.Service.Server;
 
@@ -17,7 +18,7 @@ public partial class ApplicationServerSetup : ServerSetup, IApplicationServerSet
         Type[]? sourceTypes = null,
         Type[]? clientTypes = null
     )
-    {
+    {       
         Services.AddControllersWithViews();
         Services.AddRazorPages();
 

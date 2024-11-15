@@ -98,7 +98,7 @@
     public DesignThemeModes Mode { get => mode; set { mode = value; AppearanceState.IsDarkMode = (value == DesignThemeModes.Dark) ? true : false; } }
 
     private UndersoftColors? undersoftColors;
-    public UndersoftColors? UndersoftColor { get => undersoftColors; set { undersoftColors = value; AppearanceState.Color = value.ToAttributeValue(); } }
+    public UndersoftColors? UndersoftColor { get => undersoftColors; set { undersoftColors = value; AppearanceState.PrimaryColor = value.ToAttributeValue(); } }
 
     public string? CurrentColor { get => UndersoftColor.ToAttributeValue(); set => UndersoftColor = AllUndersoftColors.Where(c => c.ToAttributeValue() == value).FirstOrDefault();  }
 

@@ -258,6 +258,10 @@ code {
         border: none;
     }
 
+    .undersoft-footer-logo {
+        display:none;
+    }
+
     [dir="rtl"] .navmenu-icon {
         left: 20px;
         right: unset
@@ -400,15 +404,6 @@ code {
         width: auto;
     }
 }
-
-
-
-@media (min-width: 800px) {
-    .fluent-dialog-main {
-        --dialog-width: 340px;
-    }
-}
-
 
 @media (max-width: 480px) {
     .fluent-dialog-main {

@@ -34,9 +34,13 @@ public class ApplicationServerHostSetup : ServerHostSetup, IApplicationServerHos
         _builder
             .UseODataBatching()
             .UseODataQueryRequest()
-            .UseBlazorFrameworkFiles()
+            .UseBlazorFrameworkFiles()            
+            #if NET8_0
             .UseStaticFiles()
-            .UseRouting()
+            #else
+            .MapStaticAssets()
+            #endif
+            .UseRouting()           
             .UseCors(o => o.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
         if(apiVersions != null )

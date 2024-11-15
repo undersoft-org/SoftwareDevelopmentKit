@@ -23,7 +23,7 @@
 
         public void SchemaPrepare(BuildDbSchemaType buildtype = BuildDbSchemaType.Schema)
         {
-            DataDbSchema dbs = new DataDbSchema(sqlcn);
+            DbSchema dbs = new DbSchema(sqlcn);
             bool wasOpen = false;
             if (sqlcn.State == ConnectionState.Open)
                 wasOpen = true;
@@ -59,7 +59,7 @@
                                             new DbColumn
                                             {
                                                 ColumnName = k["COLUMN_NAME"].ToString(),
-                                                RubricType = SqlNetType.SqlTypeToNet(
+                                                RubricType = DbNetType.SqlTypeToNet(
                                                     k["DATA_TYPE"].ToString()
                                                 ),
                                                 MaxLength =
@@ -98,7 +98,7 @@
                                                 (k["KeyType"].ToString() == "56") ? true : false,
                                             isKey = true,
                                             DbOrdinal = Convert.ToInt32(k["ordinal_position"]),
-                                            RubricType = SqlNetType.SqlTypeToNet(
+                                            RubricType = DbNetType.SqlTypeToNet(
                                                 columns
                                                     .Where(
                                                         c =>
@@ -118,9 +118,9 @@
 
             dbs.DataDbTables.AddRange(dbTables.ToList());
             if (buildtype == BuildDbSchemaType.Schema)
-                DbHand.Schema = dbs;
+                DbHelper.Schema = dbs;
             else
-                DbHand.Temp = dbs;
+                DbHelper.Temp = dbs;
         }
     }
 }

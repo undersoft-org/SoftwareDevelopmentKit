@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.FluentUI.AspNetCore.Components.Utilities;
+using Microsoft.FluentUI.AspNetCore.Components;
 using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Service.Application.GUI.View.Abstraction;
 using Undersoft.SDK.Uniques;
 using Undersoft.SDK.Utilities;
 
-namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
+namespace Undersoft.SDK.Service.Application.GUI.View.Generic.App
 {
-    public partial class GenericNavItem : ViewItem
+    public partial class GenericAppItem : ViewItem
     {
         [Inject]
         private NavigationManager _navigation { get; set; } = default!;
@@ -54,21 +54,15 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.Nav
 
         private NavLinkMatch Match => Rubric.PrefixedLink ? NavLinkMatch.Prefix : NavLinkMatch.All;
 
-        [Parameter]
-        public bool Expanded
-        {
-            get => Rubric.Expanded;
-            set => Rubric.Expanded = value;
-        }
-
-        [Parameter]
-        public bool Disabled
-        {
-            get => Rubric.Disabled;
-            set => Rubric.Disabled = value;
-        }
-
         public IViewData ExtendData { get; set; } = default!;
+
+        public Icon? GetIconActive()
+        {
+            if (Icon == null) return null;
+            var iconType = AssemblyUtilities.FindTypeByFullName(Icon.GetType().FullName!.Replace("Regular", "Filled"));
+            if (iconType == null) return null;
+            return iconType.New<Icon>();
+        }
 
         private string? GetLinkValue()
         {

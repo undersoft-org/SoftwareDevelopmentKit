@@ -45,7 +45,7 @@
                 "Schema"
             ).Generate();
 
-            var dbKeyNames = DbHand
+            var dbKeyNames = DbHelper
                 .Schema.DataDbTables.List.SelectMany(t =>
                     t.GetKeyForDataTable.Select(d => d.RubricName)
                 )
@@ -128,9 +128,9 @@
                 else
                     takeDbKeys = true;
 
-            if (takeDbKeys && DbHand.Schema != null && DbHand.Schema.DataDbTables.List.Count > 0)
+            if (takeDbKeys && DbHelper.Schema != null && DbHelper.Schema.DataDbTables.List.Count > 0)
             {
-                var dbKeyNames = DbHand
+                var dbKeyNames = DbHelper
                     .Schema.DataDbTables.List.SelectMany(t =>
                         t.GetKeyForDataTable.Select(d => d.RubricName)
                     )

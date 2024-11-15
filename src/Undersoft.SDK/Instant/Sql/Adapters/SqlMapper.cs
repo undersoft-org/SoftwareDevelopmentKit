@@ -26,7 +26,7 @@
                 if (dbTableNames != null)
                 {
                     foreach (string dbTableName in dbTableNames)
-                        if (DbHand.Schema.DataDbTables.Have(dbTableName))
+                        if (DbHelper.Schema.DataDbTables.Have(dbTableName))
                             dbtNameMixList.Add(dbTableName);
                     if (dbtNameMixList.Count > 0)
                         mixedMode = true;
@@ -35,9 +35,9 @@
                 tName = t.InstantType.Name;
                 if (!mixedMode)
                 {
-                    if (!DbHand.Schema.DataDbTables.Have(tName))
+                    if (!DbHelper.Schema.DataDbTables.Have(tName))
                     {
-                        if (DbHand.Schema.DataDbTables.Have(prefix + tName))
+                        if (DbHelper.Schema.DataDbTables.Have(prefix + tName))
                             dbtName = prefix + tName;
                     }
                     else
@@ -51,10 +51,10 @@
                                     .AsValues()
                                     .Where(
                                         c =>
-                                            DbHand.Schema.DataDbTables[dbtName].DataDbColumns.Have(
+                                            DbHelper.Schema.DataDbTables[dbtName].DataDbColumns.Have(
                                                 c.RubricName
                                             )
-                                            && !DbHand.Schema.DataDbTables[dbtName].DbPrimaryKey
+                                            && !DbHelper.Schema.DataDbTables[dbtName].DbPrimaryKey
                                                 .Select(pk => pk.ColumnName)
                                                 .Contains(c.RubricName)
                                     )
@@ -65,7 +65,7 @@
                                     .AsValues()
                                     .Where(
                                         c =>
-                                            DbHand.Schema.DataDbTables[dbtName].DbPrimaryKey
+                                            DbHelper.Schema.DataDbTables[dbtName].DbPrimaryKey
                                                 .Select(pk => pk.ColumnName)
                                                 .Contains(c.RubricName)
                                     )
@@ -87,7 +87,7 @@
                                     .AsValues()
                                     .Where(
                                         c =>
-                                            DbHand.Schema.DataDbTables[dbtName].DataDbColumns.Have(
+                                            DbHelper.Schema.DataDbTables[dbtName].DataDbColumns.Have(
                                                 c.RubricName
                                             ) && !c.IsKey
                                     )
@@ -98,7 +98,7 @@
                                     .AsValues()
                                     .Where(
                                         c =>
-                                            DbHand.Schema.DataDbTables[dbtName].DataDbColumns.Have(
+                                            DbHelper.Schema.DataDbTables[dbtName].DataDbColumns.Have(
                                                 c.RubricName
                                             ) && c.IsKey
                                     )
@@ -127,10 +127,10 @@
                                     .AsValues()
                                     .Where(
                                         c =>
-                                            DbHand.Schema.DataDbTables[dbtName].DataDbColumns.Have(
+                                            DbHelper.Schema.DataDbTables[dbtName].DataDbColumns.Have(
                                                 c.RubricName
                                             )
-                                            && !DbHand.Schema.DataDbTables[dbtName].DbPrimaryKey
+                                            && !DbHelper.Schema.DataDbTables[dbtName].DbPrimaryKey
                                                 .Select(pk => pk.ColumnName)
                                                 .Contains(c.RubricName)
                                     )
@@ -142,7 +142,7 @@
                                         .AsValues()
                                         .Where(
                                             c =>
-                                                DbHand.Schema.DataDbTables[dbtName].DbPrimaryKey
+                                                DbHelper.Schema.DataDbTables[dbtName].DbPrimaryKey
                                                     .Select(pk => pk.ColumnName)
                                                     .Contains(c.RubricName)
                                         )
@@ -155,7 +155,7 @@
                                         .AsValues()
                                         .Where(
                                             c =>
-                                                DbHand.Schema.DataDbTables[
+                                                DbHelper.Schema.DataDbTables[
                                                     dbtName
                                                 ].DataDbColumns.Have(c.RubricName)
                                         )
@@ -181,7 +181,7 @@
                                     .AsValues()
                                     .Where(
                                         c =>
-                                            DbHand.Schema.DataDbTables[dbtName].DataDbColumns.Have(
+                                            DbHelper.Schema.DataDbTables[dbtName].DataDbColumns.Have(
                                                 c.RubricName
                                             ) && !c.IsKey
                                     )
@@ -192,7 +192,7 @@
                                     .AsValues()
                                     .Where(
                                         c =>
-                                            DbHand.Schema.DataDbTables[dbtName].DataDbColumns.Have(
+                                            DbHelper.Schema.DataDbTables[dbtName].DataDbColumns.Have(
                                                 c.RubricName
                                             ) && c.IsKey
                                     )
@@ -204,7 +204,7 @@
                                         .AsValues()
                                         .Where(
                                             c =>
-                                                DbHand.Schema.DataDbTables[
+                                                DbHelper.Schema.DataDbTables[
                                                     dbtName
                                                 ].DataDbColumns.Have(c.RubricName)
                                         )

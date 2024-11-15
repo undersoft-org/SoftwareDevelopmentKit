@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<FluentDesignTheme CustomColor="@Color" Mode="@(AppearanceState.IsDarkMode ? DesignThemeModes.Dark : DesignThemeModes.Light)" />
+<FluentDesignTheme CustomColor="@PrimaryColor" Mode="@(AppearanceState.Mode)" StorageName="@APPEARANCE_STORAGE" />
 <FluentDesignSystemProvider ControlCornerRadius="@ControlCornerRadius" BaseHeightMultiplier="@BaseHeight" DisabledOpacity="@DisabledOpacity"  LayerCornerRadius="@LayerCornerRadius" Density="@Density" BaseHorizontalSpacingMultiplier="@BaseHorizontalSpacingMultiplier" FocusStrokeWidth="@FocusStrokeWidth" TypeRampBaseFontSize="@TypeRampBaseFontSize" TypeRampBaseLineHeight="@TypeRampBaseLineHeight" >
     <div @ref="@Reference" class="@ClassValue" style="@StyleValue" @attributes="AdditionalAttributes">
         <FluentMessageBarProvider Section="@ViewSection.TOP" />

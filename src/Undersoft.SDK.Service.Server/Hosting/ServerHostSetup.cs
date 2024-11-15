@@ -201,7 +201,11 @@ public class ServerHostSetup : IServerHostSetup
             .UseODataQueryRequest()
             .UseODataBatching()
             .UseDefaultFiles()
+            #if NET8_0
             .UseStaticFiles()
+            #else
+            .MapStaticAssets()
+            #endif
             .UseRouting()
             .UseCors(o => o.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 

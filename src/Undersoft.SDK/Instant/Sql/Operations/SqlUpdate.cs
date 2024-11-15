@@ -170,7 +170,7 @@
                 }
             }
 
-            if (DbHand.Schema.DataDbTables[tableName].DataDbColumns.Have("updated") && !isUpdateCol)
+            if (DbHelper.Schema.DataDbTables[tableName].DataDbColumns.Have("updated") && !isUpdateCol)
                 sb.AppendFormat(CultureInfo.InvariantCulture, ", [updated] = '{0}'", DateTime.Now);
 
             if (updateKeys)

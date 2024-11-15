@@ -9,7 +9,7 @@ using Undersoft.SDK.Service.Data.Object;
 
 [DataContract]
 [StructLayout(LayoutKind.Sequential)]
-public class ViewwModel : DataObject, IViewModel
+public class ViewModel : DataObject, IViewModel
 {
-    public ViewwModel() : base() { }
+    public ViewModel() : base() { }
 }

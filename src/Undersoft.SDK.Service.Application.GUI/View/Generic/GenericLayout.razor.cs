@@ -21,7 +21,7 @@ public partial class GenericLayout : LayoutComponentBase
     protected string? _prevUri;
     private GenericPageContents? _toc = null;
     private bool _menuChecked = true;
-    private readonly string APPEARANCEKEY = "APPEARANCEKEY";
+    private readonly string APPEARANCE_STORAGE = "appearance";
 
     protected string? ClassValue => new CssBuilder(Class)
        .AddClass("layout")
@@ -36,8 +36,9 @@ public partial class GenericLayout : LayoutComponentBase
     public string? Class { get; set; }
 
     [Parameter]
-    public string? Color { get; set; } = default!;
+    public string? PrimaryColor { get; set; } = default!;
 
+    [Parameter]
     public DesignThemeModes Mode { get; set; }
 
     [Parameter]
@@ -94,15 +95,15 @@ public partial class GenericLayout : LayoutComponentBase
     {
         if (!AppearanceState.IsLoaded)
         {
-            var appearanceState = await JS.GetFromLocalStorage(APPEARANCEKEY);
+            var appearanceState = await JS.GetFromLocalStorage(APPEARANCE_STORAGE);
             if (appearanceState != null)
                 AppearanceState.PatchFromJson<AppearanceState, AppearanceState>(appearanceState);
             else
-                await JS.SetInLocalStorage(APPEARANCEKEY, this.PatchTo(AppearanceState).ToJsonString());
+                await JS.SetInLocalStorage(APPEARANCE_STORAGE, this.PatchTo(AppearanceState).ToJsonString());
         }
         AppearanceState.IsLoaded = true;
         Mode = AppearanceState.IsDarkMode ? DesignThemeModes.Dark : DesignThemeModes.Light;
-        Color = AppearanceState.Color;
+        PrimaryColor = AppearanceState.PrimaryColor;
         Density = AppearanceState.Density;
         ControlCornerRadius = AppearanceState.ControlCornerRadius;
         LayerCornerRadius = AppearanceState.LayerCornerRadius;
