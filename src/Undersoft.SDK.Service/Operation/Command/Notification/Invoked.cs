@@ -10,7 +10,7 @@ public class Invoked<TStore, TType, TDto> : InvokeNotification<Invocation<TDto>>
     where TDto : class, IOrigin
     where TStore : IDataServerStore
 {
-    public Invoked(Action<TStore, TType, TDto> command) : base(command)
+    public Invoked(Service<TStore, TType, TDto> command) : base(command)
     {
     }
 }

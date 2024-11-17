@@ -28,14 +28,14 @@ public abstract class RemoteServiceController<TStore, TService, TDto>
     }
 
     [HttpPost]
-    public virtual IActionResult Access([FromBody] IDictionary<string, Arguments> args)
+    public virtual IActionResult Service([FromBody] IDictionary<string, Arguments> args)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         var result = Invoke(
             args,
-            (arg) => new RemoteAccess<TStore, TService, TDto>(arg.Key, arg.Value)
+            (arg) => new RemoteService<TStore, TService, TDto>(arg.Key, arg.Value)
         );
 
         Task.WaitAll(result);
@@ -43,43 +43,7 @@ public abstract class RemoteServiceController<TStore, TService, TDto>
         var response = result.Select(r => r.Result).FirstOrDefault();
         var payload = response.ToJsonBytes();
         return !response.IsValid ? BadRequest(payload) : Ok(payload);
-    }
-
-    [HttpPost]
-    public virtual IActionResult Action([FromBody] IDictionary<string, Arguments> args)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var result = Invoke(
-            args,
-            (arg) => new RemoteAction<TStore, TService, TDto>(arg.Key, arg.Value)
-        );
-
-        Task.WaitAll(result);
-
-        var response = result.Select(r => r.Result).FirstOrDefault();
-        var payload = response.ToJsonBytes();
-        return !response.IsValid ? BadRequest(payload) : Ok(payload);
-    }
-
-    [HttpPost]
-    public virtual IActionResult Setup([FromBody] IDictionary<string, Arguments> args)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var result = Invoke(
-            args,
-            (arg) => new RemoteSetup<TStore, TService, TDto>(arg.Key, arg.Value)
-        );
-
-        Task.WaitAll(result);
-
-        var response = result.Select(r => r.Result).FirstOrDefault();
-        var payload = response.ToJsonBytes();
-        return !response.IsValid ? BadRequest(payload) : Ok(payload);
-    }
+    }   
 
     protected virtual Task<Arguments>[] Invoke(
         IDictionary<string, Arguments> args,

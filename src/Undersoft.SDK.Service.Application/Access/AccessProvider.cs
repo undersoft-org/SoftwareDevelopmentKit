@@ -175,7 +175,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<IAuthorization?> SignIn(IAuthorization auth)
     {
-        var result = await _repository.Access(nameof(SignIn), auth);
+        var result = await _repository.Service(nameof(SignIn), auth);
 
         if (result == null)
             return null;
@@ -194,7 +194,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<IAuthorization> SignUp(IAuthorization auth)
     {
-        var result = await _repository.Access(nameof(SignUp), auth);
+        var result = await _repository.Service(nameof(SignUp), auth);
         _authorization.Credentials = result.Credentials;
         _authorization.Notes = result.Notes;
         return result;
@@ -204,7 +204,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
     {
         auth.Credentials.Email = await js.GetFromLocalStorage(EMAIL_STORAGE);
 
-        var result = await _repository.Access(nameof(SignOut), auth);
+        var result = await _repository.Service(nameof(SignOut), auth);
 
         await CleanUp();
         NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
@@ -213,7 +213,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<IAuthorization?> SignedIn(IAuthorization auth)
     {
-        var result = await _repository.Access(nameof(SignedIn), auth);
+        var result = await _repository.Service(nameof(SignedIn), auth);
 
         if (result == null)
             return null;
@@ -231,7 +231,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<IAuthorization?> ResetPassword(IAuthorization auth)
     {
-        var result = await _repository.Action(nameof(ResetPassword), auth);
+        var result = await _repository.Service(nameof(ResetPassword), auth);
 
         if (result == null)
             return null;
@@ -241,7 +241,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<IAuthorization?> ChangePassword(IAuthorization auth)
     {
-        var result = await _repository.Setup(nameof(ChangePassword), auth);
+        var result = await _repository.Service(nameof(ChangePassword), auth);
 
         if (result == null)
             return null;
@@ -251,7 +251,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<IAuthorization?> SignedUp(IAuthorization auth)
     {
-        var result = await _repository.Access(nameof(SignedUp), auth);
+        var result = await _repository.Service(nameof(SignedUp), auth);
 
         if (result == null)
             return null;
@@ -261,7 +261,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<IAuthorization?> ConfirmEmail(IAuthorization auth)
     {
-        var result = await _repository.Action(nameof(ConfirmEmail), auth);
+        var result = await _repository.Service(nameof(ConfirmEmail), auth);
 
         if (result == null)
             return null;
@@ -271,7 +271,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<TAccount> Register(TAccount auth)
     {
-        var result = await _repository.Setup(nameof(Register), auth);
+        var result = await _repository.Service(nameof(Register), auth);
 
         if (result == null)
             return default(TAccount)!;
@@ -288,7 +288,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
     public async Task<TAccount> Unregister(TAccount auth)
     {
-        var result = await _repository.Setup(nameof(Unregister), auth);
+        var result = await _repository.Service(nameof(Unregister), auth);
 
         if (result == null)
             return default(TAccount)!;
@@ -309,7 +309,7 @@ public class AccessProvider<TAccount> : AuthenticationStateProvider, IAccessProv
 
         auth.Credentials = _authorization.Credentials;
 
-        var result = await _repository.Access(nameof(Registered), auth);
+        var result = await _repository.Service(nameof(Registered), auth);
 
         if (result == null)
             return default(TAccount)!;

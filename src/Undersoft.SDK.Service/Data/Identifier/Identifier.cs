@@ -5,6 +5,7 @@ namespace Undersoft.SDK.Service.Data.Identifier;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Undersoft.SDK.Instant.Attributes;
 using Undersoft.SDK.Proxies;
 using Undersoft.SDK.Rubrics.Attributes;
@@ -58,7 +59,9 @@ public class Identifier<TObject> : Identifier, IIdentifier<TObject>
         }
     }
 
-    [DataMember(Order = 19)]
+    [JsonIgnore]
+    [IgnoreDataMember]
+    [NotMapped]
     public virtual TObject Object { get; set; }
 }
 

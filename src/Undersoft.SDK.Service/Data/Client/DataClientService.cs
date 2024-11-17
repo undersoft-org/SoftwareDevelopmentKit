@@ -376,13 +376,13 @@ namespace Undersoft.SDK.Service.Data.Client
 
         public async Task<TContract> Access<TContract>(string method, Arguments arguments) where TContract : IOrigin, IInnerProxy
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{typeof(TContract).Name}/Access/{method}");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{typeof(TContract).Name}/Service/{method}");
             request.Content = new ByteArrayContent(arguments.ToJsonBytes());
             return await (await this.SendAsync(request)).Content.ReadFromJsonAsync<TContract>();
         }
         public async Task<TResult> Access<TContract, TResult>(string method, TContract contract) where TContract : IOrigin, IInnerProxy
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{typeof(TContract).Name}/Access/{method}");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{typeof(TContract).Name}/Service/{method}");
             request.Content = new ByteArrayContent(new Arguments(method, contract).ToJsonBytes());
             return await (await this.SendAsync(request)).Content.ReadFromJsonAsync<TResult>();
         }

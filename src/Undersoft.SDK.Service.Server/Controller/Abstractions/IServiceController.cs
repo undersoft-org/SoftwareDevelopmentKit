@@ -5,7 +5,5 @@ public interface IServiceController<TStore, TService, TModel> where TModel : cla
     where TService : class
     where TStore : IDataServerStore
 {
-    IActionResult Access([FromBody] IDictionary<string, Arguments> args);
-    IActionResult Action([FromBody] IDictionary<string, Arguments> args);
-    IActionResult Setup([FromBody] IDictionary<string, Arguments> args);
+    IActionResult Service([FromBody] IDictionary<string, Arguments> args);   
 }

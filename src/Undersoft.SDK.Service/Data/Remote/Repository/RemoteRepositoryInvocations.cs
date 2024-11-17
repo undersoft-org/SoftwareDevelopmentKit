@@ -4,20 +4,10 @@ using System.Text.Json;
 namespace Undersoft.SDK.Service.Data.Remote.Repository;
 
 public partial class RemoteRepository<TEntity>
-{
-    public async Task<TModel> Setup<TModel>(string method, TModel arguments)
+{  
+    public async Task<TModel> Service<TModel>(string method, TModel arguments)
     {
-        return await InvokeAsync("Setup", method, arguments);
-    }
-
-    public async Task<TModel> Access<TModel>(string method, TModel arguments)
-    {
-        return await InvokeAsync("Access", method, arguments);
-    }
-
-    public async Task<TModel> Action<TModel>(string method, TModel arguments)
-    {
-        return await InvokeAsync("Action", method, arguments);
+        return await InvokeAsync("Service", method, arguments);
     }
 
     private async Task<TModel> InvokeAsync<TModel>(string action, string method, TModel args)

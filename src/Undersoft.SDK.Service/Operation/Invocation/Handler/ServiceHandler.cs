@@ -6,21 +6,21 @@ using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Operation.Invocation;
 using Undersoft.SDK.Service.Operation.Invocation.Notification;
 
-public class AccessHandler<TStore, TService, TDto>
-    : IRequestHandler<Access<TStore, TService, TDto>, Invocation<TDto>>
+public class ServiceHandler<TStore, TService, TDto>
+    : IRequestHandler<Service<TStore, TService, TDto>, Invocation<TDto>>
     where TService : class
     where TDto : class, IOrigin
     where TStore : IDataServerStore
 {
     protected readonly IServicer _servicer;
 
-    public AccessHandler(IServicer servicer)
+    public ServiceHandler(IServicer servicer)
     {
         _servicer = servicer;
     }
 
     public async Task<Invocation<TDto>> Handle(
-        Access<TStore, TService, TDto> request,
+        Service<TStore, TService, TDto> request,
         CancellationToken cancellationToken
     )
     {
@@ -38,7 +38,7 @@ public class AccessHandler<TStore, TService, TDto>
                     + $"unable create source"
             );
 
-        _ = _servicer.Publish(new AccessInvoked<TStore, TService, TDto>(request)).ConfigureAwait(false);
+        _ = _servicer.Publish(new ServiceInvoked<TStore, TService, TDto>(request)).ConfigureAwait(false);
 
         return request;
     }

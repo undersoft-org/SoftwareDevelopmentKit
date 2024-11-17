@@ -75,7 +75,7 @@ public partial class ServerSetup
                    typeof(IRequestHandler<,>).MakeGenericType(
                        new[]
                        {
-                            typeof(RemoteAccess<,,>).MakeGenericType(
+                            typeof(RemoteService<,,>).MakeGenericType(
                                 storeType,
                                 serviceType,
                                 modelType
@@ -83,90 +83,26 @@ public partial class ServerSetup
                             typeof(Invocation<>).MakeGenericType(modelType)
                        }
                    ),
-                   typeof(RemoteAcccessHandler<,,>).MakeGenericType(
+                   typeof(RemoteServiceHandler<,,>).MakeGenericType(
                        storeType,
                        serviceType,
                        modelType
                    )
-               );
-                service.AddTransient(
-                    typeof(IRequestHandler<,>).MakeGenericType(
-                        new[]
-                        {
-                            typeof(RemoteAction<,,>).MakeGenericType(
-                                storeType,
-                                serviceType,
-                                modelType
-                            ),
-                            typeof(Invocation<>).MakeGenericType(modelType)
-                        }
-                    ),
-                    typeof(RemoteActionHandler<,,>).MakeGenericType(
-                        storeType,
-                        serviceType,
-                        modelType
-                    )
-                );
-                service.AddTransient(
-                    typeof(IRequestHandler<,>).MakeGenericType(
-                        new[]
-                        {
-                            typeof(RemoteSetup<,,>).MakeGenericType(
-                                storeType,
-                                serviceType,
-                                modelType
-                            ),
-                            typeof(Invocation<>).MakeGenericType(modelType)
-                        }
-                    ),
-                    typeof(RemoteSetupHandler<,,>).MakeGenericType(
-                        storeType,
-                        serviceType,
-                        modelType
-                    )
-                );
+               );               
                 service.AddTransient(
                   typeof(INotificationHandler<>).MakeGenericType(
-                      typeof(RemoteAccessInvoked<,,>).MakeGenericType(
+                      typeof(RemoteServiceInvoked<,,>).MakeGenericType(
                           storeType,
                           serviceType,
                           modelType
                       )
                   ),
-                  typeof(RemoteAccessInvokedHandler<,,>).MakeGenericType(
+                  typeof(RemoteServiceInvokedHandler<,,>).MakeGenericType(
                       storeType,
                       serviceType,
                       modelType
                   )
-              );
-                service.AddTransient(
-                    typeof(INotificationHandler<>).MakeGenericType(
-                        typeof(RemoteActionInvoked<,,>).MakeGenericType(
-                            storeType,
-                            serviceType,
-                            modelType
-                        )
-                    ),
-                    typeof(RemoteActionInvokedHandler<,,>).MakeGenericType(
-                        storeType,
-                        serviceType,
-                        modelType
-                    )
-                );
-                service.AddTransient(
-                    typeof(INotificationHandler<>).MakeGenericType(
-                        typeof(RemoteSetupInvoked<,,>).MakeGenericType(
-                            storeType,
-                            serviceType,
-                            modelType
-                        )
-                    ),
-                    typeof(RemoteSetupInvokedHandler<,,>).MakeGenericType(
-                        storeType,
-                        serviceType,
-                        modelType
-                    )
-                );
+              );             
             }
         }
         return this;

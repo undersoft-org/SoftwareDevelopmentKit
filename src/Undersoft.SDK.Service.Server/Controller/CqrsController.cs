@@ -82,7 +82,7 @@ public abstract class CqrsController<TKey, TEntry, TReport, TEntity, TDto, TServ
     }
 
     [ODataIgnored]
-    [HttpPost("[area]/[controller]({key})")]
+    [HttpPost("[area]({key})")]
     public override async Task<IActionResult> Post([FromRoute] TKey key, [FromBody] TDto dto)
     {
         if (!ModelState.IsValid)
@@ -114,7 +114,7 @@ public abstract class CqrsController<TKey, TEntry, TReport, TEntity, TDto, TServ
     }
 
     [ODataIgnored]
-    [HttpDelete("[area]/[controller]({key})")]
+    [HttpDelete("[area]({key})")]
     public override async Task<IActionResult> Delete([FromRoute] TKey key, [FromBody] TDto dto)
     {
         if (!ModelState.IsValid)
@@ -126,7 +126,7 @@ public abstract class CqrsController<TKey, TEntry, TReport, TEntity, TDto, TServ
     }
 
     [ODataIgnored]
-    [HttpPut("[area]/[controller]")]
+    [HttpPut("[area]")]
     public override async Task<IActionResult> Put([FromBody] TDto[] dtos)
     {
         if (!ModelState.IsValid)
@@ -138,7 +138,7 @@ public abstract class CqrsController<TKey, TEntry, TReport, TEntity, TDto, TServ
     }
 
     [ODataIgnored]
-    [HttpPatch("[area]/[controller]")]
+    [HttpPatch("[area]")]
     public override async Task<IActionResult> Patch([FromBody] TDto[] dtos)
     {
         if (!ModelState.IsValid)
@@ -150,7 +150,7 @@ public abstract class CqrsController<TKey, TEntry, TReport, TEntity, TDto, TServ
     }
 
     [ODataIgnored]
-    [HttpPost("[area]/[controller]")]
+    [HttpPost("[area]")]
     public override async Task<IActionResult> Post([FromBody] TDto[] dtos)
     {
         if (!ModelState.IsValid)
@@ -160,7 +160,7 @@ public abstract class CqrsController<TKey, TEntry, TReport, TEntity, TDto, TServ
     }
 
     [ODataIgnored]
-    [HttpDelete("[area]/[controller]")]
+    [HttpDelete("[area]")]
     public override async Task<IActionResult> Delete([FromBody] TDto[] dtos)
     {
         if (!ModelState.IsValid)

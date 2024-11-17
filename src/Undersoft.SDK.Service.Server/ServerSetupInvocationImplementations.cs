@@ -79,62 +79,22 @@ public partial class ServerSetup
                  typeof(IRequestHandler<,>).MakeGenericType(
                      new[]
                      {
-                            typeof(Access<,,>).MakeGenericType(storeType, serviceType, modelType),
+                            typeof(Service<,,>).MakeGenericType(storeType, serviceType, modelType),
                             typeof(Invocation<>).MakeGenericType(modelType)
                      }
                  ),
-                 typeof(AccessHandler<,,>).MakeGenericType(storeType, serviceType, modelType)
-                );
-                service.AddTransient(
-                    typeof(IRequestHandler<,>).MakeGenericType(
-                        new[]
-                        {
-                            typeof(Action<,,>).MakeGenericType(storeType, serviceType, modelType),
-                            typeof(Invocation<>).MakeGenericType(modelType)
-                        }
-                    ),
-                    typeof(ActionHandler<,,>).MakeGenericType(storeType, serviceType, modelType)
-                );
-                service.AddTransient(
-                    typeof(IRequestHandler<,>).MakeGenericType(
-                        new[]
-                        {
-                            typeof(Setup<,,>).MakeGenericType(storeType, serviceType, modelType),
-                            typeof(Invocation<>).MakeGenericType(modelType)
-                        }
-                    ),
-                    typeof(SetupHandler<,,>).MakeGenericType(storeType, serviceType, modelType)
-                );
+                 typeof(ServiceHandler<,,>).MakeGenericType(storeType, serviceType, modelType)
+                );                             
                 service.AddTransient(
                   typeof(INotificationHandler<>).MakeGenericType(
-                      typeof(AccessInvoked<,,>).MakeGenericType(storeType, serviceType, modelType)
+                      typeof(ServiceInvoked<,,>).MakeGenericType(storeType, serviceType, modelType)
                   ),
-                  typeof(AccessInvokedHandler<,,>).MakeGenericType(
+                  typeof(ServiceInvokedHandler<,,>).MakeGenericType(
                       storeType,
                       serviceType,
                       modelType
                   )
-              );
-                service.AddTransient(
-                    typeof(INotificationHandler<>).MakeGenericType(
-                        typeof(ActionInvoked<,,>).MakeGenericType(storeType, serviceType, modelType)
-                    ),
-                    typeof(ActionInvokedHandler<,,>).MakeGenericType(
-                        storeType,
-                        serviceType,
-                        modelType
-                    )
-                );
-                service.AddTransient(
-                    typeof(INotificationHandler<>).MakeGenericType(
-                        typeof(SetupInvoked<,,>).MakeGenericType(storeType, serviceType, modelType)
-                    ),
-                    typeof(SetupInvokedHandler<,,>).MakeGenericType(
-                        storeType,
-                        serviceType,
-                        modelType
-                    )
-                );
+              );             
             }
         }
         return this;

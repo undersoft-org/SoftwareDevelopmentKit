@@ -5,17 +5,17 @@ using Undersoft.SDK.Service.Data.Store.Repository;
 
 namespace Undersoft.SDK.Service.Operation.Remote.Invocation.Notification.Handler;
 
-public class RemoteAccessInvokedHandler<TStore, TService, TModel>
-    : INotificationHandler<RemoteAccessInvoked<TStore, TService, TModel>>
+public class RemoteServiceInvokedHandler<TStore, TService, TModel>
+    : INotificationHandler<RemoteServiceInvoked<TStore, TService, TModel>>
     where TService : class
     where TModel : class, IOrigin
     where TStore : IDataServiceStore
 {
     protected readonly IStoreRepository<Event> _eventStore;
 
-    public RemoteAccessInvokedHandler() { }
+    public RemoteServiceInvokedHandler() { }
 
-    public RemoteAccessInvokedHandler(
+    public RemoteServiceInvokedHandler(
         IStoreRepository<IEventStore, Event> eventStore
     )
     {
@@ -23,7 +23,7 @@ public class RemoteAccessInvokedHandler<TStore, TService, TModel>
     }
 
     public virtual Task Handle(
-        RemoteAccessInvoked<TStore, TService, TModel> request,
+        RemoteServiceInvoked<TStore, TService, TModel> request,
         CancellationToken cancellationToken
     )
     {

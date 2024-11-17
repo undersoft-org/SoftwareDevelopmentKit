@@ -89,7 +89,7 @@ public abstract class RemoteBusController<TKey, TStore, TDto, TModel, TService>
     }
 
     [ODataIgnored]
-    [HttpPost("[area]/[controller]({key})")]
+    [HttpPost("[area]({key})")]
     public virtual async Task<IActionResult> Post([FromRoute] TKey key, [FromBody] TModel dto)
     {
         if (!ModelState.IsValid)
@@ -121,7 +121,7 @@ public abstract class RemoteBusController<TKey, TStore, TDto, TModel, TService>
     }
 
     [ODataIgnored]
-    [HttpDelete("[area]/[controller]({key})")]
+    [HttpDelete("[area]({key})")]
     public virtual async Task<IActionResult> Delete([FromRoute] TKey key, [FromBody] TModel dto)
     {
         if (!ModelState.IsValid)
@@ -133,7 +133,7 @@ public abstract class RemoteBusController<TKey, TStore, TDto, TModel, TService>
     }
 
     [ODataIgnored]
-    [HttpPost("[area]/[controller]")]
+    [HttpPost("[area]")]
     public virtual async Task<IActionResult> Post([FromBody] TModel[] dtos)
     {
         if (!ModelState.IsValid)
@@ -143,7 +143,7 @@ public abstract class RemoteBusController<TKey, TStore, TDto, TModel, TService>
     }
 
     [ODataIgnored]
-    [HttpPatch("[area]/[controller]")]
+    [HttpPatch("[area]")]
     public virtual async Task<IActionResult> Patch([FromBody] TModel[] dtos)
     {
         if (!ModelState.IsValid)
@@ -155,7 +155,7 @@ public abstract class RemoteBusController<TKey, TStore, TDto, TModel, TService>
     }
 
     [ODataIgnored]
-    [HttpPut("[area]/[controller]")]
+    [HttpPut("[area]")]
     public virtual async Task<IActionResult> Put([FromBody] TModel[] dtos)
     {
         if (!ModelState.IsValid)
@@ -167,7 +167,7 @@ public abstract class RemoteBusController<TKey, TStore, TDto, TModel, TService>
     }
 
     [ODataIgnored]
-    [HttpDelete("[area]/[controller]")]
+    [HttpDelete("[area]")]
     public virtual async Task<IActionResult> Delete([FromBody] TModel[] dtos)
     {
         if (!ModelState.IsValid)

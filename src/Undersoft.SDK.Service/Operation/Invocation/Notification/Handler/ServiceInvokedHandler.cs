@@ -8,17 +8,17 @@ using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Data.Store.Repository;
 using Undersoft.SDK.Service.Operation.Invocation.Notification;
 
-public class AccessInvokedHandler<TStore, TType, TDto>
-    : INotificationHandler<AccessInvoked<TStore, TType, TDto>>
+public class ServiceInvokedHandler<TStore, TType, TDto>
+    : INotificationHandler<ServiceInvoked<TStore, TType, TDto>>
     where TType : class
     where TDto : class, IOrigin
     where TStore : IDataStore
 {
     protected readonly IStoreRepository<Event> _eventStore;
 
-    public AccessInvokedHandler() { }
+    public ServiceInvokedHandler() { }
 
-    public AccessInvokedHandler(
+    public ServiceInvokedHandler(
         IStoreRepository<IEventStore, Event> eventStore
     )
     {
@@ -26,7 +26,7 @@ public class AccessInvokedHandler<TStore, TType, TDto>
     }
 
     public virtual Task Handle(
-        AccessInvoked<TStore, TType, TDto> request,
+        ServiceInvoked<TStore, TType, TDto> request,
         CancellationToken cancellationToken
     )
     {

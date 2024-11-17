@@ -6,7 +6,5 @@ public interface IRemoteServiceController<TStore, TService, TDto>
     where TDto : class
     where TStore : IDataServiceStore
 {
-    IActionResult Access([FromBody] IDictionary<string, Arguments> args);
-    IActionResult Action([FromBody] IDictionary<string, Arguments> args);
-    IActionResult Setup([FromBody] IDictionary<string, Arguments> args);
+    IActionResult Service([FromBody] IDictionary<string, Arguments> args);   
 }

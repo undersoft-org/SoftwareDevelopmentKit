@@ -10,8 +10,8 @@ using Undersoft.SDK.Service.Data.Store;
 using Undersoft.SDK.Service.Operation.Invocation;
 using Undersoft.SDK.Service.Operation.Remote.Invocation;
 
-public class RemoteSetupHandler<TStore, TService, TModel>
-    : IRequestHandler<RemoteSetup<TStore, TService, TModel>, Invocation<TModel>>
+public class RemoteServiceHandler<TStore, TService, TModel>
+    : IRequestHandler<RemoteService<TStore, TService, TModel>, Invocation<TModel>>
     where TService : class
     where TModel : class, IOrigin, IInnerProxy
     where TStore : IDataServiceStore
@@ -19,21 +19,24 @@ public class RemoteSetupHandler<TStore, TService, TModel>
     protected readonly IRemoteRepository<TModel> _repository;
     protected readonly IServicer _servicer;
 
-    public RemoteSetupHandler(IServicer servicer, IRemoteRepository<TStore, TModel> repository)
+    public RemoteServiceHandler(IServicer servicer, IRemoteRepository<TStore, TModel> repository)
     {
         _repository = repository;
         _servicer = servicer;
     }
 
     public async Task<Invocation<TModel>> Handle(
-        RemoteSetup<TStore, TService, TModel> request,
+        RemoteService<TStore, TService, TModel> request,
         CancellationToken cancellationToken
     )
     {
         if (!request.Validation.IsValid)
             return request;
 
-        request.Response = await _repository.Setup(request.Arguments.MethodName, request.Arguments);
+        request.Response =
+                 await _repository.Service(request.Arguments.MethodName, request.Arguments)
+
+        ;
 
         if (request.Response == null)
             throw new Exception(
@@ -43,7 +46,7 @@ public class RemoteSetupHandler<TStore, TService, TModel>
             );
 
         _ = _servicer
-            .Publish(new RemoteSetupInvoked<TStore, TService, TModel>(request), cancellationToken)
+            .Publish(new RemoteServiceInvoked<TStore, TService, TModel>(request), cancellationToken)
             .ConfigureAwait(false);
 
         return request;

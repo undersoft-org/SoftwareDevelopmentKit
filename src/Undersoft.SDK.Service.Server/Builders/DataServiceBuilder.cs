@@ -20,8 +20,8 @@ namespace Undersoft.SDK.Service.Server.Builders;
 public class DataServiceBuilder<TStore> : DataServerBuilder, IDataServerBuilder<TStore>
     where TStore : IDataStore
 {
-    protected ODataConventionModelBuilder odataBuilder;
     protected IEdmModel edmModel;
+    protected ODataConventionModelBuilder odataBuilder; 
     protected static bool actionSetAdded;
 
     public DataServiceBuilder(IServiceRegistry registry)
@@ -48,9 +48,7 @@ public class DataServiceBuilder<TStore> : DataServerBuilder, IDataServerBuilder<
     {
         var ets = odataBuilder.EntitySets.FirstOrDefault(e => e.EntityType.ClrType == entityType);
         if (ets != null)
-            return ets;
-
-        SubEntitySet(entityType);
+            return ets;              
 
         var entitySetName = entityType.Name;
         if (entityType.IsGenericType && entityType.IsAssignableTo(typeof(Identifier)))
@@ -60,6 +58,8 @@ public class DataServiceBuilder<TStore> : DataServerBuilder, IDataServerBuilder<
         etc.Name = entitySetName;
         ets = odataBuilder.AddEntitySet(entitySetName, etc);
         ets.EntityType.HasKey(entityType.GetProperty("Id"));
+
+        SubEntitySet(entityType);
 
         return ets;
     }
@@ -90,16 +90,18 @@ public class DataServiceBuilder<TStore> : DataServerBuilder, IDataServerBuilder<
             .Commit();
     }
 
-    public IEdmModel GetEdm()
+    public IEdmModel GetEdmModel(bool disposeBuilder = false)
     {
-        if (edmModel == null)
-        {
-            odataBuilder.DataServiceVersion = new Version("4.0");
-            odataBuilder.MaxDataServiceVersion = new Version("4.01");
-            odataBuilder.BindingOptions = NavigationPropertyBindingOption.Auto;
-            edmModel = odataBuilder.GetEdmModel();
-            odataBuilder.ValidateModel(edmModel);
-        }
+        if(edmModel != null)
+            return edmModel;
+
+        odataBuilder.DataServiceVersion = new Version("4.0");
+        odataBuilder.MaxDataServiceVersion = new Version("4.01");
+        odataBuilder.BindingOptions = NavigationPropertyBindingOption.Auto;
+        edmModel = odataBuilder.GetEdmModel();
+        odataBuilder.ValidateModel(edmModel);
+        if (disposeBuilder)
+            odataBuilder = null;
         return edmModel;
     }
 
@@ -154,35 +156,14 @@ public class DataServiceBuilder<TStore> : DataServerBuilder, IDataServerBuilder<
 
             EntitySet(genType);
             AddInvocations(genType);
-            registry.Put(controllerType);
-            //DataServerRegistry.DataInvokers.Put(controllerType, AddDataInvokers(controllerType));
+            registry.Put(controllerType);            
         }
 
         DataServerRegistry.DataControllers.Put(StoreType, registry);
-    }
-
-    private ISeries<IInvoker> AddDataInvokers(Type controller)
-    {
-        var args = controller.GetGenericArguments();
-
-        return new Registry<IInvoker>()
-        {
-            new Invoker(controller, "Post", [args[0], args[args.Length - 2]]),
-            new Invoker(controller, "Post", [args[args.Length - 2].MakeArrayType()]),
-            new Invoker(controller, "Patch", [args[args.Length - 2].MakeArrayType()]),
-            new Invoker(controller, "Put", [args[args.Length - 2].MakeArrayType()]),
-            new Invoker(controller, "Delete", [args[args.Length - 2].MakeArrayType()]),
-        };        
-    }
+    }   
 
     public IMvcBuilder AddDataServicer(IMvcBuilder mvc)
-    {
-        var model = GetEdm();
-        var route = RoutePrefix;
-        var defaultBatchHandler = new DefaultODataBatchHandler();
-        defaultBatchHandler.MessageQuotas.MaxNestingDepth = 5;
-        defaultBatchHandler.MessageQuotas.MaxOperationsPerChangeset = 20;
-
+    {        
         mvc.AddOData(b =>
         {
             b.RouteOptions.EnableQualifiedOperationCall = true;
@@ -195,11 +176,15 @@ public class DataServiceBuilder<TStore> : DataServerBuilder, IDataServerBuilder<
             b.EnableContinueOnErrorHeader = true;
             b.EnableQueryFeatures(PageLimit)
                 .AddRouteComponents(
-                    route,
-                    model,
+                    RoutePrefix,
+                    GetEdmModel(true),
                     ODataVersion.V401,
                     s =>
                     {
+                        var defaultBatchHandler = new DefaultODataBatchHandler();
+                        defaultBatchHandler.MessageQuotas.MaxNestingDepth = 5;
+                        defaultBatchHandler.MessageQuotas.MaxOperationsPerChangeset = 20;
+
                         s.AddSingleton(
                                 typeof(ODataPayloadValueConverter),
                                 new CustomODataPayloadConverter()
@@ -223,39 +208,9 @@ public class DataServiceBuilder<TStore> : DataServerBuilder, IDataServerBuilder<
                             );
                     }
                 );
-        });
-
-        AddMediaSupport(mvc);
+        });       
+        
         ServiceRegistry.MergeServices(true);
-        return mvc;
-    }
-
-    private IMvcBuilder AddMediaSupport(IMvcBuilder mvc)
-    {
-        mvc.AddMvcOptions(options =>
-        {
-            foreach (
-                OutputFormatter outputFormatter in options
-                    .OutputFormatters.OfType<OutputFormatter>()
-                    .Where(x => x.SupportedMediaTypes.Count == 0)
-            )
-            {
-                outputFormatter.SupportedMediaTypes.Add(
-                    new MediaTypeHeaderValue("_builder/prs.odatatestxx-odata")
-                );
-            }
-
-            foreach (
-                InputFormatter inputFormatter in options
-                    .InputFormatters.OfType<InputFormatter>()
-                    .Where(x => x.SupportedMediaTypes.Count == 0)
-            )
-            {
-                inputFormatter.SupportedMediaTypes.Add(
-                    new MediaTypeHeaderValue("_builder/prs.odatatestxx-odata")
-                );
-            }
-        });
         return mvc;
     }
 
@@ -271,11 +226,7 @@ public class DataServiceBuilder<TStore> : DataServerBuilder, IDataServerBuilder<
     {
         var name = typeof(TAuth).Name;
 
-        var action = odataBuilder.EntitySet<TAuth>(name).EntityType.Collection.Action("Action");
-
-        var access = odataBuilder.EntitySet<TAuth>(name).EntityType.Collection.Action("Access");
-
-        var setup = odataBuilder.EntitySet<TAuth>(name).EntityType.Collection.Action("Setup");
+        var service = odataBuilder.EntitySet<TAuth>(name).EntityType.Collection.Action("Service");        
     }
 }
 

@@ -88,7 +88,7 @@ public abstract class DataController<TKey, TStore, TEntity, TDto, TService>
     }
 
     [ODataIgnored]
-    [HttpPost("[area]/[controller]({key})")]
+    [HttpPost("[area]({key})")]
     public virtual async Task<IActionResult> Post([FromRoute] TKey key, [FromBody] TDto dto)
     {
         if (!ModelState.IsValid)
@@ -120,7 +120,7 @@ public abstract class DataController<TKey, TStore, TEntity, TDto, TService>
     }
 
     [ODataIgnored]
-    [HttpDelete("[area]/[controller]({key})")]
+    [HttpDelete("[area]({key})")]
     public virtual async Task<IActionResult> Delete([FromRoute] TKey key, [FromBody] TDto dto)
     {
         if (!ModelState.IsValid)
@@ -132,7 +132,7 @@ public abstract class DataController<TKey, TStore, TEntity, TDto, TService>
     }
 
     [ODataIgnored]
-    [HttpPost("[area]/[controller]")]
+    [HttpPost("[area]")]
     public virtual async Task<IActionResult> Post([FromBody] TDto[] dtos)
     {
         if (!ModelState.IsValid)
@@ -142,7 +142,7 @@ public abstract class DataController<TKey, TStore, TEntity, TDto, TService>
     }
 
     [ODataIgnored]
-    [HttpPatch("[area]/[controller]")]
+    [HttpPatch("[area]")]
     public virtual async Task<IActionResult> Patch([FromBody] TDto[] dtos)
     {
         if (!ModelState.IsValid)
@@ -152,7 +152,7 @@ public abstract class DataController<TKey, TStore, TEntity, TDto, TService>
     }
 
     [ODataIgnored]
-    [HttpPut("[area]/[controller]")]
+    [HttpPut("[area]")]
     public virtual async Task<IActionResult> Put([FromBody] TDto[] dtos)
     {
         if (!ModelState.IsValid)
@@ -162,7 +162,7 @@ public abstract class DataController<TKey, TStore, TEntity, TDto, TService>
     }
 
     [ODataIgnored]
-    [HttpDelete("[area]/[controller]")]
+    [HttpDelete("[area]")]
     public virtual async Task<IActionResult> Delete([FromBody] TDto[] dtos)
     {
         if (!ModelState.IsValid)

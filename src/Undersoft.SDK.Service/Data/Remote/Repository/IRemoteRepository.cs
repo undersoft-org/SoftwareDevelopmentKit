@@ -22,9 +22,7 @@ public interface IRemoteRepository<TEntity> : IRepository<TEntity> where TEntity
 
     string KeyString(params object[] keys);
 
-    Task<TModel> Access<TModel>(string method, TModel args);
-    Task<TModel> Action<TModel>(string method, TModel args);
-    Task<TModel> Setup<TModel>(string method, TModel args);
+    Task<TModel> Service<TModel>(string method, TModel args);
 
     Task<ISeries<TEntity>> LoadAsync(int offset, int limit);
 }
