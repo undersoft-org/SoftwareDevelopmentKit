@@ -1,4 +1,4 @@
-﻿namespace Undersoft.SDK.Ethernet
+﻿namespace Undersoft.SDK.Serialization
 {
     using System;
 
@@ -32,20 +32,7 @@
             | AttributeTargets.Field,
         Inherited = false
     )]
-    public sealed class JsonIgnoreAttribute : Attribute
-    {
-        public JsonIgnoreAttribute() { }
-    }
-
-    [AttributeUsage(
-        AttributeTargets.Class
-            | AttributeTargets.Struct
-            | AttributeTargets.Enum
-            | AttributeTargets.Delegate
-            | AttributeTargets.Property
-            | AttributeTargets.Field,
-        Inherited = false
-    )]
+  
     public sealed class JsonMemberAttribute : Attribute
     {
         public JsonMemberAttribute() { }

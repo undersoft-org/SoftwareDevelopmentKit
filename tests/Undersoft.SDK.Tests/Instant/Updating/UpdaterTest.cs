@@ -21,54 +21,54 @@ namespace Undersoft.SDK.Tests.Instant.Updating
                 Kind = AgreementKind.Agree,
                 Creator = "sfssd",
                 VersionId = 222,
-                Formats = new Listing<AgreementFormat>()
-                {
-                    new AgreementFormat() { Id = 10, Name = "telefon" },
-                    new AgreementFormat() { Id = 15, Name = "skan" }
-                },
-                Versions = new Listing<AgreementVersion>()
-                {
-                    new AgreementVersion()
-                    {
-                        Id = 20,
-                        VersionNumber = 2,
-                        Texts = new Listing<AgreementText>()
-                        {
-                            new AgreementText()
-                            {
-                                VersionId = 2,
-                                Language = "en",
-                                Content = "dfsdgdsdfsgfd"
-                            },
-                            new AgreementText()
-                            {
-                                VersionId = 2,
-                                Language = "pl",
-                                Content = "telefon"
-                            }
-                        }
-                    },
-                    new AgreementVersion()
-                    {
-                        Id = 25,
-                        VersionNumber = 5,
-                        Texts = new Listing<AgreementText>()
-                        {
-                            new AgreementText()
-                            {
-                                VersionId = 5,
-                                Language = "en",
-                                Content = "dfsdgdsdfsgfd"
-                            },
-                            new AgreementText()
-                            {
-                                VersionId = 5,
-                                Language = "pl",
-                                Content = "telefon"
-                            }
-                        }
-                    }
-                }
+                //Formats = new Listing<AgreementFormat>()
+                //{
+                //    new AgreementFormat() { Id = 10, Name = "telefon" },
+                //    new AgreementFormat() { Id = 15, Name = "skan" }
+                //},
+                //Versions = new Listing<AgreementVersion>()
+                //{
+                //    new AgreementVersion()
+                //    {
+                //        Id = 20,
+                //        VersionNumber = 2,
+                //        Texts = new Listing<AgreementText>()
+                //        {
+                //            new AgreementText()
+                //            {
+                //                VersionId = 2,
+                //                Language = "en",
+                //                Content = "dfsdgdsdfsgfd"
+                //            },
+                //            new AgreementText()
+                //            {
+                //                VersionId = 2,
+                //                Language = "pl",
+                //                Content = "telefon"
+                //            }
+                //        }
+                //    },
+                //    new AgreementVersion()
+                //    {
+                //        Id = 25,
+                //        VersionNumber = 5,
+                //        Texts = new Listing<AgreementText>()
+                //        {
+                //            new AgreementText()
+                //            {
+                //                VersionId = 5,
+                //                Language = "en",
+                //                Content = "dfsdgdsdfsgfd"
+                //            },
+                //            new AgreementText()
+                //            {
+                //                VersionId = 5,
+                //                Language = "pl",
+                //                Content = "telefon"
+                //            }
+                //        }
+                //    }
+                //}
             };
 
             var updater6 = new Updater<Agreement>(profile);

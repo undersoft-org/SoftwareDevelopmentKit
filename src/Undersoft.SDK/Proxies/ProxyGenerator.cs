@@ -83,7 +83,7 @@ public class ProxyGenerator : IInstantGenerator
         }
         catch (Exception ex)
         {
-            throw new SleeveCompilerException("ProxyGenerator compilation at runtime failed see inner exception", ex);
+            throw new ProxyCompilerException("ProxyGenerator compilation at runtime failed see inner exception", ex);
         }
     }
 
@@ -124,7 +124,7 @@ public class ProxyGenerator : IInstantGenerator
     }
 }
 
-public class SleeveCompilerException : Exception
+public class ProxyCompilerException : Exception
 {
-    public SleeveCompilerException(string message, Exception innerException) : base(message, innerException) { }
+    public ProxyCompilerException(string message, Exception innerException) : base(message, innerException) { }
 }

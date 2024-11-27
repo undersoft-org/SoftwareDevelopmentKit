@@ -245,8 +245,8 @@ namespace System.Series.Tests
             List<string> items = new List<string>();
             foreach (var item in testCollection.Skip(70000))
             {
-                string r = registry.Remove(item.Value);
-                items.Add(r);
+                registry.Remove(item.Value);
+                items.Add(item.Value);
             }
             Assert.AreEqual(30000, items.Count);
         }
@@ -377,8 +377,8 @@ namespace System.Series.Tests
             List<string> items = new List<string>();
             foreach (var item in testCollection.Skip(5000))
             {
-                string r = registry.Remove(item.Value);
-                items.Add(r);
+                registry.Remove(item.Value);
+                items.Add(item.Value);
             }
         }
     }

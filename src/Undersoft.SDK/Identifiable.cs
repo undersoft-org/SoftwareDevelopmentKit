@@ -154,7 +154,6 @@ namespace Undersoft.SDK
         {
             return code.GetPriority();
         }
-
         public virtual byte SetPriority(byte priority)
         {
             return code.SetPriority(priority);
@@ -164,7 +163,6 @@ namespace Undersoft.SDK
         {
             code.SetFlag(state, flag);
         }
-
         public virtual void GetFlag(DataFlags state)
         {
             code.GetFlag(state);
@@ -178,7 +176,6 @@ namespace Undersoft.SDK
                 return Id = longid;
             return AutoId();
         }
-
         public virtual long SetId(object id)
         {
             if (id == null)
@@ -193,7 +190,6 @@ namespace Undersoft.SDK
         {
             return code.SetTypeId(typeid);
         }
-
         public virtual long SetTypeId(Type type)
         {
 

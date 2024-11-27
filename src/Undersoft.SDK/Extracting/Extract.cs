@@ -11,7 +11,7 @@ namespace Undersoft.SDK.Extracting
 
         public static IExtract Perform => extractor;
 
-        public unsafe static bool BlockEqual(
+        public unsafe static bool BlockEquals(
             byte* source,
             long srcOffset,
             byte* dest,
@@ -37,7 +37,7 @@ namespace Undersoft.SDK.Extracting
 
 
 
-        public unsafe static bool BlockEqual(byte[] source, byte[] dest)
+        public unsafe static bool BlockEquals(byte[] source, byte[] dest)
         {
             long sl = source.LongLength;
             if (sl > dest.LongLength)

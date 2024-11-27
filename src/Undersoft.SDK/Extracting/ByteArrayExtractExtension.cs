@@ -2,7 +2,7 @@
 {
     public static class ByteArrayExtractExtenstion
     {
-        public unsafe static bool BlockEqual(this byte[] source, byte[] dest)
+        public unsafe static bool BlockEquals(this byte[] source, byte[] dest)
         {
             long sl = source.LongLength;
             if (sl > dest.LongLength)
@@ -28,7 +28,7 @@
             }
         }
 
-        public unsafe static bool BlockEqual(
+        public unsafe static bool BlockEquals(
             this IntPtr source,
             long srcOffset,
             IntPtr dest,

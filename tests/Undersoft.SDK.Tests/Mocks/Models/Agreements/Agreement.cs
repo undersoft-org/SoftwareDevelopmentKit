@@ -7,16 +7,15 @@ using Undersoft.SDK.Series;
 
 namespace Undersoft.SDK.Tests.Mocks.Models.Agreements
 {
-    [BinaryDocument]
+    [Serializable]
     public class Agreement : Origin
-    {
-        private BinaryDocumentSerializer serializer = new BinaryDocumentSerializer();
+    {       
 
         [DisplayRubric("Agreement kind")]
         public AgreementKind Kind { get; set; }
-        [IdentityRubric]
-        [RequiredRubric]
-        public Guid UserId { get; set; }
+        //[IdentityRubric]
+        //[RequiredRubric]
+        //public Guid UserId { get; set; }
         [RequiredRubric]
         [DisplayRubric("Version number")]
         public long VersionId { get; set; }
@@ -31,11 +30,12 @@ namespace Undersoft.SDK.Tests.Mocks.Models.Agreements
         [DisplayRubric("Phone number")]
         public string PhoneNumber { get; set; } = "3453453";
 
-        public virtual Listing<AgreementFormat> Formats { get; set; } = null;
-        public virtual Listing<AgreementVersion> Versions { get; set; } = null;
-        public virtual AgreementType Type { get; set; } = null;      
+        //public virtual Listing<AgreementFormat> Formats { get; set; } = null;
+        //public virtual Listing<AgreementVersion> Versions { get; set; } = null;
+        //public virtual AgreementType Type { get; set; } = null;      
     }
 
+    [Serializable]
     public class Agreements : KeyedCollection<long, Agreement>
     {
         protected override long GetKeyForItem(Agreement item)

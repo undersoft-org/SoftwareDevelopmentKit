@@ -1,9 +1,10 @@
 ﻿using System.Net;
 using System.Threading;
+using Undersoft.SDK.Ethernet;
 using Undersoft.SDK.Ethernet.Transfer;
 using Undersoft.SDK.Invoking;
 
-namespace Undersoft.SDK.Ethernet
+namespace Undersoft.SDK.Ethernet.Server
 {
     public class EthernetServer : IEthernetServer
     {
@@ -49,7 +50,7 @@ namespace Undersoft.SDK.Ethernet
             else
                 server.Receive(TransitPart.Message, ((ITransferContext)inetdealcontext).Id);
 
-            return ((ITransferContext)inetdealcontext);
+            return (ITransferContext)inetdealcontext;
         }
 
         public ITransferContext HeaderSent(object inetdealcontext)
@@ -109,7 +110,7 @@ namespace Undersoft.SDK.Ethernet
             return result;
         }
 
-        public void Start(IPEndPoint endPoint,  IInvoker echoMethod = null
+        public void Start(IPEndPoint endPoint, IInvoker echoMethod = null
         )
         {
             server = new EthernetListener(endPoint);

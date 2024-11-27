@@ -88,7 +88,7 @@ public class ExtractTest
         destinationBuffer.Initialize();
 
         Extract.CopyBlock(destinationBuffer, 0, sourceBuffer, 0, sourceBuffer.Length);
-        bool equal = destinationBuffer.BlockEqual(sourceBuffer);
+        bool equal = destinationBuffer.BlockEquals(sourceBuffer);
         Assert.IsTrue(equal);
     }
 
@@ -100,7 +100,7 @@ public class ExtractTest
         destinationBuffer.Initialize();
 
         Extract.CopyBlock(destinationBuffer, 0, sourceBuffer, 0, (ulong)sourceBuffer.Length);
-        bool equal = destinationBuffer.BlockEqual(sourceBuffer);
+        bool equal = destinationBuffer.BlockEquals(sourceBuffer);
         Assert.IsTrue(equal);
     }
 
@@ -117,7 +117,7 @@ public class ExtractTest
         )
         {
             Extract.CopyBlock(pdst, 0, psrc, 0, sourceBuffer.Length);
-            bool equal = destinationBuffer.BlockEqual(sourceBuffer);
+            bool equal = destinationBuffer.BlockEquals(sourceBuffer);
             Assert.IsTrue(equal);
         }
     }
@@ -130,7 +130,7 @@ public class ExtractTest
         destinationBuffer.Initialize();
 
         Extract.CopyBlock(destinationBuffer, 0, sourceBuffer, 0, sourceBuffer.Length);
-        bool equal = destinationBuffer.BlockEqual(sourceBuffer);
+        bool equal = destinationBuffer.BlockEquals(sourceBuffer);
         Assert.IsTrue(equal);
     }
 

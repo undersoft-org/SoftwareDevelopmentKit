@@ -1,14 +1,16 @@
-﻿namespace Undersoft.SDK.Ethernet
+﻿namespace Undersoft.SDK.Serialization
 {
     using System.Collections;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Reflection;
     using System.Text;
+    using Undersoft.SDK.Ethernet;
     using Undersoft.SDK.Instant;
     using Undersoft.SDK.Proxies;
+    using Undersoft.SDK.Rubrics;
     using Undersoft.SDK.Uniques;
+    using Undersoft.SDK.Utilities;
 
     public enum JsonToken
     {
@@ -55,7 +57,6 @@
             'E',
             'F'
         };
-        private static readonly IDictionary<string, IDictionary<Type, PropertyInfo[]>> _cache;
         private static readonly string[][] _unichar = new string[][]
         {
             new string[] { new string('"', 1), @"\""", },
@@ -72,117 +73,112 @@
 
         static JsonParser()
         {
-            _cache = new Dictionary<string, IDictionary<Type, PropertyInfo[]>>();
-            foreach (string cmplx in Enum.GetNames(typeof(TransitComplexity)))
-                _cache.Add(cmplx, new Dictionary<Type, PropertyInfo[]>());
         }
 
         public static T Deserialize<T>(string json)
         {
-            T instance;
-            var map = PrepareInstance(out instance);
+            T instance = typeof(T).New<T>();
             var bag = FromJson(json);
 
-            DeserializeImpl(map, bag, instance);
+            DeserializeImpl(bag, instance);
             return instance;
         }
 
         public static object Deserialize(string json, Type type)
         {
-            object instance;
-            var map = PrepareInstance(out instance, type);
+            object instance = type.New();
             var bag = FromJson(json);
 
-            DeserializeImpl(map, bag, instance);
+            DeserializeImpl(bag, instance);
             return instance;
         }
 
         public static void DeserializeType(
-            IEnumerable<PropertyInfo> map,
             IDictionary<string, object> bag,
             object instance
         )
         {
-            IProxy sleeve = instance.ToProxy();
-            int i = 0;
-            foreach (PropertyInfo info in map)
+            IProxy proxy = instance.ToProxy();
+            foreach (IRubric rubric in proxy.Rubrics)
             {
-                bool mutated = false;
-                string key = info.Name;
+                string key = rubric.RubricName;
                 if (!bag.ContainsKey(key))
                 {
-                    var capitalize = info.Name.Replace("_", "")[0].ToString().ToUpper();
-                    key = (capitalize + info.Name.Remove(0, 1));
+                    var capitalize = rubric.RubricName.Replace("_", "")[0].ToString().ToUpper();
+                    key = capitalize + rubric.RubricName.Remove(0, 1);
                     if (!bag.ContainsKey(key))
                     {
-                        key = info.Name.Replace("-", "");
+                        key = rubric.RubricName.Replace("-", "");
                         if (!bag.ContainsKey(key))
                             continue;
                     }
                 }
 
                 object value = bag[key];
+                Type type = rubric.RubricType;
 
-                if (value != null && value.GetType() == typeof(String))
+                if (value != null && value.GetType() == typeof(string))
                     if (value.Equals("null"))
                         value = null;
 
                 if (value != null)
                 {
-                    if (info.PropertyType == typeof(byte[]))
-                        if (value.GetType() == typeof(List<object>))
-                            value = ((List<object>)value)
+                    if (type == typeof(byte[]))
+                    {
+                        if (value.GetType().IsAssignableTo(typeof(IList<object>)))
+                            value = ((IList<object>)value)
                                 .Select(symbol => Convert.ToByte(symbol))
                                 .ToArray();
                         else
                             value = ((object[])value)
                                 .Select(symbol => Convert.ToByte(symbol))
                                 .ToArray();
-                    else if (info.PropertyType == typeof(Uscn))
-                        value = new Uscn(value.ToString());
-                    else if (info.PropertyType == typeof(Single))
-                        value = Convert.ToSingle(value, _nfi);
-                    else if (info.PropertyType == typeof(DateTime))
-                        value = Convert.ToDateTime(value);
-                    else if (info.PropertyType == typeof(double))
-                        value = Convert.ToDouble(value, _nfi);
-                    else if (info.PropertyType == typeof(decimal))
-                        value = Convert.ToDecimal(value, _nfi);
-                    else if (info.PropertyType == typeof(int))
-                        value = Convert.ToInt32(value);
-                    else if (info.PropertyType == typeof(long))
-                        value = Convert.ToInt64(value);
-                    else if (info.PropertyType == typeof(short))
-                        value = Convert.ToInt16(value);
-                    else if (info.PropertyType == typeof(bool))
-                        value = Convert.ToBoolean(value);
-                    else if (info.PropertyType == typeof(IInstant))
-                    {
-                        object n = info.GetValue(instance, null);
-                        DeserializeType(
-                            n.GetType().GetProperties(),
-                            (Dictionary<string, object>)value,
-                            n
-                        );
-                        mutated = true;
                     }
-                    else if (info.PropertyType == typeof(Type))
+                    else if (type.IsValueType)
                     {
-                        object typevalue = info.GetValue(instance, null);
-                        if (value != null)
-                            typevalue = Type.GetType(value.ToString());
-                        value = typevalue;
+                        if (type == typeof(Uscn))
+                            value = new Uscn(value.ToString());
+                        else if (type == typeof(float))
+                            value = Convert.ToSingle(value, _nfi);
+                        else if (type == typeof(DateTime))
+                            value = Convert.ToDateTime(value);
+                        else if (type == typeof(double))
+                            value = Convert.ToDouble(value, _nfi);
+                        else if (type == typeof(decimal))
+                            value = Convert.ToDecimal(value, _nfi);
+                        else if (type == typeof(int))
+                            value = Convert.ToInt32(value);
+                        else if (type == typeof(long))
+                            value = Convert.ToInt64(value);
+                        else if (type == typeof(short))
+                            value = Convert.ToInt16(value);
+                        else if (type == typeof(bool))
+                            value = Convert.ToBoolean(value);
                     }
-                    else if (info.PropertyType.IsEnum)
+                    else if (type.IsAssignableTo(typeof(IInstant)))
                     {
-                        object enumvalue = info.GetValue(instance, null);
-                        enumvalue = Enum.Parse(info.PropertyType, value.ToString());
-                        value = enumvalue;
+                        object n = proxy[rubric.RubricId];
+                        if (n == null)
+                            n = type.New();
+                        else
+                            DeserializeType(
+                                (Dictionary<string, object>)value,
+                                n
+                            );
+                        value = n;
+                    }
+                    else if (type == typeof(Type))
+                    {
+                        value = Type.GetType(value.ToString());
+                    }
+                    else if (type.IsEnum)
+                    {
+                        value = Enum.Parse(type, value.ToString());
                     }
                 }
 
-                if (!mutated)
-                    sleeve[i] = value;
+                if (value != null)
+                    proxy[rubric.RubricId] = value;
             }
         }
 
@@ -222,38 +218,14 @@
             return ParseObject(data, ref index);
         }
 
-        public static IEnumerable<PropertyInfo> PrepareInstance(out object instance, Type type)
-        {
-            instance = Activator.CreateInstance(type);
-
-            CacheReflection(type);
-
-            return _cache["Standard"][type];
-        }
-
-        public static IEnumerable<PropertyInfo> PrepareInstance<T>(out T instance)
-        {
-            instance = Activator.CreateInstance<T>();
-            Type item = typeof(T);
-
-            CacheReflection(item);
-
-            return _cache["Standard"][item];
-        }
-
         public static object Serialize(object instance)
         {
-            Type type = instance.GetType();
-            IDictionary<string, object> bag = GetBagForObject(type, instance);
-
-            return ToJson(bag);
+            return ToJson(GetBagForObject(instance.GetType(), instance.ToProxy()));
         }
 
         public static string Serialize<T>(T instance)
         {
-            IDictionary<string, object> bag = GetBagForObject(instance);
-
-            return ToJson(bag);
+            return ToJson(GetBagForObject(instance.ToProxy()));
         }
 
         public static string ToJson(
@@ -263,7 +235,7 @@
         {
             var sb = new StringBuilder(0);
 
-            SerializeItem(sb, bag, null, complexity);
+            SerializeItem(sb, bag, null);
 
             return sb.ToString();
         }
@@ -275,7 +247,7 @@
         {
             var sb = new StringBuilder(4096);
 
-            SerializeItem(sb, bag, null, complexity);
+            SerializeItem(sb, bag, null);
 
             return sb.ToString();
         }
@@ -300,63 +272,33 @@
             return sb.ToString();
         }
 
-        internal static void CacheReflection(
-            Type item,
-            TransitComplexity complexity = TransitComplexity.Standard
-        )
-        {
-            if (_cache[complexity.ToString()].ContainsKey(item))
-                return;
-
-            PropertyInfo[] verified = new PropertyInfo[0];
-
-            _cache[complexity.ToString()].Add(item, verified);
-        }
-
         internal static IDictionary<string, object> GetBagForObject<T>(
             T instance,
             TransitComplexity complexity = TransitComplexity.Standard
         )
         {
-            return GetBagForObject(typeof(T), instance, complexity);
+            return GetBagForObject(typeof(T), instance.ToProxy(), complexity);
         }
 
         internal static IDictionary<string, object> GetBagForObject(
             Type type,
-            object instance,
+            IProxy proxy,
             TransitComplexity complexity = TransitComplexity.Standard
         )
         {
-            CacheReflection(type, complexity);
-
             if (type.FullName == null)
             {
                 return null;
             }
 
             bool anonymous = type.FullName.Contains("__AnonymousType");
-            PropertyInfo[] map = _cache[complexity.ToString()][type];
 
             IDictionary<string, object> bag = InitializeBag();
-            foreach (PropertyInfo info in map)
+            foreach (MemberRubric rubric in proxy.Rubrics)
             {
-                if (info != null)
+                if (rubric != null)
                 {
-                    var readWrite = (info.CanWrite && info.CanRead);
-                    if (!readWrite && !anonymous)
-                    {
-                        continue;
-                    }
-                    object value = null;
-                    try
-                    {
-                        value = info.GetValue(instance, null);
-                    }
-                    catch (Exception ex) 
-                    {
-                        throw new Exception("see inner exception", ex);
-                    }
-                    bag.Add(info.Name, value);
+                    bag.Add(rubric.RubricName, proxy[rubric.RubricId]);
                 }
             }
 
@@ -396,7 +338,7 @@
 
         internal static JsonToken GetTokenFromSymbol(char symbol, JsonToken token)
         {
-            switch (symbol)
+            switch ((int)symbol)
             {
                 case '{':
                     token = JsonToken.LeftBrace;
@@ -497,7 +439,7 @@
 
         internal static Dictionary<string, object> InitializeBag()
         {
-            return new Dictionary<string, object>(0, StringComparer.OrdinalIgnoreCase);
+            return new Dictionary<string, object>(0, StringComparer.InvariantCulture);
         }
 
         internal static JsonToken NextToken(IList<char> data, ref int index)
@@ -788,15 +730,13 @@
 
         internal static void SerializeArray(
             object item,
-            StringBuilder sb,
-            TransitComplexity complexity = TransitComplexity.Standard
+            StringBuilder sb
         )
         {
             Type type = item.GetType();
             if (type.IsDefined(typeof(JsonObjectAttribute), false))
             {
-                var bag = GetBagForObject(item.GetType(), item, complexity);
-                SerializeItem(sb, bag, null, complexity);
+                SerializeItem(sb, GetBagForObject(item.GetType(), item.ToProxy()), null);
             }
             else
             {
@@ -808,7 +748,7 @@
                 var total = array.Cast<object>().Count();
                 foreach (object _item in array)
                 {
-                    SerializeItem(sb, _item, null, complexity);
+                    SerializeItem(sb, _item, null);
                     count++;
                     if (count < total)
                         sb.Append(",");
@@ -825,8 +765,7 @@
         internal static void SerializeItem(
             StringBuilder sb,
             object item,
-            string key = null,
-            TransitComplexity complexity = TransitComplexity.Standard
+            string key = null
         )
         {
             if (item == null)
@@ -837,61 +776,58 @@
 
             if (item is IDictionary)
             {
-                SerializeObject(item, sb, false, complexity);
+                SerializeObject(item, sb, false);
                 return;
             }
 
             if (item is ICollection && !(item is string))
             {
-                SerializeArray(item, sb, complexity);
+                SerializeArray(item, sb);
                 return;
             }
 
-            if (item is Usid)
+            if (item.GetType().IsValueType)
             {
-                sb.Append("\"" + ((Usid)item).ToString() + "\"");
+
+                if (item is Usid)
+                {
+                    sb.Append("\"" + ((Usid)item).ToString() + "\"");
+                    return;
+                }
+
+                if (item is Uscn)
+                {
+                    sb.Append("\"" + ((Uscn)item).ToString() + "\"");
+                    return;
+                }
+
+                if (item is DateTime)
+                {
+                    sb.Append("\"" + ((DateTime)item).ToString("yyyy-MM-dd HH:mm:dd") + "\"");
+                    return;
+                }
+
+                if (item is Enum)
+                {
+                    sb.Append("\"" + item.ToString() + "\"");
+                    return;
+                }
+
+                if (item is bool)
+                {
+                    sb.Append(((bool)item).ToString().ToLower());
+                    return;
+                }
+                sb.Append(item.ToString().Replace(',', '.'));
                 return;
             }
-
-            if (item is Uscn)
-            {
-                sb.Append("\"" + ((Uscn)item).ToString() + "\"");
-                return;
-            }
-
-            if (item is DateTime)
-            {
-                sb.Append("\"" + ((DateTime)item).ToString("yyyy-MM-dd HH:mm:dd") + "\"");
-                return;
-            }
-
-            if (item is Enum)
-            {
-                sb.Append("\"" + item.ToString() + "\"");
-                return;
-            }
-
             if (item is Type)
             {
                 sb.Append("\"" + ((Type)item).FullName + "\"");
                 return;
             }
 
-            if (item is bool)
-            {
-                sb.Append(((bool)item).ToString().ToLower());
-                return;
-            }
-
-            if (item is ValueType)
-            {
-                sb.Append(item.ToString().Replace(',', '.'));
-                return;
-            }
-
-            IDictionary<string, object> bag = GetBagForObject(item.GetType(), item, complexity);
-
-            SerializeItem(sb, bag, key, complexity);
+            SerializeItem(sb, GetBagForObject(item.GetType(), item.ToProxy()), key);
         }
 
         internal static void SerializeObject(
@@ -918,7 +854,7 @@
                 }
                 else
                 {
-                    SerializeItem(sb, entry.Value, entry.Key.ToString(), complexity);
+                    SerializeItem(sb, entry.Value, entry.Key.ToString());
                 }
                 if (i < count - 1)
                 {
@@ -949,21 +885,19 @@
         }
 
         private static void DeserializeImpl(
-            IEnumerable<PropertyInfo> map,
             IDictionary<string, object> bag,
             object instance
         )
         {
-            DeserializeType(map, bag, instance);
+            DeserializeType(bag, instance);
         }
 
         private static void DeserializeImpl<T>(
-            IEnumerable<PropertyInfo> map,
             IDictionary<string, object> bag,
             T instance
         )
         {
-            DeserializeType(map, bag, instance);
+            DeserializeType(bag, instance);
         }
     }
 
@@ -971,7 +905,7 @@
     {
         public static NumberFormatInfo JsonNumberInfo()
         {
-            System.Globalization.NumberFormatInfo nfi = new System.Globalization.NumberFormatInfo();
+            NumberFormatInfo nfi = new NumberFormatInfo();
             nfi.NumberDecimalSeparator = ".";
             return nfi;
         }

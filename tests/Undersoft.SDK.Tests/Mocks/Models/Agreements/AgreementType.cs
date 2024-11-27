@@ -2,6 +2,7 @@ using Undersoft.SDK.Tests.Mocks.Models.Origins;
 
 namespace Undersoft.SDK.Tests.Mocks.Models.Agreements
 {
+    [Serializable]
     public class AgreementType : Identifiable
     {
         public int CurrentVersion { get; set; }

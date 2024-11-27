@@ -1,9 +1,9 @@
 namespace System.Series.Tests
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Undersoft.SDK.Series;
     using Undersoft.SDK.Tests.Mocks.Models.Agreements;
 
@@ -12,7 +12,8 @@ namespace System.Series.Tests
         public TypedRegistryTestHelper()
         {
             typedRegistry = new TypedRegistry<Agreement>();
-            identifiableObjectTestCollection = PrepareTestListings.prepareIdentifiableObjectTestCollection();
+            identifiableObjectTestCollection =
+                PrepareTestListings.prepareIdentifiableObjectTestCollection();
         }
 
         public IList<Agreement> identifiableObjectTestCollection { get; set; }
@@ -62,7 +63,9 @@ namespace System.Series.Tests
             Typed_Registry_Async_Put_Test(testCollection);
             Typed_Registry_Async_GetByIndexer_Test(testCollection);
 
-            Debug.WriteLine($"Thread no {testCollection[0].Id.ToString()}_{typedRegistry.Count} ends");
+            Debug.WriteLine(
+                $"Thread no {testCollection[0].Id.ToString()}_{typedRegistry.Count} ends"
+            );
         }
 
         private void Typed_Registry_Sync_Add_Test(IList<Agreement> testCollection)
@@ -224,9 +227,8 @@ namespace System.Series.Tests
             List<Agreement> items = new List<Agreement>();
             foreach (var item in testCollection.Skip(70000))
             {
-                var r = typedRegistry.Remove(item);
-                if (r != null)
-                    items.Add(r);
+                typedRegistry.Remove(item);
+                items.Add(item);
             }
             Assert.AreEqual(30000, items.Count);
         }
@@ -236,8 +238,8 @@ namespace System.Series.Tests
             List<Agreement> items = new List<Agreement>();
             foreach (var item in testCollection.Skip(70000))
             {
-                Agreement r = typedRegistry.Remove(item);
-                items.Add(r);
+                typedRegistry.Remove(item);
+                items.Add(item);
             }
             Assert.AreEqual(30000, items.Count);
         }
@@ -273,9 +275,7 @@ namespace System.Series.Tests
             );
         }
 
-        private void Typed_Registry_Async_ContainsKey_Test(
-            IList<Agreement> testCollection
-        )
+        private void Typed_Registry_Async_ContainsKey_Test(IList<Agreement> testCollection)
         {
             List<bool> items = new List<bool>();
             foreach (var item in testCollection)
@@ -323,9 +323,7 @@ namespace System.Series.Tests
             Debug.WriteLine($"Get Thread no {testCollection[0].Id.ToString()}_{items.Count} ends");
         }
 
-        private void Typed_Registry_Async_GetByIndexer_Test(
-            IList<Agreement> testCollection
-        )
+        private void Typed_Registry_Async_GetByIndexer_Test(IList<Agreement> testCollection)
         {
             List<Agreement> items = new List<Agreement>();
             int i = 0;
@@ -376,9 +374,8 @@ namespace System.Series.Tests
             List<Agreement> items = new List<Agreement>();
             foreach (var item in testCollection.Skip(5000))
             {
-                var r = typedRegistry.Remove(item);
-                if (r != null)
-                    items.Add(r);
+                typedRegistry.Remove(item);
+                items.Add(item);
             }
             Debug.WriteLine(
                 $"Removed Thread no {testCollection[0].Id.ToString()}_{items.Count} ends"
@@ -390,8 +387,8 @@ namespace System.Series.Tests
             List<Agreement> items = new List<Agreement>();
             foreach (var item in testCollection.Skip(5000))
             {
-                Agreement r = typedRegistry.Remove(item);
-                items.Add(r);
+                typedRegistry.Remove(item);
+                items.Add(item);
             }
             Debug.WriteLine(
                 $"Removed V Thread no {testCollection[0].Id.ToString()}_{items.Count} ends"

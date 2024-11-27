@@ -13,10 +13,9 @@
     <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <AssemblyName>$(MSBuildProjectName.Replace(" ", "_"))</AssemblyName>
     <RepositoryType>git</RepositoryType>
-    <Deterministic>false</Deterministic>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <FileVersion>1.0.*</FileVersion>
-    <AssemblyVersion>1.0.*</AssemblyVersion>
+    <Version>2.7.2</Version>
+    <AssemblyVersion>2.7.2.1</AssemblyVersion>
+    <FileVersion>2.7.2.1</FileVersion>        
   </PropertyGroup>
 
   <ItemGroup>  

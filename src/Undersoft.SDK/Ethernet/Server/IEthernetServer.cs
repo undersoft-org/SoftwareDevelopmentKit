@@ -2,7 +2,7 @@
 using Undersoft.SDK.Ethernet.Transfer;
 using Undersoft.SDK.Invoking;
 
-namespace Undersoft.SDK.Ethernet
+namespace Undersoft.SDK.Ethernet.Server
 {
     public interface IEthernetServer
     {

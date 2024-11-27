@@ -288,7 +288,7 @@ public static class ObjectExtractExtenstion
             return false;
         byte* a = (byte*)structure.GetStructurePointer(),
             b = (byte*)other.GetStructurePointer();
-        bool equal = Extract.BlockEqual(a, 0, b, 0, asize);
+        bool equal = Extract.BlockEquals(a, 0, b, 0, asize);
         Marshal.FreeHGlobal(new IntPtr(a));
         Marshal.FreeHGlobal(new IntPtr(b));
         return equal;

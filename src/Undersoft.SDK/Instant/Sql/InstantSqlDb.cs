@@ -38,6 +38,18 @@
             set => _options.ConnectionString = value;
         }
 
+        private void Initialization()
+        {
+            string dbName = _sqlcn.Database;
+            SqlSchemaBuild SchemaBuild = new SqlSchemaBuild(_sqlcn);
+            SchemaBuild.SchemaPrepare();
+            _sqlcn.ChangeDatabase("tempdb");
+            SchemaBuild.SchemaPrepare(BuildDbSchemaType.Temp);
+            _sqlcn.ChangeDatabase(dbName);
+            _accessor = new SqlAccessor();
+            _mutator = new SqlMutator(this);
+        }
+
         public IInstantSeries Get(string sqlQry, string tableName, ISeries<string> keyNames = null)
         {
             return _accessor.Get(cnString, sqlQry, tableName, keyNames);
@@ -226,19 +238,7 @@
                 updateExcept,
                 tempType
             );
-        }
-
-        private void Initialization()
-        {
-            string dbName = _sqlcn.Database;
-            SqlSchemaBuild SchemaBuild = new SqlSchemaBuild(_sqlcn);
-            SchemaBuild.SchemaPrepare();
-            _sqlcn.ChangeDatabase("tempdb");
-            SchemaBuild.SchemaPrepare(BuildDbSchemaType.Temp);
-            _sqlcn.ChangeDatabase(dbName);
-            _accessor = new SqlAccessor();
-            _mutator = new SqlMutator(this);
-        }
+        }       
     }
 
     public class SqlException : Exception
