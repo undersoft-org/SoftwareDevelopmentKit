@@ -164,9 +164,9 @@ namespace Undersoft.SDK.Series.Complex
                     {
                         Place<T> lowestNeighborNeighbor = ((IList<Place<T>>)lowestNeighbor)[i];
                         int lowestNeighborNeughborIndex = lowestNeighborNeighbor.Index;
-
                         int lowestNeighborIndex = lowestNeighbor.Index;
                         double total = neighborValues[lowestNeighborIndex] + value;
+                        
                         if (neighborValues[lowestNeighborNeughborIndex] > total)
                         {
                             neighborValues[lowestNeighborNeughborIndex] = total;

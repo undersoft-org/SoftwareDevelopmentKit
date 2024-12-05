@@ -47,9 +47,9 @@ namespace Undersoft.SDK.Ethernet.Transfer
 
         EthernetTransfer Transfer { get; set; }
 
-        MarkupType ReadHeader(int received);
+        MarkupKind ReadHeader(int received);
 
-        MarkupType ReadMessage(int received);
+        MarkupKind ReadMessage(int received);
 
         void Reset();
     }

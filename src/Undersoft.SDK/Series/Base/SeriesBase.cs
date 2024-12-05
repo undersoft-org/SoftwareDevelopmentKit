@@ -28,13 +28,13 @@ namespace Undersoft.SDK.Series.Base
         protected uint maxid;
         protected ulong bitmask;
 
-        private int NextSize()
-        {
-            return (((int)(size * RESIZING_VECTOR)) | 3);
-        }
         private int PreviousSize()
         {
             return (int)(size * (1 - REMOVED_PERCENT_LIMIT)) | 3;
+        }
+        private int NextSize()
+        {
+            return (((int)(size * RESIZING_VECTOR)) | 3);
         }
 
         protected void CountIncrement()
@@ -48,6 +48,7 @@ namespace Undersoft.SDK.Series.Base
             if (++conflicts > (size * CONFLICTS_PERCENT_LIMIT))
                 Rehash(NextSize());
         }
+        
         protected void RemovedIncrement()
         {
             --count;

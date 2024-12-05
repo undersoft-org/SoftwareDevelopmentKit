@@ -51,12 +51,12 @@
                 }
                 catch (SocketException sx)
                 {
-                    Echo(sx.Message);
+                    WriteNotice(sx.Message);
                 }
                 finally
                 {
                     context.Dispose();
-                    Echo(string.Format("Client disconnected with Id {0}", context.Id));
+                    WriteNotice(string.Format("Client disconnected with Id {0}", context.Id));
                 }
             }
             clients.Clear();
@@ -68,7 +68,7 @@
 
             if (context == null)
             {
-                Echo(string.Format("Client {0} does not exist.", context.Id));
+                WriteNotice(string.Format("Client {0} does not exist.", context.Id));
             }
             else
             {
@@ -82,13 +82,13 @@
                 }
                 catch (SocketException sx)
                 {
-                    Echo(sx.Message);
+                    WriteNotice(sx.Message);
                 }
                 finally
                 {
                     ITransferContext contextRemoved = clients.Remove(context.Id);
                     contextRemoved.Dispose();
-                    Echo(string.Format("Client disconnected with Id {0}", context.Id));
+                    WriteNotice(string.Format("Client disconnected with Id {0}", context.Id));
                 }
             }
         }
@@ -106,7 +106,7 @@
 
                 if (context == null)
                 {
-                    Echo(string.Format("Client  does not exist."));
+                    WriteNotice(string.Format("Client  does not exist."));
                 }
                 else
                 {
@@ -120,12 +120,12 @@
                     }
                     catch (SocketException sx)
                     {
-                        Echo(sx.Message);
+                        WriteNotice(sx.Message);
                     }
                     finally
                     {
                         context.Dispose();
-                        Echo(string.Format("Client disconnected with Id {0}", context.Id));
+                        WriteNotice(string.Format("Client disconnected with Id {0}", context.Id));
                     }
                 }
             }
@@ -156,7 +156,7 @@
             {
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Header,
+                    TransferPart.Header,
                     DirectionType.Receive
                 );
                 request.Resolve(context);
@@ -169,7 +169,7 @@
                 }
                 catch (Exception ex)
                 {
-                    Echo(ex.Message);
+                    WriteNotice(ex.Message);
                     CloseClient(context.Id);
                 }
             }
@@ -185,7 +185,7 @@
             connectingNotice.Dispose();
         }
 
-        public void Echo(string message)
+        public void WriteNotice(string message)
         {
             if (WriteEcho != null)
                 WriteEcho.Invoke(message);
@@ -228,7 +228,7 @@
             }
             catch (Exception ex)
             {
-                Echo(ex.Message);
+                WriteNotice(ex.Message);
                 CloseClient(context.Id);
             }
         }
@@ -250,7 +250,7 @@
             {
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Header,
+                    TransferPart.Header,
                     DirectionType.Receive
                 );
                 request.Resolve(context);
@@ -263,7 +263,7 @@
                 }
                 catch (Exception ex)
                 {
-                    Echo(ex.Message);
+                    WriteNotice(ex.Message);
                     CloseClient(context.Id);
                 }
             }
@@ -284,7 +284,7 @@
         public void MessageReceivedCallback(IAsyncResult result)
         {
             ITransferContext context = (ITransferContext)result.AsyncState;
-            MarkupType noiseKind = MarkupType.None;
+            MarkupKind noiseKind = MarkupKind.None;
 
             int receive = context.Listener.EndReceive(result);
 
@@ -311,9 +311,9 @@
                 object readPosition = context.InputId;
 
                 if (
-                    noiseKind == MarkupType.Block
+                    noiseKind == MarkupKind.Block
                     || (
-                        noiseKind == MarkupType.End
+                        noiseKind == MarkupKind.End
                         && (int)readPosition
                             < (context.Transfer.RequestHeader.Context.ItemsCount - 1)
                     )
@@ -329,7 +329,7 @@
 
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Message,
+                    TransferPart.Message,
                     DirectionType.Receive
                 );
                 request.Resolve(context);
@@ -341,7 +341,7 @@
                     context.ChunksReceivedNotice.Set();
 
                 if (
-                    noiseKind == MarkupType.End
+                    noiseKind == MarkupKind.End
                     && (int)readPosition
                         >= (context.Transfer.RequestHeader.Context.ItemsCount - 1)
                 )
@@ -355,7 +355,7 @@
                     }
                     catch (Exception ex)
                     {
-                        Echo(ex.Message);
+                        WriteNotice(ex.Message);
                         CloseClient(context.Id);
                     }
                 }
@@ -379,7 +379,7 @@
             {
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Message,
+                    TransferPart.Message,
                     DirectionType.Send
                 );
                 request.Resolve();
@@ -407,7 +407,7 @@
                 }
                 catch (Exception ex)
                 {
-                    Echo(ex.Message);
+                    WriteNotice(ex.Message);
                     CloseClient(context.Id);
                 }
             }
@@ -437,7 +437,7 @@
                         else
                             break;
                     }
-                    Echo("Client connected. Get Id " + id);
+                    WriteNotice("Client connected. Get Id " + id);
                     context.Listener.BeginReceive(
                         context.HeaderBuffer,
                         0,
@@ -451,17 +451,17 @@
             }
             catch (SocketException sx)
             {
-                Echo(sx.Message);
+                WriteNotice(sx.Message);
             }
         }
 
-        public void Receive(TransitPart messagePart, int id)
+        public void Receive(TransferPart messagePart, int id)
         {
             ITransferContext context = GetClient(id).Value;
 
             AsyncCallback callback = HeaderReceivedCallback;
 
-            if (messagePart != TransitPart.Header && context.HasMessageToReceive)
+            if (messagePart != TransferPart.Header && context.HasMessageToReceive)
             {
                 callback = MessageReceivedCallback;
                 context.ItemsLeft = context.Transfer.RequestHeader.Context.ItemsCount;
@@ -485,7 +485,7 @@
                 );
         }
 
-        public void Send(TransitPart messagePart, int id)
+        public void Send(TransferPart messagePart, int id)
         {
             ITransferContext context = GetClient(id).Value;
             if (!IsConnected(context.Id))
@@ -493,12 +493,12 @@
 
             AsyncCallback callback = HeaderSentCallback;
 
-            if (messagePart == TransitPart.Header)
+            if (messagePart == TransferPart.Header)
             {
                 callback = HeaderSentCallback;
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Header,
+                    TransferPart.Header,
                     DirectionType.Send
                 );
                 request.Resolve();
@@ -509,7 +509,7 @@
                 context.OutputId = 0;
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Message,
+                    TransferPart.Message,
                     DirectionType.Send
                 );
                 request.Resolve();
@@ -552,7 +552,7 @@
             }
             catch (SocketException sx)
             {
-                Echo(sx.Message);
+                WriteNotice(sx.Message);
             }
         }
 

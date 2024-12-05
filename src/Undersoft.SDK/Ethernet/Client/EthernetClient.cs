@@ -11,7 +11,6 @@
     {
         private readonly ManualResetEvent connectNotice = new ManualResetEvent(false);
         public IPEndPoint EndPoint;
-        private ITransferContext context;
         private IPAddress ip;
         private int port;
         private Socket socket;
@@ -26,12 +25,6 @@
 
         public IInvoker Connected { get; set; }
 
-        public ITransferContext Context
-        {
-            get { return context; }
-            set { context = value; }
-        }
-
         public IInvoker HeaderReceived { get; set; }
 
         public IInvoker HeaderSent { get; set; }      
@@ -40,7 +33,7 @@
 
         public IInvoker MessageSent { get; set; }
 
-        public void Connect()
+        public ITransferContext Connect()
         {
             int _port = port;
             IPAddress _ip = ip;
@@ -53,11 +46,13 @@
                     SocketType.Stream,
                     ProtocolType.Tcp
                 );
-                context = new TransferContext(socket);
+                var context = new TransferContext(socket);
                 socket.BeginConnect(endpoint, OnConnectCallback, context);
                 connectNotice.WaitOne();
 
-                Connected.Invoke(this);
+                Connected.Invoke(context);
+
+                return context;
             }
             catch (SocketException ex) { throw new Exception("see inner exception", ex); }
         }
@@ -77,10 +72,10 @@
             return true;
         }
 
-        public void Receive(TransitPart messagePart)
+        public void Receive(TransferPart messagePart, ITransferContext context)
         {
             AsyncCallback callback = HeaderReceivedCallBack;
-            if (messagePart != TransitPart.Header && context.HasMessageToReceive)
+            if (messagePart != TransferPart.Header && context.HasMessageToReceive)
             {
                 callback = MessageReceivedCallBack;
                 context.ItemsLeft = context.Transfer.RequestHeader.Context.ItemsCount;
@@ -104,28 +99,28 @@
                 );
         }
 
-        public void Send(TransitPart messagePart)
+        public void Send(TransferPart messagePart, ITransferContext context)
         {
             if (!IsConnected())
                 throw new Exception("Destination socket is not connected.");
             AsyncCallback callback = HeaderSentCallback;
-            if (messagePart == TransitPart.Header)
+            if (messagePart == TransferPart.Header)
             {
                 callback = HeaderSentCallback;
                 TransferOperation request = new TransferOperation(
-                    Context.Transfer,
-                    TransitPart.Header,
+                    context.Transfer,
+                    TransferPart.Header,
                     DirectionType.Send
                 );
                 request.Resolve();
             }
-            else if (Context.HasMessageToSend)
+            else if (context.HasMessageToSend)
             {
                 callback = MessageSentCallback;
                 context.OutputId = 0;
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Message,
+                    TransferPart.Message,
                     DirectionType.Send
                 );
                 request.Resolve();
@@ -147,19 +142,11 @@
         {
             try
             {
-                if (!IsConnected())
-                {
-                    context.Dispose();
-                    return;
-                }
-
                 if (socket != null && socket.Connected)
                 {
                     socket.Shutdown(SocketShutdown.Both);
                     socket.Close();
-                }
-
-                context.Dispose();
+                }                
             }
             catch (SocketException) { }
         }
@@ -191,7 +178,7 @@
             {
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Header,
+                    TransferPart.Header,
                     DirectionType.Receive
                 );
                 request.Resolve(context);
@@ -221,7 +208,7 @@
         private void MessageReceivedCallBack(IAsyncResult result)
         {
             ITransferContext context = (ITransferContext)result.AsyncState;
-            MarkupType noiseKind = MarkupType.None;
+            MarkupKind noiseKind = MarkupKind.None;
 
             int receive = context.Listener.EndReceive(result);
 
@@ -248,9 +235,9 @@
                 object readPosition = context.InputId;
 
                 if (
-                    noiseKind == MarkupType.Block
+                    noiseKind == MarkupKind.Block
                     || (
-                        noiseKind == MarkupType.End
+                        noiseKind == MarkupKind.End
                         && (int)readPosition
                             < (context.Transfer.RequestHeader.Context.ItemsCount - 1)
                     )
@@ -266,7 +253,7 @@
 
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Message,
+                    TransferPart.Message,
                     DirectionType.Receive
                 );
                 request.Resolve(context);
@@ -278,7 +265,7 @@
                     context.ChunksReceivedNotice.Set();
 
                 if (
-                    noiseKind == MarkupType.End
+                    noiseKind == MarkupKind.End
                     && (int)readPosition
                         >= (context.Transfer.RequestHeader.Context.ItemsCount - 1)
                 )
@@ -310,7 +297,7 @@
             {
                 TransferOperation request = new TransferOperation(
                     context.Transfer,
-                    TransitPart.Message,
+                    TransferPart.Message,
                     DirectionType.Send
                 );
                 request.Resolve();

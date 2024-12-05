@@ -4,43 +4,42 @@ using Undersoft.SDK.Utilities;
 namespace Undersoft.SDK.Ethernet
 {
     public class EthernetContext
-    {
-        public string MethodTypeName;
-        public string MethodName;
+    {        
+        public string Method;
 
         public IPEndPoint LocalEndPoint;
 
         public IPEndPoint RemoteEndPoint;
 
-        private Type contentType;
+        private Type type;
 
         public TransitComplexity Complexity { get; set; } = TransitComplexity.Standard;
 
-        public Type ContentType
+        public Type Type
         {
             get
             {
-                if (contentType == null && ContentTypeName != null)
-                    ContentType = AssemblyUtilities.FindType(ContentTypeName);
-                return contentType;
+                if (type == null && TypeName != null)
+                    Type = AssemblyUtilities.FindType(TypeName);
+                return type;
             }
             set
             {
                 if (value != null)
                 {
-                    ContentTypeName = value.FullName;
-                    contentType = value;
+                    TypeName = value.FullName;
+                    type = value;
                 }
             }
         }
 
-        public string ContentTypeName { get; set; }
+        public string TypeName { get; set; }
 
-        public string Echo { get; set; }
+        public string Notice { get; set; }
 
         public int Errors { get; set; }
 
-        public EthernetSite IdentitySite { get; set; } = EthernetSite.Client;
+        public EthernetSite Site { get; set; } = EthernetSite.Client;
 
         public int ItemsCount { get; set; } = 0;
 

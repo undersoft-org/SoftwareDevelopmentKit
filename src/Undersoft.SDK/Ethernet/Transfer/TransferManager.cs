@@ -15,11 +15,11 @@ namespace Undersoft.SDK.Ethernet.Transfer
             transit = _transit;
             transitContext = transit.Context;
             ethernetContext = transit.ResponseHeader.Context;
-            site = ethernetContext.IdentitySite;
+            site = ethernetContext.Site;
             operation = new EthernetOperation(_transit);
         }
 
-        public void HeaderContent(object data, object value, DirectionType _direction)
+        public void GetHeaderData(out object data, object value, DirectionType _direction)
         {
             DirectionType direction = _direction;
             object _data = value;
@@ -28,7 +28,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
                 Type[] ifaces = _data.GetType().GetInterfaces();
                 if (ifaces.Contains(typeof(ITransferable)))
                 {
-                    transit.ResponseHeader.Context.ContentType = _data.GetType();
+                    transit.ResponseHeader.Context.Type = _data.GetType();
 
                     if (direction == DirectionType.Send)
                         _data = ((ITransferable)value).GetHeader();
@@ -61,15 +61,15 @@ namespace Undersoft.SDK.Ethernet.Transfer
             data = _data;
         }
 
-        public void MessageContent(ref object content, object value, DirectionType _direction)
+        public void GetMessageData(out object data, object value, DirectionType _direction)
         {
             DirectionType direction = _direction;
-            object _content = value;
-            if (_content != null)
+            object _data = value;
+            if (_data != null)
             {
                 if (direction == DirectionType.Receive)
                 {
-                    Type[] ifaces = _content.GetType().GetInterfaces();
+                    Type[] ifaces = _data.GetType().GetInterfaces();
                     if (ifaces.Contains(typeof(ITransferable)))
                     {
                         object[] messages_ = ((ITransferable)value).GetMessage();
@@ -85,12 +85,12 @@ namespace Undersoft.SDK.Ethernet.Transfer
                                 message.InputChunks = head.InputChunks;
                             }
 
-                            _content = messages_;
+                            _data = messages_;
                         }
                     }
                 }
             }
-            content = _content;
+            data = _data;
         }
     }
 }

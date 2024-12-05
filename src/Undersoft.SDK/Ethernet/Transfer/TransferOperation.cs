@@ -9,7 +9,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
     {
         private DirectionType direction;
         private ProtocolMethod method;
-        private TransitPart part;
+        private TransferPart part;
         private EthernetProtocol protocol;
         private EthernetSite site;
         private EthernetTransfer transit;
@@ -18,14 +18,14 @@ namespace Undersoft.SDK.Ethernet.Transfer
 
         public TransferOperation(
             EthernetTransfer _transaction,
-            TransitPart _part,
+            TransferPart _part,
             DirectionType _direction
         )
         {
             transit = _transaction;
             transitContext = transit.Context;
             ethernetContext = transit.ResponseHeader.Context;
-            site = ethernetContext.IdentitySite;
+            site = ethernetContext.Site;
             direction = _direction;
             part = _part;
             protocol = transitContext.Protocol;
@@ -42,10 +42,10 @@ namespace Undersoft.SDK.Ethernet.Transfer
                         case DirectionType.Receive:
                             switch (part)
                             {
-                                case TransitPart.Header:
+                                case TransferPart.Header:
                                     ServerReceivedTcpTransitHeader(buffer);
                                     break;
-                                case TransitPart.Message:
+                                case TransferPart.Message:
                                     ServerReceivedTcpTransitMessage(buffer);
                                     break;
                             }
@@ -53,10 +53,10 @@ namespace Undersoft.SDK.Ethernet.Transfer
                         case DirectionType.Send:
                             switch (part)
                             {
-                                case TransitPart.Header:
+                                case TransferPart.Header:
                                     ServerSendTcpTransitHeader();
                                     break;
-                                case TransitPart.Message:
+                                case TransferPart.Message:
                                     ServerSendTcpTransitMessage();
                                     break;
                             }
@@ -69,10 +69,10 @@ namespace Undersoft.SDK.Ethernet.Transfer
                         case DirectionType.Receive:
                             switch (part)
                             {
-                                case TransitPart.Header:
+                                case TransferPart.Header:
                                     ClientReceivedTcpTransitHeader(buffer);
                                     break;
-                                case TransitPart.Message:
+                                case TransferPart.Message:
                                     ClientReceivedTcpTransitMessage(buffer);
                                     break;
                             }
@@ -80,10 +80,10 @@ namespace Undersoft.SDK.Ethernet.Transfer
                         case DirectionType.Send:
                             switch (part)
                             {
-                                case TransitPart.Header:
+                                case TransferPart.Header:
                                     ClientSendTcpTransitHeader();
                                     break;
-                                case TransitPart.Message:
+                                case TransferPart.Message:
                                     ClientSendTcpTrnsitMessage();
                                     break;
                             }
@@ -215,7 +215,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
                     transit.RequestHeader = headerObject;
 
 
-                    if (transit.RequestHeader.Context.ContentType != null)
+                    if (transit.RequestHeader.Context.Type != null)
                     {
                         object _content = transit.RequestHeader.Data;
 
@@ -268,8 +268,8 @@ namespace Undersoft.SDK.Ethernet.Transfer
                     else
                     {
                         transit.ResponseHeader.Data = new Hashtable() { { "Register", true } };
-                        transit.ResponseHeader.Context.Echo +=
-                            "Registration success - ContentType: null ";
+                        transit.ResponseHeader.Context.Notice +=
+                            "Registration success - Type: null ";
                     }
                 }
                 else
@@ -293,7 +293,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
                 if (errorMessage != "")
                 {
                     transit.ResponseHeader.Data += errorMessage;
-                    transit.ResponseHeader.Context.Echo += errorMessage;
+                    transit.ResponseHeader.Context.Notice += errorMessage;
                 }
                 transit.ResponseHeader.Context.Errors++;
             }

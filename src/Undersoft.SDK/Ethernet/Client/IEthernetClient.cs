@@ -5,9 +5,7 @@ namespace Undersoft.SDK.Ethernet.Client
 {
     public interface IEthernetClient : IDisposable
     {
-        IInvoker Connected { get; set; }
-
-        ITransferContext Context { get; set; }
+        IInvoker Connected { get; set; }    
 
         IInvoker HeaderReceived { get; set; }
 
@@ -17,12 +15,12 @@ namespace Undersoft.SDK.Ethernet.Client
 
         IInvoker MessageSent { get; set; }
 
-        void Connect();
+        ITransferContext Connect();
 
         bool IsConnected();
 
-        void Receive(TransitPart messagePart);
+        void Receive(TransferPart messagePart, ITransferContext context);
 
-        void Send(TransitPart messagePart);
+        void Send(TransferPart messagePart, ITransferContext context);
     }
 }

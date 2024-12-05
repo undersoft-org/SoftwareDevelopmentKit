@@ -21,7 +21,7 @@
 
         void CloseListener();
 
-        void Echo(string message);
+        void WriteNotice(string message);
 
         void HeaderReceivedCallback(IAsyncResult result);
 
@@ -35,9 +35,9 @@
 
         void OnConnectCallback(IAsyncResult result);
 
-        void Receive(TransitPart messagePart, int id);
+        void Receive(TransferPart messagePart, int id);
 
-        void Send(TransitPart messagePart, int id);
+        void Send(TransferPart messagePart, int id);
 
         void StartListening();
     }

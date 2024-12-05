@@ -134,7 +134,6 @@ namespace Undersoft.SDK.Series.Base
             ReleaseWriting();
             return temp;
         }
-
         protected override ISeriesItem<V> InnerPut(V value)
         {
             AcquireWriting();
@@ -142,7 +141,6 @@ namespace Undersoft.SDK.Series.Base
             ReleaseWriting();
             return temp;
         }
-
         protected override ISeriesItem<V> InnerPut(long key, V value)
         {
             AcquireWriting();
@@ -188,7 +186,6 @@ namespace Undersoft.SDK.Series.Base
             ReleaseWriting();
             return temp;
         }
-
         protected override bool InnerAdd(V value)
         {
             AcquireWriting();
@@ -196,7 +193,6 @@ namespace Undersoft.SDK.Series.Base
             ReleaseWriting();
             return temp;
         }
-
         protected override bool InnerAdd(long key, V value)
         {
             AcquireWriting();
@@ -220,14 +216,12 @@ namespace Undersoft.SDK.Series.Base
             base.CopyTo(array, index);
             ReleaseReading();
         }
-
         public override void CopyTo(ISeriesItem<V>[] array, int index)
         {
             AcquireReading();
             base.CopyTo(array, index);
             ReleaseReading();
         }
-
         public override void CopyTo(V[] array, int index)
         {
             AcquireReading();
@@ -246,7 +240,7 @@ namespace Undersoft.SDK.Series.Base
         public override ISeriesItem<V> EmptyItem() { return new SeriesItem<V>(); }
 
         public override ISeriesItem<V>[] EmptyTable(int size) { return new SeriesItem<V>[size]; }
-
+        
         public override ISeriesItem<V>[] EmptyVector(int size) { return new SeriesItem<V>[size]; }
 
         public override ISeriesItem<V> GetItem(int index)
@@ -286,7 +280,6 @@ namespace Undersoft.SDK.Series.Base
             base.InnerInsert(index, item);
             ReleaseWriting();
         }
-
         public override void Insert(int index, V item)
         {
             AcquireWriting();
@@ -297,11 +290,8 @@ namespace Undersoft.SDK.Series.Base
         }
 
         public override ISeriesItem<V> NewItem(ISeriesItem<V> item) { return new SeriesItem<V>(item); }
-
         public override ISeriesItem<V> NewItem(V value) { return new SeriesItem<V>(value); }
-
         public override ISeriesItem<V> NewItem(object key, V value) { return new SeriesItem<V>(key, value); }
-
         public override ISeriesItem<V> NewItem(long key, V value) { return new SeriesItem<V>(key, value); }
 
         public override V[] ToArray()
@@ -319,7 +309,6 @@ namespace Undersoft.SDK.Series.Base
             ReleaseWriting();
             return temp;
         }
-
         public override bool TryDequeue(out V output)
         {
             AcquireWriting();

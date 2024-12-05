@@ -49,7 +49,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
             Context = new EthernetContext();
             Context.LocalEndPoint = (IPEndPoint)context.Listener.LocalEndPoint;
             Context.RemoteEndPoint = (IPEndPoint)context.Listener.RemoteEndPoint;
-            Context.IdentitySite = site;
+            Context.Site = site;
             transaction = _transaction;
             OutputChunks = 0;
             InputChunks = 0;
@@ -58,7 +58,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
         public TransferHeader(EthernetTransfer _transaction, EthernetSite site)
         {
             Context = new EthernetContext();
-            Context.IdentitySite = site;
+            Context.Site = site;
             transaction = _transaction;
             OutputChunks = 0;
             InputChunks = 0;

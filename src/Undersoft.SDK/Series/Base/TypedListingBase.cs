@@ -81,7 +81,6 @@
             for (int j = 0; j < c; j++)
                 array.SetValue(GetItem(j).Value, i++);
         }
-
         public override void CopyTo(ISeriesItem<V>[] array, int index)
         {
             int c = count,
@@ -96,7 +95,6 @@
                 array[i++] = GetItem(j);
             }
         }
-
         public override void CopyTo(V[] array, int index)
         {
             int c = count,
@@ -123,7 +121,7 @@
             if (key == 0)
                 return null;
 
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> mem = table[GetPosition(key)];
 
             while (mem != null)
             {
@@ -142,7 +140,6 @@
 
             return mem;
         }
-
         public override ISeriesItem<V> GetItem(int index)
         {
             if (index < count)
@@ -174,15 +171,14 @@
             return array;
         }
 
-        protected ISeriesItem<V> createNew(ISeriesItem<V> item)
+        protected ISeriesItem<V> NewIndex(ISeriesItem<V> item)
         {
             int id = count + removed;
             item.Index = id;
             vector[id] = item;
             return item;
         }
-
-        protected ISeriesItem<V> createNew(long key, V value)
+        protected ISeriesItem<V> NewIndex(long key, V value)
         {
             int id = count + removed;
             var newitem = NewItem(key, value);
@@ -191,18 +187,17 @@
             return newitem;
         }
 
-        protected void createRepeated(ISeriesItem<V> item, V value)
+        protected void CreateRepeated(ISeriesItem<V> item, V value)
         {
-            var _item = createNew(item.Id, item.Value);
+            var _item = NewIndex(item.Id, item.Value);
             item.Value = value;
             _item.Next = item.Next;
             item.Next = _item;
             _item.Repeated = true;
         }
-
-        protected void createRepeated(ISeriesItem<V> item, ISeriesItem<V> newitem)
+        protected void CreateRepeated(ISeriesItem<V> item, ISeriesItem<V> newitem)
         {
-            var _item = createNew(newitem);
+            var _item = NewIndex(newitem);
             var val = item.Value;
             item.Value = _item.Value;
             _item.Value = val;
@@ -211,7 +206,7 @@
             _item.Repeated = true;
         }
 
-        protected ISeriesItem<V> swapRepeated(ISeriesItem<V> item)
+        protected ISeriesItem<V> SwapRepeated(ISeriesItem<V> item)
         {
             var value = item.Value;
             var _item = item.Next;
@@ -241,14 +236,14 @@
         protected override bool InnerAdd(ISeriesItem<V> value)
         {
             long key = value.Id;
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
             if (item == null)
             {
-                table[pos] = createNew(value);
-                countIncrement();
+                table[pos] = NewIndex(value);
+                CountIncrement();
                 return true;
             }
 
@@ -260,14 +255,14 @@
                     {
                         item.Removed = false;
                         item.Value = value.Value;
-                        removedDecrement();
+                        RemovedDecrement();
                         return true;
                     }
 
                     if (repeatable)
                     {
-                        createRepeated(item, value);
-                        countIncrement();
+                        CreateRepeated(item, value);
+                        CountIncrement();
                         return true;
                     }
                     return false;
@@ -275,24 +270,23 @@
 
                 if (item.Extended == null)
                 {
-                    item.Extended = createNew(value);
-                    conflictIncrement();
+                    item.Extended = NewIndex(value);
+                    ConflictIncrement();
                     return true;
                 }
                 item = item.Extended;
             }
         }
-
         protected override bool InnerAdd(long key, V value)
         {
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
             if (item == null)
             {
-                table[pos] = createNew(key, value);
-                countIncrement();
+                table[pos] = NewIndex(key, value);
+                CountIncrement();
                 return true;
             }
 
@@ -304,14 +298,14 @@
                     {
                         item.Removed = false;
                         item.Value = value;
-                        removedDecrement();
+                        RemovedDecrement();
                         return true;
                     }
 
                     if (repeatable)
                     {
-                        createRepeated(item, value);
-                        countIncrement();
+                        CreateRepeated(item, value);
+                        CountIncrement();
                         return true;
                     }
 
@@ -320,26 +314,25 @@
 
                 if (item.Extended == null)
                 {
-                    item.Extended = createNew(key, value);
-                    conflictIncrement();
+                    item.Extended = NewIndex(key, value);
+                    ConflictIncrement();
                     return true;
                 }
 
                 item = item.Extended;
             }
         }
-
         protected override bool InnerAdd(V value)
         {
             long key = unique.Key(value, value.TypeId);
 
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
             ISeriesItem<V> item = table[pos];
 
             if (item == null)
             {
-                table[pos] = createNew(key, value);
-                countIncrement();
+                table[pos] = NewIndex(key, value);
+                CountIncrement();
                 return true;
             }
 
@@ -351,14 +344,14 @@
                     {
                         item.Removed = false;
                         item.Value = value;
-                        removedDecrement();
+                        RemovedDecrement();
                         return true;
                     }
 
                     if (repeatable)
                     {
-                        createRepeated(item, value);
-                        countIncrement();
+                        CreateRepeated(item, value);
+                        CountIncrement();
                         return true;
                     }
 
@@ -367,8 +360,8 @@
 
                 if (item.Extended == null)
                 {
-                    item.Extended = createNew(key, value);
-                    conflictIncrement();
+                    item.Extended = NewIndex(key, value);
+                    ConflictIncrement();
                     return true;
                 }
 
@@ -382,7 +375,7 @@
             if (c > 0)
             {
                 if (removed > 0)
-                    reindexWithInsert(index, item);
+                    InnerReindexWithInsert(index, item);
                 else
                 {
                     var replaceItem = GetItem(index);
@@ -407,19 +400,31 @@
             }
         }
 
+        public override void Insert(int index, ISeriesItem<V> seriesItem)
+        {
+            InnerAdd(seriesItem);
+            InnerInsert(index, seriesItem);
+        }
+        public override void Insert(int index, V seriesItem)
+        {
+            var newitem = NewItem(seriesItem);
+            InnerAdd(newitem);
+            InnerInsert(index, newitem);
+        }
+
         protected override ISeriesItem<V> InnerPut(ISeriesItem<V> value)
         {
             long key = value.Id;
 
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> item = table[pos];
 
             if (item == null)
             {
-                item = createNew(value);
+                item = NewIndex(value);
                 table[pos] = item;
-                countIncrement();
+                CountIncrement();
                 return item;
             }
 
@@ -432,32 +437,31 @@
                     if (item.Removed)
                     {
                         item.Removed = false;
-                        removedDecrement();
+                        RemovedDecrement();
                     }
                     return item;
                 }
 
                 if (item.Extended == null)
                 {
-                    var newitem = createNew(value);
+                    var newitem = NewIndex(value);
                     item.Extended = newitem;
-                    conflictIncrement();
+                    ConflictIncrement();
                     return newitem;
                 }
                 item = item.Extended;
             }
         }
-
         protected override ISeriesItem<V> InnerPut(long key, V value)
         {
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
             ISeriesItem<V> item = table[pos];
 
             if (item == null)
             {
-                item = createNew(key, value);
+                item = NewIndex(key, value);
                 table[pos] = item;
-                countIncrement();
+                CountIncrement();
                 return item;
             }
 
@@ -469,7 +473,7 @@
                     if (item.Removed)
                     {
                         item.Removed = false;
-                        removedDecrement();
+                        RemovedDecrement();
                     }
 
                     return item;
@@ -477,27 +481,26 @@
 
                 if (item.Extended == null)
                 {
-                    var newitem = createNew(key, value);
+                    var newitem = NewIndex(key, value);
                     item.Extended = newitem;
-                    conflictIncrement();
+                    ConflictIncrement();
                     return newitem;
                 }
 
                 item = item.Extended;
             }
         }
-
         protected override ISeriesItem<V> InnerPut(V value)
         {
             long key = unique.Key(value, value.TypeId);
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
             ISeriesItem<V> item = table[pos];
 
             if (item == null)
             {
-                item = createNew(key, value);
+                item = NewIndex(key, value);
                 table[pos] = item;
-                countIncrement();
+                CountIncrement();
                 return item;
             }
 
@@ -509,7 +512,7 @@
                     if (item.Removed)
                     {
                         item.Removed = false;
-                        removedDecrement();
+                        RemovedDecrement();
                     }
 
                     return item;
@@ -517,9 +520,9 @@
 
                 if (item.Extended == null)
                 {
-                    var newitem = createNew(key, value);
+                    var newitem = NewIndex(key, value);
                     item.Extended = newitem;
-                    conflictIncrement();
+                    ConflictIncrement();
                     return newitem;
                 }
 
@@ -529,7 +532,7 @@
 
         protected override V InnerRemove(long key)
         {
-            ISeriesItem<V> _item = table[getPosition(key)];
+            ISeriesItem<V> _item = table[GetPosition(key)];
 
             while (_item != null)
             {
@@ -539,20 +542,19 @@
                         return default(V);
 
                     if (repeatable && _item.Next != null)
-                        _item = swapRepeated(_item);
+                        _item = SwapRepeated(_item);
 
                     _item.Removed = true;
-                    removedIncrement();
+                    RemovedIncrement();
                     return _item.Value;
                 }
                 _item = _item.Extended;
             }
             return default(V);
         }
-
         protected override V InnerRemove(long key, V item)
         {
-            ISeriesItem<V> _item = table[getPosition(key)];
+            ISeriesItem<V> _item = table[GetPosition(key)];
 
             while (_item != null)
             {
@@ -565,10 +567,10 @@
                         if (ValueEquals(_item.Value, item))
                         {
                             if (_item.Next != null)
-                                _item = swapRepeated(_item);
+                                _item = SwapRepeated(_item);
 
                             _item.Removed = true;
-                            removedIncrement();
+                            RemovedIncrement();
                             return _item.Value;
                         }
                         _item = _item.Next;
@@ -590,7 +592,6 @@
         {
             return IndexOf(unique.Key(item), item);
         }
-
         protected override int IndexOf(long key, V value)
         {
             if (!repeatable)
@@ -615,17 +616,14 @@
         {
             return IndexOf(item.Id, item.Value) > -1;
         }
-
         public override bool Contains(IUnique<V> item)
         {
             return IndexOf(unique.Key(item), item.UniqueValue) > -1;
         }
-
         public override bool Contains(V item)
         {
             return IndexOf(item) > -1;
         }
-
         public override bool Contains(long key, V item)
         {
             return IndexOf(key, item) > -1;
@@ -638,12 +636,12 @@
                 return default(V);
 
             if (repeatable && _output.Next != null)
-                _output = swapRepeated(_output);
+                _output = SwapRepeated(_output);
             else
                 first = _output;
 
             _output.Removed = true;
-            removedIncrement();
+            RemovedIncrement();
             return _output.Value;
         }
 
@@ -658,16 +656,15 @@
                 return false;
 
             if (repeatable && _output.Next != null)
-                _output = swapRepeated(_output);
+                _output = SwapRepeated(_output);
             else
                 first = _output;
 
             _output.Removed = true;
-            removedIncrement();
+            RemovedIncrement();
             output = _output.Value;
             return true;
         }
-
         public override bool TryDequeue(out ISeriesItem<V> output)
         {
             output = null;
@@ -679,12 +676,12 @@
                 return false;
 
             if (repeatable && output.Next != null)
-                output = swapRepeated(output);
+                output = SwapRepeated(output);
             else
                 first = output;
 
             output.Removed = true;
-            removedIncrement();
+            RemovedIncrement();
             return true;
         }
 
@@ -697,13 +694,13 @@
             if (removed != 0)
             {
                 ISeriesItem<V>[] newBaseDeck = EmptyVector(_newsize);
-                rehashAndReindex(newItemTable, newBaseDeck, newMaxId);
+                InnerRehashAndReindex(newItemTable, newBaseDeck, newMaxId);
                 vector = newBaseDeck;
             }
             else
             {
                 ISeriesItem<V>[] newBaseDeck = EmptyVector(_newsize);
-                rehash(newItemTable, newMaxId);
+                Rehash(newItemTable, newMaxId);
                 Array.Copy(vector, 0, newBaseDeck, 0, finish);
                 vector = newBaseDeck;
             }
@@ -730,7 +727,7 @@
             removed = 0;
         }
 
-        protected override void renewClear(int capacity)
+        protected override void RenewClear(int capacity)
         {
             if (capacity != size || count > 0)
             {
@@ -746,7 +743,7 @@
             }
         }
 
-        private void rehash(ISeriesItem<V>[] newItemTable, uint newMaxId)
+        private void Rehash(ISeriesItem<V>[] newItemTable, uint newMaxId)
         {
             int _conflicts = 0;
             int total = count + removed;
@@ -761,7 +758,7 @@
                 if (item == null || item.Removed || (repeatable && item.Repeated))
                     continue;
 
-                ulong pos = getPosition(item.Id, _newMaxId);
+                ulong pos = GetPosition(item.Id, _newMaxId);
 
                 mem = _newItemTable[pos];
 
@@ -788,7 +785,7 @@
             conflicts = _conflicts;
         }
 
-        private void rehashAndReindex(
+        private void InnerRehashAndReindex(
             ISeriesItem<V>[] newItemTable,
             ISeriesItem<V>[] newBaseDeck,
             uint newMaxId
@@ -816,7 +813,7 @@
                     continue;
                 }
 
-                ulong pos = getPosition(item.Id, _newMaxId);
+                ulong pos = GetPosition(item.Id, _newMaxId);
 
                 mem = _newItemTable[pos];
 
@@ -849,7 +846,7 @@
             removed = 0;
         }
 
-        private void reindexWithInsert(int index, ISeriesItem<V> item)
+        private void InnerReindexWithInsert(int index, ISeriesItem<V> item)
         {
             ISeriesItem<V> _item = null;
             first = EmptyItem();

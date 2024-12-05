@@ -12,7 +12,7 @@
 
         void Close();
 
-        ITransferContext Initiate(bool isAsync = true);
+        ITransferContext Open(bool isAsync = true);
 
         void Reconnect();
 
@@ -25,7 +25,6 @@
     {
         private readonly ManualResetEvent completeNotice = new ManualResetEvent(false);
         public IInvoker CompleteMethod;
-        public IInvoker EchoMethod;
         private IInvoker connected;
         private IInvoker headerReceived;
         private IInvoker headerSent;
@@ -33,13 +32,14 @@
         private IInvoker messageSent;
         private bool isAsync = true;
 
-        public EthernetConnection(IPEndPoint endPoint,
+        public EthernetConnection(
+            EthernetClient client,
             IInvoker OnCompleteEvent = null,
             IInvoker OnEchoEvent = null
         )
         {
-            EthernetClient client = new EthernetClient(endPoint);
-            Transit = new EthernetTransfer();
+            Client = client;
+            Transfer = new EthernetTransfer();
 
             connected = new EthernetMethod(nameof(this.Connected), this);
             headerSent = new EthernetMethod(nameof(this.HeaderSent), this);
@@ -53,23 +53,18 @@
             client.HeaderReceived = headerReceived;
             client.MessageReceived = messageReceived;
 
-            CompleteMethod = OnCompleteEvent;
-            EchoMethod = OnEchoEvent;
+            CompleteMethod = OnCompleteEvent;    
 
-            Client = client;
-
-            WriteEcho("Client Connection Created");
+            WriteNotice("Client Connection Created");
         }
 
         public object Content
         {
-            get { return Transit.ResponseHeader.Data; }
-            set { Transit.ResponseHeader.Data = value; }
+            get { return Transfer.ResponseHeader.Data; }
+            set { Transfer.ResponseHeader.Data = value; }
         }
 
-        public ITransferContext Context { get; set; }
-
-        public EthernetTransfer Transit { get; set; }
+        public EthernetTransfer Transfer { get; set; }
 
         private EthernetClient Client { get; set; }
 
@@ -78,86 +73,82 @@
             Client.Dispose();
         }
 
-        public ITransferContext Connected(object inetdealclient)
+        public ITransferContext Connected(object contextState)
         {
-            WriteEcho("Client Connection Established");
-            Transit.ResponseHeader.Context.Echo = "Client say Hello. ";
-            Context = Client.Context;
-            Client.Context.Transfer = Transit;
+            WriteNotice("Client Connection Established");
+            Transfer.ResponseHeader.Context.Notice = "Client say Hello. ";
 
-            IEthernetClient idc = (IEthernetClient)inetdealclient;
+            ITransferContext context = (ITransferContext)contextState;
+            context.Transfer = Transfer;
 
-            idc.Send(TransitPart.Header);
+            Client.Send(TransferPart.Header, context);
 
-            return idc.Context;
+            return context;
         }
 
-        public ITransferContext HeaderReceived(object inetdealclient)
+        public ITransferContext HeaderReceived(object contextState)
         {
-            string serverEcho = Transit.RequestHeader.Context.Echo;
-            WriteEcho(string.Format("Server header received"));
+            string serverEcho = Transfer.RequestHeader.Context.Notice;
+            WriteNotice(string.Format("Server header received"));
             if (serverEcho != null && serverEcho != "")
-                WriteEcho(string.Format("Server echo: {0}", serverEcho));
+                WriteNotice(string.Format("Server echo: {0}", serverEcho));
 
-            IEthernetClient idc = (IEthernetClient)inetdealclient;
+            ITransferContext context = (ITransferContext)contextState;
 
-            if (idc.Context.Close)
-                idc.Dispose();
+            if (context.Close)
+                context.Dispose();
             else
             {
-                if (!idc.Context.Synchronic)
+                if (!context.Synchronic)
                 {
-                    if (idc.Context.HasMessageToSend)
-                        idc.Send(TransitPart.Message);
+                    if (context.HasMessageToSend)
+                        Client.Send(TransferPart.Message, context);
                 }
 
-                if (idc.Context.HasMessageToReceive)
-                    idc.Receive(TransitPart.Message);
+                if (context.HasMessageToReceive)
+                    Client.Receive(TransferPart.Message, context);
             }
 
-            if (!idc.Context.HasMessageToReceive && !idc.Context.HasMessageToSend)
+            if (!context.HasMessageToReceive && !context.HasMessageToSend)
             {
                 if (CompleteMethod != null)
-                    CompleteMethod.Invoke(idc.Context);
+                    CompleteMethod.Invoke(context);
                 if (!isAsync)
                     completeNotice.Set();
             }
 
-            return idc.Context;
+            return context;
         }
 
-        public ITransferContext HeaderSent(object inetdealclient)
+        public ITransferContext HeaderSent(object contextState)
         {
-            WriteEcho("Client header sent");
-            IEthernetClient idc = (IEthernetClient)inetdealclient;
-            if (!idc.Context.Synchronic)
-                idc.Receive(TransitPart.Header);
+            WriteNotice("Client header sent");
+            ITransferContext context = (ITransferContext)contextState;
+            if (!context.Synchronic)
+                Client.Receive(TransferPart.Header, context);
             else
-                idc.Send(TransitPart.Message);
+                Client.Send(TransferPart.Message, context);
 
-            return idc.Context;
+            return context;
         }
 
-        public ITransferContext Initiate(bool IsAsync = true)
+        public ITransferContext Open(bool IsAsync = true)
         {
             isAsync = IsAsync;
-            Client.Connect();
-            if (!isAsync)
-            {
+            var context = Client.Connect();
+            if (!IsAsync)
                 completeNotice.WaitOne();
-                return Context;
-            }
 
-            return null;
+            return context;
         }
 
-        public ITransferContext MessageReceived(object inetdealclient)
+        public ITransferContext MessageReceived(object contextState)
         {
-            WriteEcho(string.Format("Server message received"));
+            WriteNotice(string.Format("Server message received"));
 
-            ITransferContext context = ((IEthernetClient)inetdealclient).Context;
+            ITransferContext context = (ITransferContext)contextState;
             if (context.Close)
-                ((IEthernetClient)inetdealclient).Dispose();
+                ((IEthernetClient)contextState).Dispose();
 
             if (CompleteMethod != null)
                 CompleteMethod.Invoke(context);
@@ -166,31 +157,31 @@
             return context;
         }
 
-        public ITransferContext MessageSent(object inetdealclient)
+        public ITransferContext MessageSent(object contextState)
         {
-            WriteEcho("Client message sent");
+            WriteNotice("Client message sent");
 
-            IEthernetClient idc = (IEthernetClient)inetdealclient;
-            if (idc.Context.Synchronic)
-                idc.Receive(TransitPart.Header);
+            ITransferContext context = (ITransferContext)contextState;
+            if (context.Synchronic)
+                Client.Receive(TransferPart.Header, context);
 
-            if (!idc.Context.HasMessageToReceive)
+            if (!context.HasMessageToReceive)
             {
                 if (CompleteMethod != null)
-                    CompleteMethod.Invoke(idc.Context);
+                    CompleteMethod.Invoke(context);
                 if (!isAsync)
                     completeNotice.Set();
             }
 
-            return idc.Context;
+            return context;
         }
 
         public void Reconnect()
         {
             IPEndPoint endpoint = new IPEndPoint(Client.EndPoint.Address, Client.EndPoint.Port);
-            Transit.Dispose();
+            Transfer.Dispose();
             EthernetClient client = new EthernetClient(endpoint);
-            Transit = new EthernetTransfer(endpoint);
+            Transfer = new EthernetTransfer(endpoint);
             client.Connected = connected;
             client.HeaderSent = headerSent;
             client.MessageSent = messageSent;
@@ -209,10 +200,8 @@
             CompleteMethod = new EthernetMethod(methodName, classObject);
         }
 
-        private void WriteEcho(string message)
+        private void WriteNotice(string message)
         {
-            if (EchoMethod != null)
-                EchoMethod.Invoke(message);
         }
     }
 }

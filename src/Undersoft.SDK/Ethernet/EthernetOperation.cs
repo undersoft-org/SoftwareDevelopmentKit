@@ -14,7 +14,7 @@ namespace Undersoft.SDK.Ethernet
             _transit = transit;
             transitContext = transit.Context;
             ethernetContext = transit.ResponseHeader.Context;
-            site = ethernetContext.IdentitySite;
+            site = ethernetContext.Site;
         }
 
         public bool Execute(object data, DirectionType direction, out object[] messages)

@@ -162,9 +162,9 @@ namespace Undersoft.SDK.Stocks
             return DeserialBlockPtr;
         }
 
-        public MarkupType ReceiveBytes(byte[] buffer, int received)
+        public MarkupKind ReceiveBytes(byte[] buffer, int received)
         {
-            MarkupType noiseKind = MarkupType.None;
+            MarkupKind noiseKind = MarkupKind.None;
             lock (binReceive)
             {
                 int offset = 0, length = received;
@@ -203,10 +203,10 @@ namespace Undersoft.SDK.Stocks
             return noiseKind;
         }
 
-        public MarkupType ReceiveBytes(byte[] buffer, long received)
+        public MarkupKind ReceiveBytes(byte[] buffer, long received)
         {
 
-            MarkupType noiseKind = MarkupType.None;
+            MarkupKind noiseKind = MarkupKind.None;
             lock (binReceive)
             {
                 int offset = 0, length = (int)received;

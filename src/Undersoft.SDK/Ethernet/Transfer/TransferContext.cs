@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 using Undersoft.SDK.Series;
 
 namespace Undersoft.SDK.Ethernet.Transfer
@@ -201,7 +199,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
 
         public EthernetSite Site
         {
-            get { return Transfer.ResponseHeader.Context.IdentitySite; }
+            get { return Transfer.ResponseHeader.Context.Site; }
         }
 
         public bool Synchronic { get; set; }
@@ -227,7 +225,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
             }
         }
 
-        internal EthernetMethod SendEcho { get; set; }       
+        internal EthernetMethod SendNotice { get; set; }       
 
         public void Dispose()
         {
@@ -272,13 +270,13 @@ namespace Undersoft.SDK.Ethernet.Transfer
             }
         }
 
-        public MarkupType ReadHeader(int received)
+        public MarkupKind ReadHeader(int received)
         {
             disposed = false;
             return ProcessHeader(received);
         }
 
-        public unsafe MarkupType ReadMessage(int received)
+        public unsafe MarkupKind ReadMessage(int received)
         {
             disposed = false;
             return ProcessMessage(received);
@@ -307,9 +305,9 @@ namespace Undersoft.SDK.Ethernet.Transfer
             }
         }
 
-        public unsafe MarkupType ProcessHeader(int received)
+        public unsafe MarkupKind ProcessHeader(int received)
         {
-            MarkupType noiseKind = MarkupType.None;
+            MarkupKind noiseKind = MarkupKind.None;
 
             lock (inputData)
             {
@@ -357,9 +355,9 @@ namespace Undersoft.SDK.Ethernet.Transfer
             return noiseKind;
         }
 
-        public unsafe MarkupType ProcessMessage(int received)
+        public unsafe MarkupKind ProcessMessage(int received)
         {
-            MarkupType noiseKind = MarkupType.None;
+            MarkupKind noiseKind = MarkupKind.None;
 
             lock (inputData)
             {

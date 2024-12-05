@@ -1,6 +1,6 @@
 ﻿namespace System.IO
 {
-    public enum MarkupType
+    public enum MarkupKind
     {
         None = (byte)0xFF,
         Block = (byte)0x17,

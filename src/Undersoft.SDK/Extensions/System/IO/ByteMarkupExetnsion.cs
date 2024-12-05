@@ -32,21 +32,21 @@ namespace System.IO
         /// <param name="checknoise">The checknoise.</param>
         /// <param name="noisekind">The noisekind.</param>
         /// <returns><c>true</c> if the specified noisekind is markup; otherwise, <c>false</c>.</returns>
-        public static bool IsMarkup(this byte checknoise, out MarkupType noisekind)
+        public static bool IsMarkup(this byte checknoise, out MarkupKind noisekind)
         {
             switch (checknoise)
             {
-                case (byte)MarkupType.Block:
-                    noisekind = MarkupType.Block;
+                case (byte)MarkupKind.Block:
+                    noisekind = MarkupKind.Block;
                     return true;
-                case (byte)MarkupType.End:
-                    noisekind = MarkupType.End;
+                case (byte)MarkupKind.End:
+                    noisekind = MarkupKind.End;
                     return true;
-                case (byte)MarkupType.Empty:
-                    noisekind = MarkupType.Empty;
+                case (byte)MarkupKind.Empty:
+                    noisekind = MarkupKind.Empty;
                     return false;
                 default:
-                    noisekind = MarkupType.None;
+                    noisekind = MarkupKind.None;
                     return false;
             }
         }
@@ -63,33 +63,33 @@ namespace System.IO
         /// <param name="checknoise">The checknoise.</param>
         /// <param name="spliterkind">The spliterkind.</param>
         /// <returns><c>true</c> if the specified spliterkind is spliter; otherwise, <c>false</c>.</returns>
-        public static bool IsSpliter(this byte checknoise, out MarkupType spliterkind)
+        public static bool IsSpliter(this byte checknoise, out MarkupKind spliterkind)
         {
             switch (checknoise)
             {
-                case (byte)MarkupType.Empty:
-                    spliterkind = MarkupType.Empty;
+                case (byte)MarkupKind.Empty:
+                    spliterkind = MarkupKind.Empty;
                     return true;
-                case (byte)MarkupType.Line:
-                    spliterkind = MarkupType.Line;
+                case (byte)MarkupKind.Line:
+                    spliterkind = MarkupKind.Line;
                     return true;
-                case (byte)MarkupType.Space:
-                    spliterkind = MarkupType.Space;
+                case (byte)MarkupKind.Space:
+                    spliterkind = MarkupKind.Space;
                     return true;
-                case (byte)MarkupType.Semi:
-                    spliterkind = MarkupType.Semi;
+                case (byte)MarkupKind.Semi:
+                    spliterkind = MarkupKind.Semi;
                     return true;
-                case (byte)MarkupType.Coma:
-                    spliterkind = MarkupType.Coma;
+                case (byte)MarkupKind.Coma:
+                    spliterkind = MarkupKind.Coma;
                     return true;
-                case (byte)MarkupType.Colon:
-                    spliterkind = MarkupType.Colon;
+                case (byte)MarkupKind.Colon:
+                    spliterkind = MarkupKind.Colon;
                     return true;
-                case (byte)MarkupType.Dot:
-                    spliterkind = MarkupType.Dot;
+                case (byte)MarkupKind.Dot:
+                    spliterkind = MarkupKind.Dot;
                     return true;
                 default:
-                    spliterkind = MarkupType.None;
+                    spliterkind = MarkupKind.None;
                     return false;
             }
         }

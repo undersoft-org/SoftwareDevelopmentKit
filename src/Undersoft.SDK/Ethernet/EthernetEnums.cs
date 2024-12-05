@@ -42,7 +42,7 @@
     }
 
     [Serializable]
-    public enum TransitPart
+    public enum TransferPart
     {
         Header,
         Message,

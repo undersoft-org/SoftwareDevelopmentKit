@@ -28,7 +28,7 @@
         public static byte[] Markup(
             this byte[] array,
             int blocksize,
-            MarkupType bytenoise,
+            MarkupKind bytenoise,
             int written = 0,
             int byteprefix = 0
         )
@@ -49,7 +49,7 @@
         public static byte[] Markup(
             this byte[] array,
             long blocksize,
-            MarkupType bytenoise,
+            MarkupKind bytenoise,
             int written = 0,
             int byteprefix = 0
         )
@@ -68,7 +68,7 @@
             return array;
         }
 
-        public static MarkupType SeekMarkup(
+        public static MarkupKind SeekMarkup(
             this byte[] array,
             out long position,
             SeekDirection direction = SeekDirection.Forward,
@@ -78,7 +78,7 @@
         {
             bool isFwd = (direction != SeekDirection.Forward) ? false : true;
             short noiseFlag = 0;
-            MarkupType lastKind = MarkupType.None;
+            MarkupKind lastKind = MarkupKind.None;
             if (array.Length > 0)
             {
                 long length = (_length <= 0 || _length > array.Length) ? array.Length : _length;
@@ -94,7 +94,7 @@
                     else
                         checknoise = array[i];
 
-                    if (checknoise.IsMarkup(out MarkupType tempKind))
+                    if (checknoise.IsMarkup(out MarkupKind tempKind))
                     {
                         lastKind = tempKind;
                         noiseFlag++;
@@ -121,24 +121,24 @@
 
             long endPosition = array.Length;
 
-            MarkupType endNoise = array.SeekMarkup(
+            MarkupKind endNoise = array.SeekMarkup(
                 out long endTempPosition,
                 SeekDirection.Backward,
                 0,
                 noiseCount
             );
-            if (endNoise != MarkupType.None)
+            if (endNoise != MarkupKind.None)
                 endPosition = endTempPosition;
 
             long startPosition = 0;
 
-            MarkupType startNoise = array.SeekMarkup(
+            MarkupKind startNoise = array.SeekMarkup(
                 out long startTempPosition,
                 SeekDirection.Forward,
                 0,
                 noiseCount
             );
-            if (startNoise != MarkupType.None)
+            if (startNoise != MarkupKind.None)
                 startPosition = startTempPosition;
 
             return new MarkedSegment()

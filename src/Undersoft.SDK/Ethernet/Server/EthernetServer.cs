@@ -10,9 +10,11 @@ namespace Undersoft.SDK.Ethernet.Server
     {
         private IEthernetListener server;
 
+        private Thread handler;
+
         public void ClearClients()
         {
-            Echo("Client registry cleaned");
+            WriteNotice("Client registry cleaned");
             if (server != null)
                 server.ClearClients();
         }
@@ -21,43 +23,43 @@ namespace Undersoft.SDK.Ethernet.Server
         {
             if (server != null)
             {
-                Echo("Server instance shutdown ");
+                WriteNotice("Server instance shutdown ");
                 server.CloseListener();
                 server = null;
             }
             else
             {
-                Echo("Server instance doesn't exist ");
+                WriteNotice("Server instance doesn't exist ");
             }
         }
 
-        public ITransferContext HeaderReceived(object inetdealcontext)
+        public ITransferContext HeaderReceived(object contextState)
         {
-            string clientEcho = ((ITransferContext)inetdealcontext)
+            string clientEcho = ((ITransferContext)contextState)
                 .Transfer
                 .RequestHeader
                 .Context
-                .Echo;
-            Echo(string.Format("Client header received"));
+                .Notice;
+            WriteNotice(string.Format("Client header received"));
             if (clientEcho != null && clientEcho != "")
-                Echo(string.Format("Client echo: {0}", clientEcho));
+                WriteNotice(string.Format("Client echo: {0}", clientEcho));
 
-            EthernetContext trctx = ((ITransferContext)inetdealcontext).Transfer.ResponseHeader.Context;
-            if (trctx.Echo == null || trctx.Echo == "")
-                trctx.Echo = "Server say Hello";
-            if (!((ITransferContext)inetdealcontext).Synchronic)
-                server.Send(TransitPart.Header, ((ITransferContext)inetdealcontext).Id);
+            EthernetContext trctx = ((ITransferContext)contextState).Transfer.ResponseHeader.Context;
+            if (trctx.Notice == null || trctx.Notice == "")
+                trctx.Notice = "Server say Hello";
+            if (!((ITransferContext)contextState).Synchronic)
+                server.Send(TransferPart.Header, ((ITransferContext)contextState).Id);
             else
-                server.Receive(TransitPart.Message, ((ITransferContext)inetdealcontext).Id);
+                server.Receive(TransferPart.Message, ((ITransferContext)contextState).Id);
 
-            return (ITransferContext)inetdealcontext;
+            return (ITransferContext)contextState;
         }
 
-        public ITransferContext HeaderSent(object inetdealcontext)
+        public ITransferContext HeaderSent(object contextState)
         {
-            Echo("Server header sent");
+            WriteNotice("Server header sent");
 
-            ITransferContext context = (ITransferContext)inetdealcontext;
+            ITransferContext context = (ITransferContext)contextState;
             if (context.Close)
             {
                 context.Transfer.Dispose();
@@ -68,10 +70,10 @@ namespace Undersoft.SDK.Ethernet.Server
                 if (!context.Synchronic)
                 {
                     if (context.HasMessageToReceive)
-                        server.Receive(TransitPart.Message, context.Id);
+                        server.Receive(TransferPart.Message, context.Id);
                 }
                 if (context.HasMessageToSend)
-                    server.Send(TransitPart.Message, context.Id);
+                    server.Send(TransferPart.Message, context.Id);
             }
             return context;
         }
@@ -80,28 +82,28 @@ namespace Undersoft.SDK.Ethernet.Server
         {
             if (server != null)
             {
-                Echo("Server Instance Is Active");
+                WriteNotice("Server Instance Is Active");
                 return true;
             }
             else
             {
-                Echo("Server Instance Doesn't Exist");
+                WriteNotice("Server Instance Doesn't Exist");
                 return false;
             }
         }
 
-        public ITransferContext MessageReceived(object inetdealcontext)
+        public ITransferContext MessageReceived(object contextState)
         {
-            Echo(string.Format("Client message received"));
-            if (((ITransferContext)inetdealcontext).Synchronic)
-                server.Send(TransitPart.Header, ((ITransferContext)inetdealcontext).Id);
-            return (ITransferContext)inetdealcontext;
+            WriteNotice(string.Format("Client message received"));
+            if (((ITransferContext)contextState).Synchronic)
+                server.Send(TransferPart.Header, ((ITransferContext)contextState).Id);
+            return (ITransferContext)contextState;
         }
 
-        public ITransferContext MessageSent(object inetdealcontext)
+        public ITransferContext MessageSent(object contextState)
         {
-            Echo("Server message sent");
-            ITransferContext result = (ITransferContext)inetdealcontext;
+            WriteNotice("Server message sent");
+            ITransferContext result = (ITransferContext)contextState;
             if (result.Close)
             {
                 result.Transfer.Dispose();
@@ -121,15 +123,20 @@ namespace Undersoft.SDK.Ethernet.Server
             server.MessageReceived = new EthernetMethod(nameof(this.MessageReceived), this);
             server.WriteEcho = echoMethod;
 
-            new Thread(new ThreadStart(server.StartListening)).Start();
+            handler = new Thread(new ThreadStart(server.StartListening));
+            handler.Start();
 
-            Echo("Server instance started");
+            WriteNotice("Server instance started");
         }
 
-        public void Echo(string message)
+        public void Stop()
+        {
+            handler.Join();
+        }
+        public void WriteNotice(string message)
         {
             if (server != null)
-                server.Echo(message);
+                server.WriteNotice(message);
         }
     }
 }

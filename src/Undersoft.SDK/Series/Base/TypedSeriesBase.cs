@@ -31,37 +31,37 @@
         protected uint maxid;
         protected ulong bitmask;
 
-        protected int nextSize()
+        protected int NextSize()
         {
             return (((int)(size * RESIZING_VECTOR)) ^ 3);
         }
-        protected int previousSize()
+        protected int PreviousSize()
         {
             return (int)(size * (1 - REMOVED_PERCENT_LIMIT)) ^ 3;
         }
-        protected void countIncrement()
+        protected void CountIncrement()
         {
             if ((++count + 7) > size)
-                Rehash(nextSize());
+                Rehash(NextSize());
         }
-        protected void conflictIncrement()
+        protected void ConflictIncrement()
         {
-            countIncrement();
+            CountIncrement();
             if (++conflicts > (size * CONFLICTS_PERCENT_LIMIT))
-                Rehash(nextSize());
+                Rehash(NextSize());
         }
-        protected void removedIncrement()
+        protected void RemovedIncrement()
         {
             --count;
             if (++removed > ((size * REMOVED_PERCENT_LIMIT) - 1))
             {
                 if (size < (size * 0.5))
-                    Rehash(previousSize());
+                    Rehash(PreviousSize());
                 else
                     Rehash(size);
             }
         }
-        protected void removedDecrement()
+        protected void RemovedDecrement()
         {
             ++count;
             --removed;
@@ -78,7 +78,7 @@
             table = EmptyTable(capacity);
             first = EmptyItem();
             last = first;
-            ValueEquals = getValueComparer();
+            ValueEquals = GetValueComparer();
             Id = typeof(V).UniqueKey64();
         }
 
@@ -235,7 +235,7 @@
 
         protected virtual V InnerGet(long key)
         {
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> mem = table[GetPosition(key)];
 
             while (mem != null)
             {
@@ -282,7 +282,7 @@
         {
             output = null;
 
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> mem = table[GetPosition(key)];
             while (mem != null)
             {
                 if (mem.Equals(key))
@@ -369,7 +369,7 @@
             if (key == 0)
                 return null;
 
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> mem = table[GetPosition(key)];
 
             while (mem != null)
             {
@@ -540,22 +540,18 @@
         {
             return InnerPut(key, (V)value);
         }
-
         public virtual ISeriesItem<V> Put(long key, V value)
         {
             return InnerPut(key, value);
         }
-
         public virtual ISeriesItem<V> Put(object key, V value)
         {
             return InnerPut(unique.Key(key, (long)value.TypeId), value);
         }
-
         public virtual ISeriesItem<V> Put(object key, long seed, V value)
         {
             return InnerPut(unique.Key(key, seed), value);
         }
-
         public virtual ISeriesItem<V> Put(object key, long seed, object value)
         {
             if (value is V)
@@ -565,12 +561,10 @@
             }
             return null;
         }
-
         public virtual ISeriesItem<V> Put(ISeriesItem<V> item)
         {
             return InnerPut(item);
         }
-
         public virtual void Put(IList<ISeriesItem<V>> items)
         {
             int i = 0,
@@ -578,7 +572,6 @@
             while (i < c)
                 InnerPut(items[i++]);
         }
-
         public virtual void Put(IEnumerable<ISeriesItem<V>> items)
         {
             foreach (ISeriesItem<V> item in items)
@@ -760,17 +753,14 @@
         {
             return InnerAdd(value);
         }
-
         public virtual bool TryAdd(V value, long seed)
         {
             return InnerAdd(value, seed);
         }
-
         public virtual bool TryAdd(object key, V value)
         {
             return Add(key, value);
         }
-
         public virtual bool TryAdd(object key, long seed, V value)
         {
             return Add(key, seed, value);
@@ -783,7 +773,6 @@
                 return newItem;
             return null;
         }
-
         public virtual ISeriesItem<V> New(long key)
         {
             ISeriesItem<V> newItem = NewItem(key, default(V));
@@ -791,7 +780,6 @@
                 return newItem;
             return null;
         }
-
         public virtual ISeriesItem<V> New(object key)
         {
             if (key is IUnique)
@@ -806,7 +794,6 @@
             else
                 throw new NotSupportedException();
         }
-
         public virtual ISeriesItem<V> New(object key, long seed)
         {
             ISeriesItem<V> newItem = NewItem(unique.Key(key, seed), default(V));
@@ -820,7 +807,7 @@
         public virtual void Insert(int index, ISeriesItem<V> item)
         {
             long key = item.Id;
-            ulong pos = getPosition(key);
+            ulong pos = GetPosition(key);
 
             ISeriesItem<V> _item = table[pos];
 
@@ -829,7 +816,7 @@
                 _item = NewItem(item);
                 table[pos] = _item;
                 InnerInsert(index, _item);
-                countIncrement();
+                CountIncrement();
                 return;
             }
 
@@ -842,7 +829,7 @@
                         var newitem = NewItem(item);
                         _item.Extended = newitem;
                         InnerInsert(index, newitem);
-                        conflictIncrement();
+                        ConflictIncrement();
                         return;
                     }
                     throw new Exception("SeriesItem exist");
@@ -853,13 +840,12 @@
                     var newitem = NewItem(item);
                     _item.Extended = newitem;
                     InnerInsert(index, newitem);
-                    conflictIncrement();
+                    ConflictIncrement();
                     return;
                 }
                 item = item.Extended;
             }
         }
-
         public virtual void Insert(int index, V item)
         {
             Insert(index, NewItem(item));
@@ -869,22 +855,18 @@
         {
             return InnerAdd(value);
         }
-
         public virtual bool Enqueue(object key, V value)
         {
             return Add(key, value);
         }
-
         public virtual bool Enqueue(V value, long seed)
         {
             return InnerAdd(value, seed);
         }
-
         public virtual bool Enqueue(object key, long seed, V value)
         {
             return Add(key, seed, value);
         }
-
         public virtual void Enqueue(ISeriesItem<V> item)
         {
             InnerAdd(item);
@@ -898,7 +880,6 @@
                 output = _output.Value;
             return check;
         }
-
         public virtual bool TryPick(int skip, out ISeriesItem<V> output)
         {
             output = this.AsItems().Skip(skip).FirstOrDefault();
@@ -915,7 +896,7 @@
             if (item != null)
             {
                 item.Removed = true;
-                removedIncrement();
+                RemovedIncrement();
                 first = item;
                 return item.Value;
             }
@@ -932,14 +913,13 @@
             if (item != null)
             {
                 item.Removed = true;
-                removedIncrement();
+                RemovedIncrement();
                 first = item;
                 output = item.Value;
                 return true;
             }
             return false;
         }
-
         public virtual bool TryDequeue(out ISeriesItem<V> output)
         {
             output = null;
@@ -950,7 +930,7 @@
             if (output != null)
             {
                 output.Removed = true;
-                removedIncrement();
+                RemovedIncrement();
                 first = output;
                 return true;
             }
@@ -962,7 +942,7 @@
             return TryDequeue(out output);
         }
 
-        protected virtual void renewClear(int capacity)
+        protected virtual void RenewClear(int capacity)
         {
             if (capacity != size || count > 0)
             {
@@ -979,35 +959,32 @@
 
         public virtual void Renew(IEnumerable<V> items)
         {
-            renewClear(minSize);
+            RenewClear(minSize);
             Put(items);
         }
-
         public virtual void Renew(IList<V> items)
         {
             int capacity = items.Count;
             capacity += (int)(capacity * CONFLICTS_PERCENT_LIMIT);
-            renewClear(capacity);
+            RenewClear(capacity);
             Put(items);
         }
-
         public virtual void Renew(IList<ISeriesItem<V>> items)
         {
             int capacity = items.Count;
             capacity += (int)(capacity * CONFLICTS_PERCENT_LIMIT);
-            renewClear(capacity);
+            RenewClear(capacity);
             Put(items);
         }
-
         public virtual void Renew(IEnumerable<ISeriesItem<V>> items)
         {
-            renewClear(minSize);
+            RenewClear(minSize);
             Put(items);
         }
 
         protected bool InnerContainsKey(long key)
         {
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> mem = table[GetPosition(key)];
 
             while (mem != null)
             {
@@ -1032,17 +1009,14 @@
             else
                 throw new NotSupportedException();
         }
-
         public virtual bool ContainsKey(object key, long seed)
         {
             return InnerContainsKey(unique.Key(key, seed));
         }
-
         public virtual bool ContainsKey(long key)
         {
             return InnerContainsKey(key);
         }
-
         public virtual bool ContainsKey(IIdentifiable key)
         {
             return InnerContainsKey(unique.Key(key, key.TypeId));
@@ -1052,28 +1026,24 @@
         {
             return InnerContainsKey(item.Id);
         }
-
         public virtual bool Contains(IUnique<V> item)
         {
             return InnerContainsKey(unique.Key(item, item.TypeId));
         }
-
         public virtual bool Contains(V item)
         {
             return InnerContainsKey(unique.Key(item, (long)item.TypeId));
         }
-
         public virtual bool Contains(V item, long seed)
         {
             return InnerContainsKey(unique.Key(item, seed));
         }
-
         public virtual bool Contains(long key, V item)
         {
             return InnerContainsKey(key);
         }
 
-        protected virtual Func<V, V, bool> getValueComparer()
+        protected virtual Func<V, V, bool> GetValueComparer()
         {
             if (typeof(V).IsValueType)
                 return (o1, o2) => o1.Equals(o2);
@@ -1082,7 +1052,7 @@
 
         protected virtual V InnerRemove(long key)
         {
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> mem = table[GetPosition(key)];
 
             while (mem != null)
             {
@@ -1092,7 +1062,7 @@
                         return default(V);
 
                     mem.Removed = true;
-                    removedIncrement();
+                    RemovedIncrement();
                     return mem.Value;
                 }
 
@@ -1100,10 +1070,9 @@
             }
             return default(V);
         }
-
         protected virtual V InnerRemove(long key, V item)
         {
-            ISeriesItem<V> mem = table[getPosition(key)];
+            ISeriesItem<V> mem = table[GetPosition(key)];
 
             while (mem != null)
             {
@@ -1115,7 +1084,7 @@
                     if (ValueEquals(mem.Value, item))
                     {
                         mem.Removed = true;
-                        removedIncrement();
+                        RemovedIncrement();
                         return mem.Value;
                     }
                     return default(V);
@@ -1129,7 +1098,6 @@
         {
             return InnerRemove(unique.Key(item, (long)item.TypeId)).Equals(default(V)) ? false : true;
         }
-
         public virtual V Remove(object key)
         {
             if (key is IUnique)
@@ -1141,7 +1109,6 @@
             else
                 throw new NotSupportedException();
         }
-
         public virtual V Remove(object key, long seed)
         {
             return InnerRemove(unique.Key(key, seed));
@@ -1151,10 +1118,13 @@
         {
             return InnerRemove(item.Id).Equals(default(V)) ? false : true;
         }
-
         public virtual bool Remove(IUnique<V> item)
         {
             return TryRemove(unique.Key(item, item.TypeId));
+        }
+        public virtual bool Remove(object key, V item)
+        {
+            return InnerRemove(unique.Key(key), item).Equals(default(V)) ? false : true;
         }
 
         public virtual bool TryRemove(object key)
@@ -1171,7 +1141,6 @@
             else
                 throw new NotSupportedException();
         }
-
         public virtual bool TryRemove(object key, long seed)
         {
             return InnerRemove(unique.Key(key, seed)).Equals(default(V)) ? false : true;
@@ -1181,12 +1150,7 @@
         {
             InnerRemove(GetItem(index).Id);
         }
-
-        public virtual bool Remove(object key, V item)
-        {
-            return InnerRemove(unique.Key(key), item).Equals(default(V)) ? false : true;
-        }
-
+                
         public virtual void Clear()
         {
             size = minSize;
@@ -1225,7 +1189,6 @@
                 foreach (ISeriesItem<V> ves in this)
                     array[i++] = ves;
         }
-
         public virtual void CopyTo(Array array, int index)
         {
             int c = count,
@@ -1241,7 +1204,6 @@
                 foreach (V ves in this.AsValues())
                     array.SetValue(ves, i++);
         }
-
         public virtual void CopyTo(V[] array, int index)
         {
             int c = count,
@@ -1302,15 +1264,12 @@
             value.TypeId = (long)seed;
             return NewItem(unique.Key(key, seed), value);
         }
-
         public abstract ISeriesItem<V> NewItem(ISeriesItem<V> item);
-
         public virtual ISeriesItem<V> NewItem(V item, long seed)
         {
             item.TypeId = (long)seed;
             return NewItem(item);
         }
-
         public abstract ISeriesItem<V> NewItem(V item);
 
         public abstract ISeriesItem<V>[] EmptyTable(int size);
@@ -1319,12 +1278,10 @@
         {
             return GetItem(item).Index;
         }
-
         public virtual int IndexOf(V item)
         {
             return GetItem(item).Index;
         }
-
         protected virtual int IndexOf(long key, V value)
         {
             var item = GetItem(key);
@@ -1337,7 +1294,6 @@
         {
             return (IEnumerable<V>)this;
         }
-
         public virtual IEnumerable<ISeriesItem<V>> AsItems()
         {
             foreach (ISeriesItem<V> item in this)
@@ -1350,12 +1306,10 @@
         {
             return new SeriesItemKeyEnumerator<V>(this);
         }
-
         public virtual IEnumerator<ISeriesItem<V>> GetEnumerator()
         {
             return new SeriesItemEnumerator<V>(this);
         }
-
         public virtual IEnumerator<long> GetKeyEnumerator()
         {
             return new SeriesItemUniqueKeyEnumerator<V>(this);
@@ -1365,18 +1319,16 @@
         {
             return new SeriesItemEnumerator<V>(this);
         }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new SeriesItemEnumerator<V>(this);
         }       
 
-        protected ulong getPosition(long key)
+        protected ulong GetPosition(long key)
         {
             return ((ulong)key % maxid);
         }
-
-        protected static ulong getPosition(long key, uint tableMaxId)
+        protected static ulong GetPosition(long key, uint tableMaxId)
         {
             return ((ulong)key % tableMaxId);
         }
@@ -1391,11 +1343,11 @@
             item = item.Next;
             if (removed > 0)
             {
-                rehashAndReindex(item, newItemTable, newMaxId);
+                InnerRehashAndReindex(item, newItemTable, newMaxId);
             }
             else
             {
-                rehash(item, newItemTable, newMaxId);
+                InnerRehash(item, newItemTable, newMaxId);
             }
 
             table = newItemTable;
@@ -1403,7 +1355,7 @@
             size = newsize;
         }
 
-        private void rehashAndReindex(ISeriesItem<V> item, ISeriesItem<V>[] newItemTable, uint newMaxId)
+        private void InnerRehashAndReindex(ISeriesItem<V> item, ISeriesItem<V>[] newItemTable, uint newMaxId)
         {
             int _conflicts = 0;
             uint _newMaxId = newMaxId;
@@ -1414,7 +1366,7 @@
             {
                 if (!item.Removed)
                 {
-                    ulong pos = getPosition(item.Id, _newMaxId);
+                    ulong pos = GetPosition(item.Id, _newMaxId);
 
                     ISeriesItem<V> mem = _newItemTable[pos];
 
@@ -1449,8 +1401,7 @@
             first = _firstitem;
             last = _lastitem;
         }
-
-        private void rehash(ISeriesItem<V> item, ISeriesItem<V>[] newItemTable, uint newMaxId)
+        private void InnerRehash(ISeriesItem<V> item, ISeriesItem<V>[] newItemTable, uint newMaxId)
         {
             int _conflicts = 0;
             uint _newMaxId = newMaxId;
@@ -1459,7 +1410,7 @@
             {
                 if (!item.Removed)
                 {
-                    ulong pos = getPosition(item.Id, _newMaxId);
+                    ulong pos = GetPosition(item.Id, _newMaxId);
 
                     ISeriesItem<V> mem = _newItemTable[pos];
 
@@ -1490,7 +1441,7 @@
             conflicts = _conflicts;
         }
 
-        protected ulong mapPosition(long key)
+        protected ulong MapPosition(long key)
         {
             // standard hashmap method to establish position / index in table
 
@@ -1502,8 +1453,7 @@
 
             return Submix.Map(key, maxid, bitmask, msbid);
         }
-
-        protected ulong mapPosition(long key, uint newmaxid, ulong newbitmask, int newmsbid)
+        protected ulong MapPosition(long key, uint newmaxid, ulong newbitmask, int newmsbid)
         {
             // standard hashmap method to establish position / index in table 
 
@@ -1526,11 +1476,11 @@
             item = item.Next;
             if (removed > 0)
             {
-                remapAndReindex(item, _table, _maxid);
+                InnerRemapAndReindex(item, _table, _maxid);
             }
             else
             {
-                remap(item, _table, _maxid);
+                InnerRemap(item, _table, _maxid);
             }
 
             table = _table;
@@ -1538,7 +1488,7 @@
             size = _size;
         }
 
-        private void remapAndReindex(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
+        private void InnerRemapAndReindex(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
         {
             int _conflicts = 0;
             uint _maxid = newMaxId;
@@ -1552,7 +1502,7 @@
             {
                 if (!item.Removed)
                 {
-                    ulong pos = mapPosition(item.Id, _maxid, _bitmask, _msbid);
+                    ulong pos = MapPosition(item.Id, _maxid, _bitmask, _msbid);
 
                     ISeriesItem<V> mem = _table[pos];
 
@@ -1589,8 +1539,7 @@
             bitmask = _bitmask;
             msbid = _msbid;
         }
-
-        private void remap(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
+        private void InnerRemap(ISeriesItem<V> item, ISeriesItem<V>[] newTable, uint newMaxId)
         {
             int _conflicts = 0;
             uint _maxid = newMaxId;
@@ -1601,7 +1550,7 @@
             {
                 if (!item.Removed)
                 {
-                    ulong pos = mapPosition(item.Id, _maxid, _bitmask, _msbid);
+                    ulong pos = MapPosition(item.Id, _maxid, _bitmask, _msbid);
 
                     ISeriesItem<V> mem = newTable[pos];
 
@@ -1718,49 +1667,40 @@
         {
             this.AsItems().ForOnly(e => other.Contains(e.Value), e => Remove(e));
         }
-
         public virtual void IntersectWith(IEnumerable<V> other)
         {
             this.AsItems().ForOnly(e => !other.Contains(e.Value), (e) => Remove(e));
         }
-
         public virtual bool IsProperSubsetOf(IEnumerable<V> other)
         {
             return (this.Count < other.Count()) && this.All(e => other.Contains(e));
         }
-
         public virtual bool IsProperSupersetOf(IEnumerable<V> other)
         {
             return (this.Count > other.Count()) && other.All(e => this.Contains(e));
         }
-
         public virtual bool IsSubsetOf(IEnumerable<V> other)
         {
             return (this.Count <= other.Count()) && this.All(e => other.Contains(e));
         }
-
         public virtual bool IsSupersetOf(IEnumerable<V> other)
         {
             return (this.Count >= other.Count()) && other.All(e => this.Contains(e));
         }
-
         public virtual bool Overlaps(IEnumerable<V> other)
         {
             return this.Any(e => other.Contains(e));
         }
-
         public virtual bool SetEquals(IEnumerable<V> other)
         {
             return ReferenceEquals(this, other) || (this.Count == other.Count()) && this.All(e => other.Contains(e));
         }
-
         public virtual void SymmetricExceptWith(IEnumerable<V> other)
         {
             var toRemove = this.AsItems().ForOnly(e => other.Contains(e.Value), (e) => e).ToListing();
             other.ForOnly(e => !this.Contains(e), e => this.Add(e));
             toRemove.ForEach(r => Remove(r));
         }
-
         public virtual void UnionWith(IEnumerable<V> other)
         {
             this.Add(other);
@@ -1774,22 +1714,18 @@
         {
             return this.InnerPut((V)value).Index;
         }
-
         bool IList.Contains(object value)
         {
             return this.Contains((V)value);
         }
-
         int IList.IndexOf(object value)
         {
             return this.IndexOf((V)value);
         }
-
         void IList.Insert(int index, object value)
         {
             this.Insert(index, (V)value);
         }
-
         void IList.Remove(object value)
         {
             this.Remove((V)value);

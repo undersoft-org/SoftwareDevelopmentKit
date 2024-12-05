@@ -5,7 +5,7 @@ namespace System.IO
     public static class StreamMarkupExtension
     {
 
-        public static Stream Markup(this Stream stream, int blocksize, MarkupType bytenoise)
+        public static Stream Markup(this Stream stream, int blocksize, MarkupKind bytenoise)
         {
             int blockSize = blocksize;
             long blockLeft = stream.Length % blockSize;
@@ -15,7 +15,7 @@ namespace System.IO
             return stream;
         }
 
-        public static Stream Markup(this Stream stream, long blocksize, MarkupType bytenoise)
+        public static Stream Markup(this Stream stream, long blocksize, MarkupKind bytenoise)
         {
             long blockSize = blocksize;
             long blockLeft = stream.Length % blockSize;
@@ -25,12 +25,12 @@ namespace System.IO
             return stream;
         }
 
-        public static MarkupType SeekMarkup(this Stream stream, SeekOrigin seekorigin = SeekOrigin.Begin, SeekDirection direction = SeekDirection.Forward, int offset = 0, int _length = -1)
+        public static MarkupKind SeekMarkup(this Stream stream, SeekOrigin seekorigin = SeekOrigin.Begin, SeekDirection direction = SeekDirection.Forward, int offset = 0, int _length = -1)
         {
             bool isFwd = (direction != SeekDirection.Forward) ? false : true;
             short noiseFlag = 0;
-            MarkupType noiseKind = MarkupType.None;
-            MarkupType lastKind = MarkupType.None;
+            MarkupKind noiseKind = MarkupKind.None;
+            MarkupKind lastKind = MarkupKind.None;
             if (stream.Length > 0)
             {
                 long length = (_length <= 0) ? stream.Length : _length;
@@ -47,7 +47,7 @@ namespace System.IO
 
                     byte checknoise = (byte)stream.ReadByte();
 
-                    MarkupType tempKind = MarkupType.None;
+                    MarkupKind tempKind = MarkupKind.None;
                     if (checknoise.IsMarkup(out tempKind))
                     {
                         lastKind = tempKind;

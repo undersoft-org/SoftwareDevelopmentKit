@@ -8,14 +8,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Undersoft.SDK.Ethernet.Transfer
-{
-    [Serializable]
+{    
     public class TransferMessage : ITransferable, IDisposable
     {
         private object data;
         private DirectionType direction;
-
-        [NonSerialized]
+        
         private EthernetTransfer transaction;
 
         public TransferMessage()

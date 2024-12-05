@@ -8,7 +8,7 @@ namespace Undersoft.SDK.Ethernet.Server
     {
         void ClearClients();
         void Close();
-        void Echo(string message);
+        void WriteNotice(string message);
         ITransferContext HeaderReceived(object inetdealcontext);
         ITransferContext HeaderSent(object inetdealcontext);
         bool IsActive();
