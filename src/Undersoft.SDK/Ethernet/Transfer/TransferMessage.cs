@@ -45,7 +45,7 @@ namespace Undersoft.SDK.Ethernet.Transfer
         public object Data
         {
             get { return data; }
-            set { transaction.Manager.MessageContent(ref data, value, direction); }
+            set { transaction.Manager.GetMessageData(out data, value, direction); }
         }
 
         public int InputChunks { get; set; }

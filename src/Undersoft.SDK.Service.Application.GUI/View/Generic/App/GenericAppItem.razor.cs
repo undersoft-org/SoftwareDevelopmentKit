@@ -57,7 +57,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.App
         public IViewData ExtendData { get; set; } = default!;
 
         public Icon? GetIconActive()
-        {
+        {                       
             if (Icon == null) return null;
             var iconType = AssemblyUtilities.FindTypeByFullName(Icon.GetType().FullName!.Replace("Regular", "Filled"));
             if (iconType == null) return null;
@@ -65,7 +65,7 @@ namespace Undersoft.SDK.Service.Application.GUI.View.Generic.App
         }
 
         private string? GetLinkValue()
-        {
+        {         
             string? link = null;
             if (Rubric.LinkValue != null)
                 link = Rubric.LinkValue;

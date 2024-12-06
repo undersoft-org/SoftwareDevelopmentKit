@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Text;
-using System.Collections;
-using System.Text.Json;
+﻿using System.Collections;
 
 namespace Undersoft.SDK.Ethernet.Transfer
 {
@@ -165,13 +162,12 @@ namespace Undersoft.SDK.Ethernet.Transfer
         }
 
         private void ClientSendTcpTransitHeader()
-        {
-            transit.Manager.HeaderContent(
-                transitContext.Transfer.ResponseHeader.Data,
+        {            
+            transit.Manager.GetHeaderData(out var data,                
                 transitContext.Transfer.ResponseHeader.Data,
                 DirectionType.Send
             );
-
+            transitContext.Transfer.ResponseHeader.Data = data;
             if (transit.ResponseHeader.Context.ItemsCount == 0)
                 transitContext.HasMessageToSend = false;
 
@@ -318,11 +314,11 @@ namespace Undersoft.SDK.Ethernet.Transfer
 
         private void ServerSendTcpTransitHeader()
         {
-            transit.Manager.HeaderContent(
-                transitContext.Transfer.ResponseHeader.Data,
+            transit.Manager.GetHeaderData(out var data,
                 transitContext.Transfer.ResponseHeader.Data,
                 DirectionType.Send
             );
+            transitContext.Transfer.ResponseHeader.Data = data;
 
             if (transit.ResponseHeader.Context.ItemsCount == 0)
                 transitContext.HasMessageToSend = false;
